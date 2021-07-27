@@ -1,0 +1,17 @@
+Consider tsne, and then cluster 
+
+might be a spearman thing -- might throw out info, try pearson
+
+may need to play around with new clustering tools
+
+The filtering seems a bit extreme. I should figure out whats going on here.
+
+claras stuff, use lassoo for each virus
+glmnet - is fancier lasoo
+
+elements of statistical learning -- recomends lasoo glmnet chapter
+introduction to statistical learning
+
+r package elastic net, function glmnet
+
+added a little ridge
