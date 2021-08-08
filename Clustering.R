@@ -5,8 +5,10 @@ source("InitialProcessing.R")
 nonSpikes20 %>% filter(copiesPerL > 0) %>%
   summarize(min(copiesPerL))
 
-wideASVs <- nonSpikes20 %>% select(ID, ASV, copiesPerL) %>%
-  pivot_wider(id_cols = ID, names_from = ASV, values_from = copiesPerL) %>%
+wideASVs <- nonSpikes20 %>%
+  mutate(copiesPerLPermm = copiesPerL/Bin_Size) %>%
+  select(ID, ASV, copiesPerLPermm) %>%
+  pivot_wider(id_cols = ID, names_from = ASV, values_from = copiesPerLPermm) %>%
   column_to_rownames("ID") %>% na.omit()
 # 
 
@@ -199,7 +201,7 @@ messy_plot(justPam_sums)
 
 log(wideASVs_mtx + 2.5)
 
-logPam <- pam(t(scale(log(wideASVs_mtx + 2.5))), 10)
+logPam <- pam(t(scale(log(wideASVs_mtx + 2.5))), 20)
 logPam_sums <- sum_over_clusters(nonSpikes20, names(logPam$clustering), logPam$clustering)
 messy_plot(logPam_sums)
 
@@ -209,6 +211,19 @@ nonSpikes20  %>% filter(copiesPerL !=0) %>% summarize(min(copiesPerL))
 
 # note, I need to do a variance stabilizing transformation eventually
 # These just aren't that different from eachother!
+
+## As above, but this time, I'll plot out every asv
+allCluster <- nonSpikes20 %>% left_join(tibble(ASV = names(logPam$clustering), cluster = logPam$clustering),
+                          by = "ASV")
+
+allCluster %>%
+  filter(Depth == "Surface") %>%
+  ggplot(aes(x = Size_Class, y = copiesPerL, group = ASV)) + 
+  facet_grid(cluster ~ Station) +
+  geom_line(alpha = 0.3) +
+  scale_x_log10() + scale_y_log10()
+# These clusters don't really look like clusters to me.
+# Better when there are more of them
 
 ## TSNE
 

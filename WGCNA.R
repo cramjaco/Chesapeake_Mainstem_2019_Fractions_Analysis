@@ -75,5 +75,33 @@ smeL %>%
 
 signedKME(countDat,  net$MEs) -> skme
 
-sweep(skme, 1, FUN = "/", STATS = rowSums(skme))
+skme1 <- sweep(skme, 1, FUN = "/", STATS = rowSums(skme))
 
+skmeL <- skme1 %>%
+  rownames_to_column(var = "ASV") %>%
+  pivot_longer(cols = -ASV, names_to = "kME", values_to = "weight")
+
+simpleWGCNAGroups <- left_join(nonSpikes20,
+                               tibble(ASV = names(net$colors), cluster = net$colors),
+                               by = "ASV") %>%
+  group_by(Station, Depth, Size_Class, Bin_Size, cluster) %>%
+  summarize(copiesPerL = sum(copiesPerL))
+
+messy_plot(simpleWGCNAGroups)
+# As expected, this is no better than the alternatives.
+
+# However, what if I weight the contributions of each ASV to each group
+
+ns_weighted <- nonSpikes20 %>% left_join(skmeL, by = "ASV") %>%
+  mutate(WeightedCopies = copiesPerL * weight)
+
+ns_sum_weighted <- ns_weighted %>% 
+  group_by(Station, Depth, Size_Class, Bin_Size, kME) %>%
+  summarise(copiesPerL = sum(WeightedCopies)) %>%
+  rename(cluster = "kME")
+
+messy_plot(ns_sum_weighted)
+
+# No improvement, or else a very marginal improvement
+
+# I wonder if I should cluster by presence and abscence
