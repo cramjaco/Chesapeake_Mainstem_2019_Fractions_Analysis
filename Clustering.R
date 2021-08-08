@@ -1,10 +1,17 @@
 source("InitialProcessing.R")
 ## Ordination
 
+
+nonSpikes20 %>% filter(copiesPerL > 0) %>%
+  summarize(min(copiesPerL))
+
 wideASVs <- nonSpikes20 %>% select(ID, ASV, copiesPerL) %>%
   pivot_wider(id_cols = ID, names_from = ASV, values_from = copiesPerL) %>%
   column_to_rownames("ID") %>% na.omit()
 # 
+
+wideASVs_log <- log(wideASVs + 1)
+
 sdist <- (1-cor(wideASVs, method = "spear"))/2
  
 library(vegan)
@@ -19,6 +26,7 @@ myNMDS_scores <- scores(myNMDS) %>% as.data.frame() %>%
   rownames_to_column(var = "ID") %>% as.tibble() %>%
   left_join(sample, by = "ID")
 ggplot(aes(x = NMDS1, y = NMDS2, shape = as.factor(Station), color = Size_Class), data = myNMDS_scores) + geom_point()
+# this looks bad now. All driven by very few outliers
 
 heatmap(sdist)
 
@@ -60,7 +68,13 @@ ggsave("ClusterAbundances.pdf")
 # differences in these group totals are really friggin subtle
 # also some values that should have been elimnated like 5.1 bottom are still there
 # for misterious reasons
+# true even if I log transform before taking spearman distance (which makes sense, its all rank based)
 
+byKMed %>% ggplot(aes(y = copiesPerL/MassperLiter, x = Size_Class, color = Depth)) + geom_point(shape = 1) +
+  facet_grid(cluster ~ Station) + scale_color_manual(values = c("Green", "Blue", "Black"))+
+theme(axis.text.x = element_text(angle = 90, size = 6)) +
+  scale_x_log10() + scale_y_log10()
+# subtle even if I normalize to mass
 
 metaASVs <- metaMDS(sdist)
 

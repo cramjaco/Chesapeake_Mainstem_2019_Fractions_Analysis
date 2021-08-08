@@ -3,8 +3,8 @@
 library(tidyverse)
 library(Rtsne)
 ## Load in Main data types
-counts <- read_tsv('ASVs_counts.tsv') %>% rename(ASV = "X1")
-taxa0 <- read_tsv("ASVs_taxonomy.tsv") %>% rename(ASV = "X1")
+counts <- read_tsv('ASVs_counts.tsv') %>% rename(ASV = "...1")
+taxa0 <- read_tsv("ASVs_taxonomy.tsv") %>% rename(ASV = "...1")
 key2 <- read_csv("SampleKey2.csv")
 sample0 <- read_csv("EnvDataForAmplicons.csv")
 flags <- read_csv("ManualFlags.csv") %>%
