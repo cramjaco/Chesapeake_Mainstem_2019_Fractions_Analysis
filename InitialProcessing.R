@@ -26,8 +26,26 @@ sample <-sample0 %>%
   left_join(flags, by = "ID") %>%
   mutate(Depth = factor(Depth, levels = c("Surface", "Oxy", "Bottom")))
 
-taxa <- taxa0 %>%
+taxa01 <- taxa0 %>%
   mutate(nASV = extract_numeric(ASV))
+
+# give a "Tag" which is the finest level of taxa known
+TaxResTab <- tibble(
+  TagLevel = c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus"),
+  TaxRes = 1:6
+)
+TagDf <- taxa01 %>%
+  select(-nASV) %>%
+  pivot_longer(Kingdom:Genus, names_to = "TagLevel", values_to = "Tag") %>%
+  left_join(TaxResTab) %>%
+  filter(!is.na(Tag)) %>%
+  group_by(ASV) %>%
+  slice_max(order_by = TaxRes, n = 1) %>%
+  select(-TaxRes)
+
+taxa <- taxa01 %>%
+  left_join(TagDf, by = "ASV")
+  
   
 ## Make flags file, for when I hadn't done that, so I can manually edit
 # overwrite flags file
@@ -106,7 +124,8 @@ nonSpikes <- counts_long %>%
   filter(Kingdom != "Spike" & !is.na(Kingdom)) %>%
   left_join(correctionData) %>%
   mutate(copiesPerL = reads * conversionMultiplier) %>%
-  filter(!is.na(copiesPerL))
+  filter(!is.na(copiesPerL)) %>%
+  filter(SpikeReads > 0)
 
 microbialAbundance <- nonSpikes %>%
   group_by(ID) %>%

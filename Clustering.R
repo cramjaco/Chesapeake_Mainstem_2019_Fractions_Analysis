@@ -261,6 +261,54 @@ logHclustCut_sums <- sum_over_clusters(nonSpikes20, names(logHclustCut), logHclu
 plot_hclust_messy <- messy_plot(logHclustCut_sums)
 ggsave("MessyHclust.pdf", plot_hclust_messy, height = 24, width = 8)
 
+# can I do as above, but with station as the x axis? I'd prefer latitude, but number is probably ok for now.
+
+MessyHclustInverted <- logHclustCut_sums %>% 
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Station, color = Depth)) + geom_point(shape = 1) + 
+  facet_grid(cluster ~ Size_Class) + scale_color_manual(values = c("darkgreen", "Blue", "Black"))+
+    theme(axis.text.x = element_text(angle = 90, size = 6)) +
+    scale_x_log10() + scale_y_log10()
+
+ggsave("MessyHclustInverted.pdf", MessyHclustInverted, height = 24, width = 8)
+
+## Plot all the things
+plot_hclust_many <- nonSpikes20 %>% 
+  left_join(tibble(ASV = names(logHclustCut), cluster = logHclustCut), by = "ASV") %>%
+  arrange(Size_Class) %>% 
+  ggplot(aes(x = Size_Class, y = copiesPerL/Bin_Size, group = ASV, color = Depth)) +
+  facet_grid(cluster ~ Station) +
+  geom_path() +
+  scale_x_log10() + scale_y_log10()
+ggsave("ManyHclust.pdf", plot_hclust_many, height = 24, width = 8)
+
+
+## Zooming in on a few of these to try to ounderstand oddness
+
+nonSpikes20 %>% 
+  left_join(tibble(ASV = names(logHclustCut), cluster = logHclustCut), by = "ASV") %>%
+  arrange(Size_Class) %>% 
+  filter(cluster == 3, Station == 3.1) %>%
+  filter(Depth == "Bottom") %>%
+  ggplot(aes(x = Size_Class, y = copiesPerL/Bin_Size, group = ASV, color = Depth)) +
+  geom_path() +
+  scale_x_log10() + scale_y_log10() +
+  facet_wrap(~ASV)
+
+LocalStuff <- nonSpikes20 %>% 
+  left_join(tibble(ASV = names(logHclustCut), cluster = logHclustCut), by = "ASV") %>%
+  arrange(Size_Class) %>% 
+  filter(cluster == 17, Station == 3.3) %>%
+  filter(Depth == "Bottom")
+LocalStuff %>%
+  ggplot(aes(x = Size_Class, y = copiesPerL/Bin_Size)) +
+  geom_path(aes( group = ASV)) +
+  scale_x_log10() + scale_y_log10() +
+  geom_point(data = LocalStuff %>%
+               group_by(Size_Class, Bin_Size) %>%
+               summarize(copiesPerL = sum(copiesPerL))
+             )
+
+# there are vertical bars here which really bother me
 ## I wonder what the pca eigenvectors look like. Is it clear that this just doesn't compress
 # into 5-1 dimensions or something?
 library(vegan)
@@ -271,6 +319,8 @@ plot(eigenvals(myPCA)/sum(eigenvals(myPCA)))
 
 # I wonder what would happen if I plotted the first x pcs vs the samples
 # kind of an odd concept, since a bunch would be negative
+
+
 
 site_score_df <- scores(myPCA, display = "sites") %>% as.data.frame() %>% rownames_to_column("ID")
 #nonSpikes20PC <- nonSpikes20 %>% left_join(site_score_df, by = "ID")
