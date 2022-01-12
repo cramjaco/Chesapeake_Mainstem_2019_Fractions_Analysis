@@ -30,11 +30,17 @@ source("ChesapeakePersonalLibrary.R")
 ```{r}
 wideASVs <- nonSpikes20 %>%
   mutate(copiesPerLPermm = copiesPerL/Bin_Size) %>%
+  #filter(Depth != "Oxy") %>%
   #mutate(copiesPerLPermm = copiesPerL/MassperLiter) %>% # temporary swap out just to see
   select(ID, ASV, copiesPerLPermm) %>%
   pivot_wider(id_cols = ID, names_from = ASV, values_from = copiesPerLPermm) %>%
-  column_to_rownames("ID") %>% na.omit()
+  column_to_rownames("ID") %>% na.omit() 
 ```
+
+```{r}
+sampleData01 <- sampleData[match(rownames(wideASVs), sampleData$ID),]
+```
+
 
 ```{r}
 wideASVs_log <- log(wideASVs + 1)
@@ -64,7 +70,7 @@ myPlotDetails <- list(
 but pretty this time
 
 ```{r}
-ccaConstrained <- cca(wideASVs_log ~ (Station)+ (Depth=="Surface") + sqrt(Size_Class), data = microbialAbundance)
+ccaConstrained <- cca(wideASVs_log ~ lat + Depth2 + sqrt(Size_Class), data = sampleData01)
 ```
 
 ```{r}
@@ -95,10 +101,203 @@ CCA_Eigen_Plot(ccaConstrained)
 ```
 
 ```{r}
+anova(ccaConstrained)
+```
+
+```{r}
+anova(ccaConstrained, by = "margin")
+```
+
+```{r}
+permutest(ccaConstrained)
+```
+
+
+```{r}
 ccaConstrainedFort <- fortify(ccaConstrained) %>% filter(Score %in% c("sites", "biplot")) %>% # not sure what constraints are
  left_join(microbialAbundance, by = c("Label" = "ID"))
 ```
 
+```{r}
+ccaConstrainedPlot <- ccaConstrainedFort %>%
+  filter(Score == "sites") %>%
+  mutate(Depth = recode(Depth, `Oxy` = "Oxycline")) %>%
+  select(Station, Depth, Size_Class, everything()) %>%
+  ggplot(aes(x = CCA1, y = CCA2,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = sqrt(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+ geom_point() +
+ coord_fixed(sqrt(ccaConstrained$CCA$eig[2]/ccaConstrained$CCA$eig[1])) +
+ geom_text(aes(label = Label, x = CCA1 * 2, y = CCA2 * 2), color = "black",
+           data = ccaConstrainedFort %>%
+             filter(Score == "biplot") %>%
+             mutate(Label = recode(Label, lat = "Lat",
+                                   `sqrt(Size_Class)` = "Size",
+                                   `Depth2Surface` = "Surface"
+                                   ))
+             ) +
+  geom_segment(aes(x = 0, y = 0, xend  = CCA1 * 1.7, yend = CCA2 * 1.7), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.5, arrow = arrow(length = unit(0.1, "in"))) +
+  #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
+  myPlotDetails
+ccaConstrainedPlot
+```
+
+This should run vs lat, not station.
+And names should be easier.
+Done
+
+# Constrained ordination with respect to size (all sizes included), conditioned on lat and depth
+
+```{r}
+ccaConditionedAllSizes <- cca(wideASVs_log ~ Condition(Depth2 + lat) + sqrt(Size_Class), data = sampleData01)
+```
+
+```{r}
+CCA_Eigen_Plot(ccaConditionedAllSizes)
+```
+
+```{r}
+paste("Variance Explained", round(ccaConditionedAllSizes$CCA$eig[1]/ccaConditionedAllSizes$tot.chi, 3) * 100, "%")
+anova(ccaConditionedAllSizes, permutations = how(nperm = 10^3 - 1))
+```
+
+```{r}
+
+My_Constrained_CCA_Plot <- function(ConditionedCCA){
+
+Fort <- fortify(ConditionedCCA) %>% filter(Score %in% c("sites", "biplot")) %>% # not sure what constraints are
+ left_join(microbialAbundance, by = c("Label" = "ID"))
+
+ccaPlot <- Fort %>%
+  filter(Score == "sites") %>%
+  mutate(Depth = recode(Depth, `Oxy` = "Oxycline")) %>%
+  select(Station, Depth, Size_Class, everything()) %>%
+  ggplot(aes(x = CCA1, y = CA1,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = sqrt(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+ geom_point() +
+ coord_fixed(sqrt(ConditionedCCA$CA$eig[1]/ConditionedCCA$CCA$eig[1])) +
+ geom_text(aes(label = Label, x = CCA1 * 3.5, y = CA1 * 3.5), color = "black",
+           data = Fort %>%
+             filter(Score == "biplot") %>%
+             mutate(Label = recode(Label,
+                                   `sqrt(Size_Class)` = "Size"
+                                  
+                                   ))
+             ) +
+  geom_segment(aes(x = 0, y = 0, xend  = CCA1 * 3, yend = CA1 * 3), data = Fort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.5, arrow = arrow(length = unit(0.1, "in"))) +
+  #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
+  myPlotDetails
+ccaPlot
+}
+
+My_Constrained_CCA_Plot(ccaConditionedAllSizes)
+```
+
+## Minus free living stuff
+
+```{r}
+sampleData_NoFree <- sampleData01 %>% filter(Size_Class > 1)
+wideASVs_log_NoFree <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoFree$ID,]
+wideASVs_log_NoFree <- wideASVs_log_NoFree[match(sampleData_NoFree$ID, rownames(wideASVs_log_NoFree)),]
+# this is silly, I rearanged sample data last time time, but the ASV table this time
+```
+
+```{r}
+ccaConditionedNoFree <- cca(wideASVs_log_NoFree ~ Condition(Depth2 + lat) + sqrt(Size_Class), data = sampleData_NoFree)
+```
+
+```{r}
+CCA_Eigen_Plot(ccaConditionedNoFree)
+```
+
+```{r}
+paste("Variance Explained", round(ccaConditionedNoFree$CCA$eig[1]/ccaConditionedNoFree$tot.chi, 3) * 100, "%")
+anova(ccaConditionedNoFree, permutations = how(nperm = 10^3 - 1))
+```
+
+```{r}
+My_Constrained_CCA_Plot(ccaConditionedNoFree)
+```
 
 
+## Minus 1.2 micron stuff
 
+
+```{r}
+sampleData_NoSmall <- sampleData01 %>% filter(Size_Class > 2)
+wideASVs_log_NoSmall <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoSmall$ID,]
+wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID, rownames(wideASVs_log_NoSmall)),]
+# this is silly, I rearanged sample data last time time, but the ASV table this time
+```
+
+```{r}
+ccaConditionedNoSmall <- cca(wideASVs_log_NoSmall ~ Condition(Depth2 + lat) + sqrt(Size_Class), data = sampleData_NoSmall)
+```
+
+```{r}
+paste("Variance Explained", round(ccaConditionedNoSmall$CCA$eig[1]/ccaConditionedNoSmall$tot.chi, 3) * 100, "%")
+anova(ccaConditionedNoSmall, permutations = how(nperm = 10^3 - 1))
+```
+
+```{r}
+My_Constrained_CCA_Plot(ccaConditionedNoSmall)
+```
+
+Hahaha. Ok, now size is a factor, as I expected.
+Maybe I was just underpowered with the surface only stuff?
+Or the non-effect is only in the surface?
+
+## Minus 1.2 micron stuff surface only
+
+
+```{r}
+sampleData_NoSmall <- sampleData01 %>% filter(Size_Class > 2) %>% filter(Depth == "Surface")
+wideASVs_log_NoSmall <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoSmall$ID,]
+wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID, rownames(wideASVs_log_NoSmall)),]
+# this is silly, I rearanged sample data last time time, but the ASV table this time
+```
+
+```{r}
+ccaConditionedNoSmall <- cca(wideASVs_log_NoSmall ~ Condition(lat) + sqrt(Size_Class), data = sampleData_NoSmall)
+```
+
+```{r}
+paste("Variance Explained", round(ccaConditionedNoSmall$CCA$eig[1]/ccaConditionedNoSmall$tot.chi, 3) * 100, "%")
+anova(ccaConditionedNoSmall, permutations = how(nperm = 10^3 - 1))
+```
+
+```{r}
+My_Constrained_CCA_Plot(ccaConditionedNoSmall)
+```
+
+## Minus 1.2 micron stuff bottom only
+
+
+```{r}
+sampleData_NoSmall <- sampleData01 %>% filter(Size_Class > 2) %>% filter(Depth == "Bottom")
+wideASVs_log_NoSmall <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoSmall$ID,]
+wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID, rownames(wideASVs_log_NoSmall)),]
+# this is silly, I rearanged sample data last time time, but the ASV table this time
+```
+
+```{r}
+ccaConditionedNoSmall <- cca(wideASVs_log_NoSmall ~ Condition(lat) + sqrt(Size_Class), data = sampleData_NoSmall)
+```
+
+```{r}
+paste("Variance Explained", round(ccaConditionedNoSmall$CCA$eig[1]/ccaConditionedNoSmall$tot.chi, 3) * 100, "%")
+anova(ccaConditionedNoSmall, permutations = how(nperm = 10^3 - 1))
+```
+
+```{r}
+My_Constrained_CCA_Plot(ccaConditionedNoSmall)
+```
+
+Too narrow. I'm calling it, size does matter.

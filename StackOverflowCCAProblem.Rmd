@@ -1,0 +1,31 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+I'm having trouble getting geom_segment to show
+
+```{r}
+library(tidyverse)
+library(ggvegan)
+library(vegan)
+```
+
+```{r}
+data(dune)
+data(dune.env)
+```
+
+```{r}
+dune.Manure <- cca(dune ~ Manure, dune.env)
+```
+
+```{r}
+dmFort <- fortify(dune.Manure) %>% filter(Score %in% c("sites", "biplot"))
+```
+
+```{r}
+ggplot(dmFort %>% filter(Score == "sites"), aes(x = CCA1, y = CCA2)) + geom_point() +
+  geom_segment(data = dmFort %>% filter(Score == "biplot"), aes(x = 0, y = 0, xend = CCA1, yend = CCA2))
+```
+

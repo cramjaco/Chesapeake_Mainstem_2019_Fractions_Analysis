@@ -261,4 +261,5 @@ stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
   mutate(isWest = str_detect(Station, "W")) %>% filter(!isWest) %>% mutate(Station = str_remove(Station, "C")) %>% select(-isWest)
 
 sampleData <- microbialAbundance %>%
-  left_join(stations01 %>% mutate(Station = as.numeric(Station)), by = "Station")
+  left_join(stations01 %>% mutate(Station = as.numeric(Station)), by = "Station") %>%
+  mutate(Depth2 = if_else(Depth == "Surface", "Surface", "NotSurface"))
