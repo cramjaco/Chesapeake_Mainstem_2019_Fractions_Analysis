@@ -1,0 +1,104 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Trying to be more systematic about constrained CCA.
+
+Step 1 -- CCA with Station and Depth and Size
+
+Step 2 -- CCA with Size, factoring out Station and Depth
+
+Step 3 -- CCA with Size, factoring out Station and Depth, removing Free-living microbes
+
+Step 4 - CCA with Size, factoring out Station and Depth, > 5 micron only
+
+Try to get nice looking CCA plots with symbols on each
+
+```{r}
+library(ggvegan)
+library(vegan)
+library(tidyverse)
+library(cowplot)
+source("InitialProcessing.R")
+source("ChesapeakePersonalLibrary.R")
+```
+
+# Setup
+
+
+```{r}
+wideASVs <- nonSpikes20 %>%
+  mutate(copiesPerLPermm = copiesPerL/Bin_Size) %>%
+  #mutate(copiesPerLPermm = copiesPerL/MassperLiter) %>% # temporary swap out just to see
+  select(ID, ASV, copiesPerLPermm) %>%
+  pivot_wider(id_cols = ID, names_from = ASV, values_from = copiesPerLPermm) %>%
+  column_to_rownames("ID") %>% na.omit()
+```
+
+```{r}
+wideASVs_log <- log(wideASVs + 1)
+wideASVs_scaled <- scale(wideASVs_log)
+```
+
+## Plot settings
+```{r}
+filterSizes <- c(0.2, 1.2, 5, 20, 53, 180, 500)
+myGuides <-   guides(shape = guide_legend(ncol = 2), fill = guide_legend(ncol = 2),
+         size = guide_legend(ncol = 2),
+         color = guide_legend(ncol = 2))
+
+myPlotDetails <- list(
+  scale_fill_viridis_d() ,
+  scale_shape_manual(values = rep(21:25, 2)),
+  scale_color_manual(values = c("green", "blue", "black")) ,
+  scale_size(breaks = sqrt(filterSizes),
+             labels = filterSizes) ,
+  theme_bw(),
+  myGuides
+)
+```
+
+
+# CCA with everything
+but pretty this time
+
+```{r}
+ccaConstrained <- cca(wideASVs_log ~ (Station)+ (Depth=="Surface") + sqrt(Size_Class), data = microbialAbundance)
+```
+
+```{r}
+ccaConstrained
+anova(ccaConstrained)
+```
+
+```{r}
+CCA_Eigen_Plot <- function(CCA){
+  CCAPctVarPlot <- enframe(c(CCA$CCA$eig/CCA$tot.chi,CCA$CA$eig/CCA$tot.chi), name = "CA", value = "PctVarExplained") %>%
+  mutate(CAN = parse_number(CA)) %>%
+    mutate(Type = str_remove(CA, "[:digit:].*")) %>%
+    mutate(Type = factor(Type, levels = c("CCA", "CA"))) %>%
+  ggplot(aes(x = CAN, y = PctVarExplained)) + 
+  geom_point() +
+  geom_segment(aes(x = CAN, xend = CAN, y = 0, yend = PctVarExplained)) + 
+  labs(y = "Percent Variance Explained", x = NULL) +
+  geom_vline(xintercept = 7.5, color = "grey") +
+    facet_grid(~Type, scales = "free_x", space = "free_x", switch = "both") + 
+    #scale_x_continuous(expand = c(0.1,0)) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+           strip.placement = "outside", legend.position = "none")
+CCAPctVarPlot
+}
+
+CCA_Eigen_Plot(ccaConstrained)
+```
+
+```{r}
+ccaConstrainedFort <- fortify(ccaConstrained) %>% filter(Score %in% c("sites", "biplot")) %>% # not sure what constraints are
+ left_join(microbialAbundance, by = c("Label" = "ID"))
+```
+
+
+
+

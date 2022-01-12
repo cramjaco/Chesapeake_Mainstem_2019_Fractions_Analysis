@@ -1,0 +1,55 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+source("InitialProcessing.R")
+source("ChesapeakePersonalLibrary.R")
+```
+
+I'm interested in looking more at Euks
+
+```{r}
+nonSpikes20 %>%
+  filter(Kingdom == "Eukaryota") %>%
+  group_by(ASV) %>%
+  filter(row_number() == 1)
+```
+
+```{r fig.width = 10}
+nonSpikes20 %>%
+  filter(Kingdom == "Eukaryota") %>%
+  arrange(Size_Class) %>%
+  #mutate(Tag = if_else(Tag == "Arachnida", "Acartia tonsa", Tag)) %>%
+  mutate(Tag = case_when(
+    Tag == "Arachnida" ~ "Acartia tonsa",
+    Tag == "Eukaryota" ~ "Leucocryptos marina", 
+    TRUE ~ Tag
+  )
+           ) %>%
+  mutate(Tag = factor(Tag, levels = c("Cercozoa", "Leucocryptos marina", "Cydippida", "Lobata", "Acartia tonsa"))) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice(omag = seq(from = -1, to = 7, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag, labeller = labeller(Tag = label_wrap_gen(10))) +
+  geom_point(size = 2) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw(base_size = 18) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5), legend.position = "none") +
+  labs(y = "Copies/L/mm", x = "Size (um)")
+```
+
+Lets blast these others
+
+Arachnida (ASV7) are actualy Acartia tonsa
+
+Cydippida (ASV65) (Mnemiopsis ledyi) -- Probably
+
+Cercozoa (ASV84) -- Probably actually that. maybe Order Ebriales -- Flagelates and Ameboa that hunt bacteria on particles
+
+Eukaryota (ASV 338) --  probably Leucocryptos marina -- Also a flagelate
+
+Lobata -- Hits lots of Ctenophores

@@ -252,3 +252,13 @@ length(unique(nonSpikes20$ASV))
 
 sapply(nonSpikes20, function(x) sum(is.na(x)))
 
+my_sizes <- sort(unique(microbialAbundance$Size_Class))
+my_sizes
+
+## Pull in stations
+stations <- read_csv("stations.csv")
+stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
+  mutate(isWest = str_detect(Station, "W")) %>% filter(!isWest) %>% mutate(Station = str_remove(Station, "C")) %>% select(-isWest)
+
+sampleData <- microbialAbundance %>%
+  left_join(stations01 %>% mutate(Station = as.numeric(Station)), by = "Station")

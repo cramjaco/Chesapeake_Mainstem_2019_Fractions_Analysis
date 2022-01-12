@@ -1,0 +1,370 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+07 January 2022
+Explorations for the new year. Looking forward to an OSM virtual talk.
+
+So far, we have some examples of species that are abundanter on big particles.
+And some size resolved eukaryotic eDNA stuff.
+
+Things I'd like to at least try.
+
+Some sort of CCA looking at the effects of particle size, latitude and depth on community structure, perhaps biplotting in some species.
+
+How does alpha diversity vary as a function of size latitude and depth?
+
+Something about gamma diversity. How do the diversity of different particle types affect overall alpha diversity in a volume of water?
+
+
+## Notes from meeting with Louis plough about matt gray's grant. 
+Doesn't really belong here but this was open
+Louis AMOVA
+Diversity within regions, oceans rivers, ocean basins.
+
+Expression profiels for host 
+Fish for biomarker for host or microbial genes that precede a crash.
+
+Or genes that are in.
+
+If there is a bio signal of crashes we will see it.
+
+```{r}
+library(ggvegan)
+library(vegan)
+library(tidyverse)
+library(cowplot)
+source("InitialProcessing.R")
+source("ChesapeakePersonalLibrary.R")
+```
+
+```{r}
+wideASVs <- nonSpikes20 %>%
+  mutate(copiesPerLPermm = copiesPerL/Bin_Size) %>%
+  #mutate(copiesPerLPermm = copiesPerL/MassperLiter) %>% # temporary swap out just to see
+  select(ID, ASV, copiesPerLPermm) %>%
+  pivot_wider(id_cols = ID, names_from = ASV, values_from = copiesPerLPermm) %>%
+  column_to_rownames("ID") %>% na.omit()
+```
+
+```{r}
+wideASVs_log <- log(wideASVs + 1)
+wideASVs_scaled <- scale(wideASVs_log)
+```
+
+```{r}
+library(vegan)
+pcaTry2 <- rda(X = wideASVs_scaled)
+```
+
+
+```{r}
+plot(pcaTry2, scaling = 1)
+```
+
+Doesn't work on scaled data the scaled data is negative. CCA only works with positive data. Therefore we skip the transformations.
+```{r}
+ccaTry2 <- cca(X = wideASVs_log)
+```
+
+scores_pca_try2
+```{r}
+plot(ccaTry2, scaling = 2)
+```
+
+```{r}
+fortCCA <- fortify(ccaTry2, axes = 1:7)
+sitesCCA <- fortCCA %>% filter(Score == "sites")
+speciesCCA <- fortCCA %>% filter(Score == "species")
+```
+
+```{r}
+ccabp <- function(){barplot(ccaTry2$CA$eig/ccaTry2$tot.chi)}
+ggdraw(ccabp)
+```
+
+```{r fig.height = 3, fig.width=6}
+CAPctVarPlot <- enframe(ccaTry2$CA$eig/ccaTry2$tot.chi, name = "CA", value = "PctVarExplained") %>%
+  mutate(CA = extract_numeric(CA)) %>%
+  ggplot(aes(x = CA, y = PctVarExplained)) + 
+  geom_point() +
+  geom_segment(aes(x = CA, xend = CA, y = 0, yend = PctVarExplained)) + 
+  labs(y = "Percent Variance Explained") +
+  geom_vline(xintercept = 7.5, color = "grey") +
+  theme_bw()
+CAPctVarPlot
+```
+
+
+Then lets left join some stuff on these
+
+```{r}
+sitesCCA_2 <- sitesCCA %>% left_join(microbialAbundance, by = c("Label" = "ID"))
+```
+
+```{r}
+myGuides <-   guides(shape = guide_legend(ncol = 2), fill = guide_legend(ncol = 2),
+         size = guide_legend(ncol = 2),
+         color = guide_legend(ncol = 2))
+
+filterSizes <- c(0.2, 1.2, 5, 20, 53, 180, 500)
+pCA1CA2_withlegend <- sitesCCA_2 %>%
+  mutate(Depth = recode(Depth, `Oxy` = "Oxycline")) %>%
+  select(Station, Depth, Size_Class, everything()) %>%
+  ggplot(aes(x = CA1, y = CA2,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = sqrt(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+  geom_point() +
+  coord_fixed(sqrt(ccaTry2$CA$eig[2]/ccaTry2$CA$eig[1])) + # reshape to scale
+  labs(x = paste0("CA1 (", round(ccaTry2$CA$eig[1]/ccaTry2$tot.chi, 3) * 100, "%)"),
+       y = paste0("CA2 (", round(ccaTry2$CA$eig[2]/ccaTry2$tot.chi, 3) * 100, "%)"),
+       col = "Depth (Outline Color)",
+       fill = "Station",
+       shape = "Station",
+       size = "Size Class") +
+  #coord_fixed(sqrt(1)) + 
+  scale_fill_viridis_d() +
+  scale_shape_manual(values = rep(21:25, 2))+
+  scale_color_manual(values = c("green", "blue", "black")) +
+  scale_size(breaks = sqrt(filterSizes),
+             labels = filterSizes) +
+  theme_bw() +
+  myGuides
+
+
+pCA1CA2 <- pCA1CA2_withlegend + theme(legend.position = "none")
+pCA_legend <- get_legend(pCA1CA2_withlegend)
+pCA1CA2_withlegend
+```
+
+```{r}
+pCA1CA3 <- sitesCCA_2 %>%
+  ggplot(aes(x = CA1, y = CA3,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = sqrt(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+  geom_point() +
+  coord_fixed(sqrt(ccaTry2$CA$eig[3]/ccaTry2$CA$eig[1])) + # reshape to scale
+  labs(x = paste0("CA1 (", round(ccaTry2$CA$eig[1]/ccaTry2$tot.chi, 3) * 100, "%)"),
+       y = paste0("CA3 (", round(ccaTry2$CA$eig[3]/ccaTry2$tot.chi, 3) * 100, "%)")) +
+  #coord_fixed(sqrt(.8)) + 
+  scale_fill_viridis_d() +
+  scale_shape_manual(values = rep(21:25, 2))+
+  scale_color_manual(values = c("green", "blue", "black")) +
+  theme_bw() + theme(legend.position = "none") 
+```
+
+```{r}
+cowplot::plot_grid(pCA1CA2, pCA1CA3, pCA_legend, nrow = 1)
+```
+
+
+```{r}
+allCAPlot <- sitesCCA_2 %>%
+  select(Label, Station, Size_Class, Depth, CA1:CA7) %>%
+  pivot_longer(CA2:CA7, names_to = "CA_ID", values_to = "CA_B") %>%
+  ggplot(aes(x = CA1, y = CA_B,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = sqrt(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+  geom_point(stroke = 1) +
+  scale_fill_viridis_d() +
+  scale_shape_manual(values = rep(21:25, 2))+
+  scale_color_manual(values = c("green", "blue", "black")) +
+  facet_wrap(~CA_ID,
+             strip.position = "left") +
+  ylab(NULL) + 
+  theme_bw() +
+  theme(strip.background = element_blank(),
+           strip.placement = "outside", legend.position = "none") +
+  myGuides
+
+plot_grid(
+plot_grid(allCAPlot, CAPctVarPlot, nrow = 2, rel_heights = c(3, 2)),
+pCA_legend, rel_widths = c(3,1)
+)
+```
+
+```{r}
+sitesCCA_2 %>%
+  select(Label, Station, Size_Class, Depth, CA1:CA3) %>%
+  pivot_longer(CA2:CA3, names_to = "CA_ID", values_to = "CA_B") %>%
+  ggplot(aes(x = CA1, y = CA_B,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = log(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+  geom_point(stroke = 1) +
+  scale_fill_viridis_d() +
+  scale_shape_manual(values = rep(21:25, 2))+
+  scale_color_manual(values = c("green", "blue", "black")) +
+  facet_wrap(~CA_ID) +
+  theme_bw()
+```
+
+So in general, there is a devide between stations (CA1 in order) free and not-free (CA2), and between surface and deep (CA3).
+
+Less of a clean gradient along particle size overall, even as we get into the lower dimensions. I could fish for one to see if it exists with CCA, rather than just CA.
+But generally the size effects differ by stations. Different CA appear to partial out size effects for different stations.
+
+# Constrained
+
+```{r}
+ccaConstrained <- cca(wideASVs_log ~ log(Size_Class), data = microbialAbundance)
+```
+
+```{r}
+cca01 <- fortify(ccaConstrained, display = "wa") %>% left_join(microbialAbundance, by = c("Label" = "ID"))
+```
+
+```{r}
+cca01 %>%
+  select(Label, Station, Size_Class, Depth, CCA1, CA1:CA3) %>%
+  pivot_longer(CA1:CA3, names_to = "CA_ID", values_to = "CA") %>%
+  ggplot(aes(x = CCA1, y = CA,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = log(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+  geom_point(stroke = 1) +
+  scale_fill_viridis_d() +
+  scale_shape_manual(values = rep(21:25, 2))+
+  scale_color_manual(values = c("green", "blue", "black")) +
+  facet_wrap(~CA_ID) +
+  theme_bw()
+```
+
+```{r}
+cca01 %>%
+  select(Label, Station, Size_Class, Depth, CCA1, CA1:CA3) %>%
+  ggplot(aes(x = CCA1, y = CA1,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = log(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+  geom_point(stroke = 1) +
+  scale_fill_viridis_d() +
+  scale_shape_manual(values = rep(21:25, 2))+
+  scale_color_manual(values = c("green", "blue", "black")) +
+  #facet_wrap(~CA_ID) +
+  theme_bw()
+```
+
+## Constrained More vectors
+
+```{r}
+ccaConstrained <- cca(wideASVs_log ~ (Station)+ (Depth=="Surface") + sqrt(Size_Class), data = microbialAbundance)
+```
+
+```{r}
+summary(ccaConstrained)
+```
+
+
+```{r}
+barplot(
+c(ccaConstrained$CCA$eig/ccaConstrained$tot.chi, ccaConstrained$CA$eig/ccaConstrained$tot.chi)
+)
+```
+
+```{r}
+plot(ccaConstrained)
+```
+
+```{r}
+anova(ccaConstrained)
+```
+
+But what if everything is being driven by free vs attached. What if I throw out the free stuff and look for gradients
+## Particles Only
+Is there a gradient effect for just the attached particles.
+Might start with just surface.
+
+```{r}
+partiKeep <- microbialAbundance$Size_Class > 2 & microbialAbundance$Depth == "Surface"
+microbialAbundance_PK <- microbialAbundance[partiKeep,]
+wideASVs_log_PK <- wideASVs_log[rownames(wideASVs_log) %in% microbialAbundance_PK$ID,]
+```
+
+```{r}
+ccaConstrained_PK <- cca(wideASVs_log_PK ~ (Station) + log(Size_Class), data = microbialAbundance_PK)
+```
+
+
+```{r}
+plot(ccaConstrained_PK)
+```
+
+```{r}
+barplot(
+c(ccaConstrained_PK$CCA$eig/ccaConstrained_PK$tot.chi, ccaConstrained_PK$CA$eig/ccaConstrained_PK$tot.chi)
+)
+```
+
+```{r}
+anova(ccaConstrained_PK)
+```
+
+```{r}
+ccaConstrained_PK_2 <- cca(wideASVs_log_PK ~ Condition(as.factor(Station)) + log(Size_Class), data = microbialAbundance_PK)
+```
+
+```{r}
+plot(ccaConstrained_PK_2)
+```
+
+```{r}
+anova(ccaConstrained_PK_2)
+```
+Wait! No its not. At least with the 5 and bigger only in the surface, conditioned.
+1.2 and bigger there is a size effect.
+I need to automate this question and show this cutoff.
+This says, to me that the 5 micron and larger particles are more or less indistinguishable from eachother.
+Currently I've done this for the cells/L but not cells/mg particle, might be different in the later case, which I should check.
+Just checked, no better. Huh. Very interesting. Not what I expected.
+I expected that there would be some smooth gradient with respect to size.
+Maybe there is a bunch of aggregation and disaggregation happening?
+
+```{r}
+summary(ccaConstrained_PK_2)
+```
+
+So yes, even if we just keep the 1.2 and larger, we still see patterns. Ibid just 5um and larger. (Manually changed settings because lazy and not good at DRY coding)
+Lets visualise.
+
+```{r}
+ccaPK <- fortify(ccaConstrained_PK_2, display = "wa") %>% left_join(microbialAbundance, by = c("Label" = "ID"))
+```
+
+```{r}
+ccaPK %>%
+  select(Label, Station, Size_Class, Depth, CCA1, CA1:CA3) %>%
+  pivot_longer(CA1:CA3, names_to = "CA_ID", values_to = "CA") %>%
+  ggplot(aes(x = CCA1, y = CA,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = log(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+  geom_point(stroke = 1) +
+  scale_fill_viridis_d() +
+  scale_shape_manual(values = rep(21:25, 2))+
+  scale_color_manual(values = c("green", "blue", "black")) +
+  facet_wrap(~CA_ID) +
+  theme_bw()
+```
+
+## Conditioned size dependence, this time in terms of size per mg particle.
+Results are the same, with changes to the code above.
+
+Now to DRY code this so that the results all show up in a meaningful way.

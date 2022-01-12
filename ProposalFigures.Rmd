@@ -9,31 +9,32 @@ Load in Initial Processing file (and dependencies)
 
 ```{r}
 source("InitialProcessing.R")
+source("ChesapeakePersonalLibrary.R")
 ```
 
 
 # Cells/mg of particle
 
 ```{r}
-my_sizes <- sort(unique(microbialAbundance$Size_Class))
-my_sizes
+# my_sizes <- sort(unique(microbialAbundance$Size_Class))
+# my_sizes
 ```
 
 ```{r}
-scientific_10_c <- function(x) {
-    xout <- gsub("1e", "10^{", format(x),fixed=TRUE)
-    xout <- gsub("{-0", "{-", xout,fixed=TRUE)
-    xout <- gsub("{+", "{", xout,fixed=TRUE)
-    xout <- gsub("{0", "{", xout,fixed=TRUE)
-    xout <- paste(xout,"}",sep="")
-    return(parse(text=xout))
-    
-}
-
-scale_y_log10nice <- function(name=NULL,omag=seq(-10,20),...) {
-    breaks10 <- 10^omag
-    scale_y_log10(breaks=breaks10,labels=scientific_10_c(breaks10),...)
-}
+# scientific_10_c <- function(x) {
+#     xout <- gsub("1e", "10^{", format(x),fixed=TRUE)
+#     xout <- gsub("{-0", "{-", xout,fixed=TRUE)
+#     xout <- gsub("{+", "{", xout,fixed=TRUE)
+#     xout <- gsub("{0", "{", xout,fixed=TRUE)
+#     xout <- paste(xout,"}",sep="")
+#     return(parse(text=xout))
+#     
+# }
+# 
+# scale_y_log10nice <- function(name=NULL,omag=seq(-10,20),...) {
+#     breaks10 <- 10^omag
+#     scale_y_log10(breaks=breaks10,labels=scientific_10_c(breaks10),...)
+# } # Reclocated to ChesapeakePersonalLibrary.R
 ```
 
 
@@ -130,7 +131,7 @@ x.grob <- textGrob(expression(paste("Particle Size (", mu, "m)")),
 
 
 ```{r fig.height = 4, fig.width = 11}
-combinedPlot <- plot_grid(PPLPlot, ParticleMassPlot, abunPlot, nrow = 1)
+combinedPlot <- plot_grid(PPLPlot, ParticleMassPlot, abunPlot, nrow = 1, labels = c("B", "C", "D"))
 ```
 
 ```{r}
@@ -138,9 +139,18 @@ meta2 <- grid.arrange(arrangeGrob(combinedPlot, bottom = x.grob))
 ```
 
 ```{r}
-plot_grid(cbMap, meta2, rel_widths = c(1,3))
+cbMap
 ```
 
+
+```{r}
+physical_particles <- plot_grid(cbMap, meta2, rel_widths = c(1,3), labels = c("A", ""))
+physical_particles
+```
+
+```{r}
+ggsave("PhysicalParticles.png", physical_particles, height = 4, width = 7)
+```
 
 
 
@@ -328,15 +338,287 @@ taxa %>%
 ```
 
 ```{r}
-SlopesAndMeans %>% 
+Horses <- SlopesAndMeans %>% 
   left_join(taxa, by = "ASV") %>%
   filter(estimate > 0, meanCopies > 0e5) %>%
   arrange(-meanCopies)
+Horses
 ```
 
 Ok. Big stuff are cyanos and Planctomycetes, and apparently Spiders.
 Also apparently some proteos of different stripes. Rhodobacter are cool though.
 
+```{r fig.width = 10}
+nonSpikes20 %>%
+  left_join(SlopesAndMeans, by = "ASV") %>%
+  filter(estimate > 0, meanCopies > 1e5, Depth != "Oxy") %>%
+  arrange(-meanCopies, Size_Class) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag) +
+  geom_point(size = 2) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r fig.width = 10}
+nonSpikes20 %>%
+  left_join(SlopesAndMeans, by = "ASV") %>%
+  filter(estimate > 0, meanCopies > 1e5, Depth != "Oxy") %>%
+  arrange(-meanCopies, Size_Class) %>%
+  filter(ASV == "ASV_7") %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag) +
+  geom_point(size = 2) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r fig.width = 10}
+nonSpikes20 %>%
+  left_join(SlopesAndMeans, by = "ASV") %>%
+  filter(estimate > 0, meanCopies < 1e5, Depth != "Oxy") %>%
+  arrange(-meanCopies, Size_Class) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag) +
+  geom_point(size = 2) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
 Lets look at these!
+
+I like, as examples Paracoccus (a Rhodobacter) -ASV_459
+Synechococcus_CC9902 -- ASV_23
+SAR11_Clade -- ASV_3
+
+```{r}
+nonSpikes20 %>%
+  filter(ASV %in% c("ASV_3", "ASV_23", "ASV_459"), Depth != "Oxy") %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag) +
+  geom_point(size = 3) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")
+```
+
+
+
 # Module abundance plot
 
+```{r}
+hgroups_ants <- cutree(sclust, k = 50)
+```
+
+
+```{r}
+nonSpikes20A <- nonSpikes20 %>% left_join(
+  tibble(ASV = names(hgroups_ants), cluster = hgroups_ants), by = "ASV")
+# ASVsToView <- nonSpikes20A %>%
+#   filter(Kingdom == "Bacteria") %>%
+#   group_by(ASV, cluster) %>%
+#   summarise(meanCopies = mean(copiesPerL)) %>%
+#   group_by(cluster) %>%
+#   summarize(topASV = ASV[which.max(meanCopies)])
+  
+```
+
+```{r}
+ClusterSumsA <- nonSpikes20A %>%
+  group_by(Station, Depth, cluster, Size_Class, Bin_Size) %>%
+  summarise(copiesPerL = sum(copiesPerL))
+```
+
+
+```{r}
+HugeSurfacePlot <- nonSpikes20A %>%
+  filter(Depth == "Surface") %>%
+  arrange(Bin_Size) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class)) +
+  facet_grid(cluster ~ Station) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 4)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  geom_path(alpha = 0.5, aes(group = ASV)) +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station") +
+  geom_path(color = "red", data = ClusterSumsA %>% filter(Depth == "Surface")) # Add sums
+ggsave("HugeSurfacePlot.pdf", HugeSurfacePlot, height = 72, width = 8, limitsize = FALSE)
+```
+
+I think we're using "intercept" in the clustering information somehow. Which I don't particularly want. But the clustering does happen by correlation. Super strange. Maybe the correlation isn't the way I think it is?
+
+```{r}
+MinimalSurfacePlot <- nonSpikes20A %>%
+  filter(Depth == "Surface", cluster %in% c(1, 7, 15)) %>%
+  arrange(Bin_Size) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class)) +
+  facet_grid(cluster~ Station) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  geom_path(alpha = 0.5, aes(group = ASV)) +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station") +
+  geom_path(color = "red", data = ClusterSumsA %>% filter(Depth == "Surface", cluster %in% c(1, 7, 15))) # Add sums
+ggsave("MinimalSurfacePlot.pdf", MinimalSurfacePlot, height = 11, width = 8, limitsize = FALSE)
+```
+
+```{r}
+MinimalSurfacePlot
+```
+
+
+```{r}
+MinimalClusterPlot <- nonSpikes20A %>%
+  filter(Depth != "Oxy", cluster %in% c(1, 7, 15)) %>%
+  arrange(Bin_Size) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class)) +
+  facet_grid(cluster + Depth ~ Station) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  geom_path(alpha = 0.5, aes(group = ASV)) +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station") +
+  geom_path(color = "red", data = ClusterSumsA %>% filter(Depth != "Oxy", cluster %in% c(1, 7, 15))) # Add sums
+ggsave("MinimalClusterPlot.pdf", MinimalClusterPlot, height = 11, width = 8, limitsize = FALSE)
+```
+
+
+# For sairah specifically
+
+```{r}
+ExampleTaxa <- nonSpikes20 %>%
+  filter(ASV %in% c("ASV_3", "ASV_23", "ASV_459")) %>%
+  filter(Station %in% c("3.3", "4.3")) %>%
+  mutate(Depth = recode(Depth, Oxy = "Oxycline")) %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Depth), shape = as.factor(Depth))) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Station ~ Tag) +
+  geom_point(size = 4) +
+  geom_path(aes(color = as.factor(Depth))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_manual(values = c("green", "blue", "black")) +
+  scale_color_manual(values = c("green", "blue", "black")) +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "right") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")
+ExampleTaxa
+```
+
+### Thing 2
+
+
+```{r}
+abunPlot0 <- microbialAbundance %>% 
+  filter(is.finite(MassperLiter)) %>%
+  #filter(Depth %in% c("Surface", "Bottom")) %>%
+  filter(Station %in% c(3.3, 4.3)) %>%
+  mutate(Depth = recode(Depth, Oxy = "Oxycline")) %>%
+  mutate(copiesPerMg = copiesPerL / MassperLiter) %>%
+  ggplot(aes(x = Size_Class, y = copiesPerMg, shape = as.factor(Depth), fill = as.factor(Depth))) +
+  facet_wrap(~Station, ncol = 1) +
+  theme_bw(base_size = 16) +
+  geom_point(size = 4) +
+  #geom_path() + 
+  geom_path(aes(color = as.factor(Depth))) +
+  scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  scale_y_log10nice() +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_manual(values = c("green", "blue", "black")) +
+  scale_color_manual(values = c("green", "blue", "black")) +
+  labs(y = "16s + 18s Genes / mg Particles", x = expression(paste("Particle Size (", mu, "m)")), color = "Depth", fill = "Depth", shape = "Depth") +
+  theme(plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0))
+SairahLegend <- get_legend(abunPlot0)
+abunPlot <- abunPlot0 + theme(legend.position = "none")
+#abunPlot
+```
+
+```{r}
+PPLPlot <- microbialAbundance %>%
+  filter(Size_Class >= 1) %>%
+  #filter(Depth %in% c("Surface", "Bottom")) %>%
+  filter(Station %in% c(3.3, 4.3)) %>%
+  ggplot(aes(x = Size_Class, y = ParticlesPerLiter, shape = as.factor(Depth), fill = as.factor(Depth))) +
+  facet_wrap(~Station, ncol = 1) +
+  theme_bw(base_size = 16) +
+  geom_point(size = 4) +
+  #geom_path() + 
+  geom_path(aes(color = as.factor(Depth))) +
+  scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  scale_y_log10nice(omag=seq(-10,20, by = 2)) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_manual(values = c("green", "blue", "black")) +
+  scale_color_manual(values = c("green", "blue", "black")) +
+  labs(y = "Particles/L/mm", x = expression(paste("Particle Size (", mu, "m)"))) +
+  theme(legend.position = "none",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0))
+#PPLPlot
+
+
+```
+
+```{r}
+ParticleMassPlot <- microbialAbundance %>%
+  filter(Size_Class >= 1) %>%
+  #filter(Depth %in% c("Surface", "Bottom")) %>%
+  filter(Station %in% c(3.3, 4.3)) %>%
+  ggplot(aes(x = Size_Class, y = MassperLiter/ParticlesPerLiter, shape = as.factor(Depth), fill = as.factor(Depth))) +
+  facet_wrap(~Station, ncol = 1) +
+  theme_bw(base_size = 16) +
+  geom_point(size = 4) +
+  #geom_path() + 
+  geom_path(aes(color = as.factor(Depth))) +
+  scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_manual(values = c("green", "blue", "black")) +
+  scale_color_manual(values = c("green", "blue", "black")) +
+  labs(y = "Dry Mass (mg) / Particle", x = expression(paste("Particle Size (", mu, "m)"))) +
+  theme(legend.position = "none",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = .5))
+#ParticleMassPlot
+```
+
+```{r}
+x.grob <- textGrob(expression(paste("Particle Size (", mu, "m)")), 
+                   gp=gpar(fontsize=16))
+```
+
+
+```{r fig.height = 4, fig.width = 11}
+combinedPlot <- plot_grid(PPLPlot, ParticleMassPlot, abunPlot, nrow = 1, labels = c("A", "B", "C"))
+```
+
+```{r}
+meta2 <- grid.arrange(arrangeGrob(combinedPlot, bottom = x.grob), right = SairahLegend)
+```
