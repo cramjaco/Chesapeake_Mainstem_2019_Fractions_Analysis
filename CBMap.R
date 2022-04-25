@@ -1,4 +1,4 @@
-
+library("tidyverse")
 library("rnaturalearth")
 library("rnaturalearthdata")
 
@@ -11,7 +11,9 @@ library(ggrepel)
 
 stations <- read_csv("stations.csv")
 stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
-  mutate(isWest = str_detect(Station, "W")) %>% filter(!isWest) %>% mutate(Station = str_remove(Station, "C")) %>% select(-isWest)
+  mutate(isWest = str_detect(Station, "W")) %>% filter(!isWest) %>% mutate(Station = str_remove(Station, "C")) %>%
+  select(-isWest) %>%
+  filter(Station %in% c("4.3", "3.3"))
 
 cbMap <- ggplot(data = world ) + geom_sf(color = "grey30", fill = "grey90") + coord_sf(xlim = c(-76.65, -76.15), ylim = c(37.6, 39.3)) +
   scale_x_continuous(breaks = seq(from = -76.8, to = -76.0, by = 0.2)) +
@@ -31,3 +33,5 @@ cbMap <- ggplot(data = world ) + geom_sf(color = "grey30", fill = "grey90") + co
   scale_fill_viridis_d(option = "plasma") + scale_shape_manual(values = c(21:25, 21)) +
   labs(x = "Longitude", y = "Latitude")
 cbMap
+
+ggsave("cbMap.png", height = 6, width = 4)

@@ -1,0 +1,118 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Goal here is to get breakaway richness and evenness from all of the samples. Plot the like Emily Dougherty did her variables. (but With confidence intervals)
+
+```{r}
+library(breakaway)
+source("InitialProcessing.R")
+source("ChesapeakePersonalLibrary.R")
+```
+```{r}
+otuTable <- nonSpikes %>% select(ID, ASV, reads) %>% pivot_wider(names_from = ASV, values_from = reads, id_cols = ID)
+```
+
+
+
+```{r}
+otuMatrix <- otuTable %>% column_to_rownames(var = "ID") %>% as.matrix %>% t()
+```
+
+```{r}
+otuPhyseq <- phyloseq::otu_table(otuMatrix, taxa_are_rows = FALSE)
+```
+
+
+
+```{r}
+frequencytablelist <- build_frequency_count_tables(otuMatrix)
+```
+
+```{r}
+plot(breakaway_nof1(frequencytablelist[[1]]))
+```
+
+```{r}
+allBreak <- breakaway(otuPhyseq)
+```
+
+```{r}
+richSummary <- summary(allBreak)
+```
+
+```{r}
+richSummaryExpanded <- richSummary %>% left_join(sampleData, by = c("sample_names" = "ID"))
+```
+
+```{r fig.height = 8, fig.width = 6}
+richSummaryExpanded %>%
+  arrange(Size_Class) %>%
+  filter(Depth != "Oxy") %>%
+  ggplot(
+  aes(x = Size_Class, y = estimate,
+      fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Station~Depth) +
+  geom_point(aes(size = model)) +
+  geom_segment(aes(x = Size_Class, xend = Size_Class, y = lower, yend = upper, color = as.factor(Station))) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+So no real richness patterns, except maybe that the big particles at the surface of station 3.1 are lower than their friends
+
+```{r fig.height = 4, fig.width = 6}
+richSummaryExpanded %>%
+  arrange(Size_Class) %>%
+  filter(Depth != "Oxy") %>%
+  ggplot(
+  aes(x = Size_Class, y = estimate,
+      fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(~Depth) +
+  geom_point(size = 3) +
+  geom_segment(aes(x = Size_Class, xend = Size_Class, y = lower, yend = upper, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both")) +
+  geom_path(aes(color = as.factor(Station))) +
+  labs(x = "Size Class (μm)", y = "Richness (Species)") +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none")
+```
+
+There could be an alpha diversity effect (eg maximally high diversity at intermediate sizes) but its pretty subtle if it exists. There are generally 1k to 10k bugs per sample probably.
+
+
+
+```{r}
+myBet <- betta(
+  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + lat +  I(lat^2) + depth,
+  ses = error,
+  data = richSummaryExpanded %>% filter(depth != "Oxy")
+)
+```
+
+```{r}
+myBet$table
+```
+
+Huh. There is a statistical effect for everything except size.
+
+Wait, with the non linear size class, I'm actually significant on everything.
+Holy cow.
+
+Apparently my R2 is like 15 percent so no wonder everything looks terrible
+
+## What if I split off the surface and bottom
+
+```{r}
+kable(myBet$table)
+```
+

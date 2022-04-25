@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+source("InitialProcessing.R")
+source("ChesapeakePersonalLibrary.R")
+library(vegan)
+```
+
+Where are bears found
+```{r}
+nonSpikes20 %>%
+  filter(ASV %in% c("ASV_3", "ASV_23", "ASV_459"), Depth != "Oxy") %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag) +
+  geom_point(size = 3) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")
+```
+
+```{r}
+nonSpikes20 %>%
+  filter(ASV %in% c("ASV_3", "ASV_23", "ASV_459"), Depth != "Oxy") %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(y = copiesPerL/MassperLiter, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag) +
+  geom_point(size = 3) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/mg", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")
+```
+
+```{r}
+nonSpikes20 %>%
+  filter(ASV %in% c("ASV_3", "ASV_23", "ASV_459"), Depth != "Oxy") %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(y = RA, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth ~ Tag) +
+  geom_point(size = 3) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "Relative Abundance", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")
+```
+
+# I sure would like to find an example of something that has high relative abundance on really big stuff
+
+
+
+```{r}
+wideASVs <- nonSpikes20 %>%
+  mutate(copiesPerLPermm = copiesPerL/Bin_Size) %>%
+  #filter(Depth != "Oxy") %>%
+  #mutate(copiesPerLPermm = copiesPerL/MassperLiter) %>% # temporary swap out just to see
+  select(ID, ASV, copiesPerLPermm) %>%
+  pivot_wider(id_cols = ID, names_from = ASV, values_from = copiesPerLPermm) %>%
+  column_to_rownames("ID") %>% na.omit() 
+
+wideASVs_log <- log(wideASVs + 1)
+sampleData01 <- sampleData[match(rownames(wideASVs), sampleData$ID),]
+```
+
+
+
+?simper
+```{r}
+sim <- simper(comm = wideASVs_log, group = sampleData01$Size_Class)
+```
+
+```{r}
+# not sure what I was going for here
+#names(sim)$average
+```
+
+```{r}
+data.frame(sim[["5_500"]][c("species", "average")]) %>%
+  arrange(-average)
+```
+

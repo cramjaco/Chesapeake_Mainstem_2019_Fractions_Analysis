@@ -52,8 +52,8 @@ abunPlot <- microbialAbundance %>%
   scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
   scale_y_log10nice() +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
   labs(y = "16s + 18s Genes / mg Particles", x = expression(paste("Particle Size (", mu, "m)"))) +
   theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
@@ -76,8 +76,8 @@ PPLPlot <- microbialAbundance %>%
   scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
   scale_y_log10nice(omag=seq(-10,20, by = 2)) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
   labs(y = "Particles/L/mm", x = expression(paste("Particle Size (", mu, "m)"))) +
   theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
@@ -100,8 +100,8 @@ ParticleMassPlot <- microbialAbundance %>%
   scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
   scale_y_log10nice(omag = seq(-10, 20, by = 2)) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
   labs(y = "Dry Mass (mg) / Particle", x = expression(paste("Particle Size (", mu, "m)"))) +
   theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
@@ -149,7 +149,7 @@ physical_particles
 ```
 
 ```{r}
-ggsave("PhysicalParticles.png", physical_particles, height = 4, width = 7)
+ggsave("PhysicalParticles.png", physical_particles, height = 4, width = 8)
 ```
 
 
@@ -210,8 +210,8 @@ nonSpikes20C %>%
   geom_point(size = 2) +
   geom_path(aes(color = as.factor(Station))) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d()
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma")
 ```
 Fig X. Copies per L
 
@@ -227,8 +227,8 @@ nonSpikes20C %>%
   geom_point(size = 2) +
   geom_path(aes(color = as.factor(Station))) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d()
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma")
 ```
 Fig X + 1. Copies per mg stuff.
 I don't love these examples because there is a bunch of station to station ariance, and you never see things that like, always show up at large stations.
@@ -359,8 +359,8 @@ nonSpikes20 %>%
   geom_point(size = 2) +
   geom_path(aes(color = as.factor(Station))) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 ```
@@ -377,8 +377,8 @@ nonSpikes20 %>%
   geom_point(size = 2) +
   geom_path(aes(color = as.factor(Station))) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 ```
@@ -394,8 +394,8 @@ nonSpikes20 %>%
   geom_point(size = 2) +
   geom_path(aes(color = as.factor(Station))) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 ```
@@ -416,8 +416,8 @@ nonSpikes20 %>%
   geom_point(size = 3) +
   geom_path(aes(color = as.factor(Station))) +
   scale_shape_manual(values = rep(21:25, 2)) +
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
   theme_bw(base_size = 14) +
   theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
   labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")

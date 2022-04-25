@@ -122,7 +122,8 @@ correctionData <- left_join(sample, spikes, by = "ID") %>%
 
 nonSpikes <- counts_long %>%
   filter(Kingdom != "Spike" & !is.na(Kingdom)) %>%
-  left_join(correctionData) %>%
+  left_join(correctionData, by = "ID") %>%
+  left_join(counts_ra %>% select(ASV, ID, RA), by = c("ASV", "ID")) %>%
   mutate(copiesPerL = reads * conversionMultiplier) %>%
   filter(!is.na(copiesPerL)) %>%
   filter(SpikeReads > 0)
@@ -263,3 +264,5 @@ stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
 sampleData <- microbialAbundance %>%
   left_join(stations01 %>% mutate(Station = as.numeric(Station)), by = "Station") %>%
   mutate(Depth2 = if_else(Depth == "Surface", "Surface", "NotSurface"))
+
+
