@@ -41,7 +41,9 @@ TagDf <- taxa01 %>%
   filter(!is.na(Tag)) %>%
   group_by(ASV) %>%
   slice_max(order_by = TaxRes, n = 1) %>%
-  select(-TaxRes)
+  select(-TaxRes) %>%
+  #mutate(ASV1 = str_extract(ASV, "\\d+")) %>%
+  mutate(Tag_ASV = paste(Tag, str_extract(ASV, "\\d+"), sep = ";"))
 
 taxa <- taxa01 %>%
   left_join(TagDf, by = "ASV")

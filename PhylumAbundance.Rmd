@@ -1,0 +1,178 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+library(cowplot)
+source("InitialProcessing.R")
+source("ChesapeakePersonalLibrary.R")
+```
+
+```{r}
+nonSpikes20 %>% head()
+```
+
+```{r}
+nsPhylum <- nonSpikes20 %>% group_by(Phylum, ID) %>%
+  summarise(across(.cols = c(Kingdom, Station:ParticlesPerLiter), .fns = first),
+            across(.cols = c(RA, copiesPerL), .fns = sum)) %>%
+  filter(!is.na(Phylum))
+```
+
+```{r}
+nsPhylum$Phylum %>% unique()
+```
+
+```{r}
+filter_sizes <- c(0.2, 1.2, 20, 53, 180, 500)
+```
+
+
+```{r}
+nsPhylum %>%
+  filter(Station == 4.3) %>%
+  filter(Depth != "Oxy") %>%
+  ungroup() %>%
+  #arrange(desc(Kingdom), desc(Phylum)) %>% # Why isn't arrange affecting the y axis order?
+  #mutate(Phylum = factor(Phylum)) %>%
+  mutate(Phylum = forcats::fct_rev(factor(Phylum))) %>%
+  #filter(Kingdom == "Bacteria") %>%
+  ggplot(aes(x = Size_Class, y = Phylum, size = sqrt(RA), color = Kingdom)) +
+  geom_point(alpha = 0.5) + facet_grid(Depth  ~ ., drop = TRUE, scales = "free_y") + # this is working great
+  scale_color_manual(values = c("Red", "Black", "Blue")) +
+  scale_x_log10(breaks = filter_sizes) + 
+ #scale_y_reverse() +
+  theme_bw()
+```
+I need to order the factor based on domain level
+
+# There is more than one point per thing. I haven't filtered fully.
+And I want zome shape for not there that isn't just a small dot.
+And I want this to be not so crammed
+
+But really I want mass per particle for the particles and abundance per liter for the free bacteria.
+
+```{r}
+nsPhylum %>%
+  filter(Station == 4.3) %>%
+  filter(Depth == "Bottom") %>%
+  filter(Phylum == "Chloroflexi")
+```
+
+```{r}
+cb_hail_plot <- function(kingdom = "Archaea", maxCpMg = 8, minCpMg = 4){
+# maxCpMg <- 8
+# minCpMg <- 4
+
+fill_breaks <- minCpMg:maxCpMg
+fill_labels <- as.character(fill_breaks)
+fill_labels[1] <- paste0("<=", fill_labels[1])
+fill_labels[length(fill_labels)] <- paste0(">=", fill_labels[length(fill_labels)])
+
+nsPhylum %>%
+  arrange(-Size_Class) %>%
+  filter(Depth == "Surface", Kingdom == kingdom, Size_Class >= 1.2) %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  mutate(copiesPerMg = case_when(
+    log(copiesPerMg) > maxCpMg ~ exp(maxCpMg),
+    log(copiesPerMg) < minCpMg ~ exp(minCpMg),
+    TRUE ~ copiesPerMg
+  )) %>%
+  ggplot(aes(x = as.factor(Station), y = Phylum, size = sqrt(Size_Class), fill = log(copiesPerMg))) +
+  geom_point(shape = 21, color = "black", stroke = .5) +
+  scale_radius(breaks = sqrt(c(1.2, 5, 20, 53, 180, 500)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 12)) +
+  scale_fill_viridis_c(breaks = fill_breaks, labels = fill_labels) +
+  theme_bw()
+}
+
+cb_hail_plot(kingdom = "Archaea")
+```
+Need the right order
+
+I'm confused because these densities look higher than on the total microial density plot. Have I screwed up the units?
+```{r, fig.height= 8, fig.width = 4}
+cb_hail_plot(kingdom = "Bacteria", maxCpMg = 15)
+```
+
+Better
+```{r fig.height= 3, fig.width = 5}
+threshold = 10^6
+attachedPhyla <- nsPhylum %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  filter(Size_Class >= 1.2) %>%
+  group_by(Phylum) %>%
+  summarise(max_copiesPerMg = max(copiesPerMg)) %>%
+  mutate(isAttached = max_copiesPerMg > threshold) %>%
+  filter(isAttached) %>%
+  pull(Phylum)
+
+minCpMg <- 4
+maxCpMg <- 7.5
+nsPhylum %>%
+  arrange(-Size_Class) %>%
+  #filter(Kingdom == "Bacteria", Phylum %in% attachedPhyla, Size_Class >= 1.2) %>%
+  filter(Phylum %in% attachedPhyla, Size_Class >= 1.2) %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  mutate(copiesPerMg = case_when(
+    log10(copiesPerMg) > maxCpMg ~ 10^(maxCpMg),
+    log10(copiesPerMg) < minCpMg ~ 10^(minCpMg),
+    TRUE ~ copiesPerMg
+  )) %>%
+  #mutate(Phylum = factor(Phylum, levels = rev(unique(Phylum)))) %>%
+  mutate(Phylum = fct_rev(Phylum)) %>%
+  ggplot(aes(x = as.factor(Station), y = Phylum, size = sqrt(Size_Class), fill = log10(copiesPerMg))) +
+  geom_point(shape = 21, color = "black", stroke = .5) +
+  scale_radius(breaks = sqrt(c(1.2, 5, 20, 53, 180, 500)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 12)) +
+  scale_fill_viridis_c() +
+  facet_grid(Kingdom~Depth, drop = TRUE, scales = "free", space = "free") + 
+  labs(y = "Phylum", x = "Station", size = "Size Class", fill = "log10(Copies/mg)") +
+  theme_bw()
+```
+This is a brigandine plot.
+
+What about classes of proteobacteria?
+
+```{r}
+nsClass <- nonSpikes20 %>% group_by(Class, ID) %>%
+  summarise(across(.cols = c(Kingdom:Phylum, Station:ParticlesPerLiter), .fns = first),
+            across(.cols = c(RA, copiesPerL), .fns = sum)) %>%
+  filter(!is.na(Class))
+```
+
+
+```{r}
+threshold = 10^6
+attachedClass <- nsClass %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  filter(Size_Class >= 1.2) %>%
+  group_by(Class) %>%
+  summarise(max_copiesPerMg = max(copiesPerMg)) %>%
+  mutate(isAttached = max_copiesPerMg > threshold) %>%
+  filter(isAttached) %>%
+  pull(Class)
+
+minCpMg <- 4
+maxCpMg <- 7.5
+nsPhylum %>%
+  arrange(-Size_Class) %>%
+  #filter(Kingdom == "Bacteria", Phylum %in% attachedPhyla, Size_Class >= 1.2) %>%
+  filter(Phylum %in% attachedPhyla, Size_Class >= 1.2) %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  mutate(copiesPerMg = case_when(
+    log10(copiesPerMg) > maxCpMg ~ 10^(maxCpMg),
+    log10(copiesPerMg) < minCpMg ~ 10^(minCpMg),
+    TRUE ~ copiesPerMg
+  )) %>%
+  #mutate(Phylum = factor(Phylum, levels = rev(unique(Phylum)))) %>%
+  mutate(Phylum = fct_rev(Phylum)) %>%
+  ggplot(aes(x = as.factor(Station), y = Phylum, size = sqrt(Size_Class), fill = log10(copiesPerMg))) +
+  geom_point(shape = 21, color = "black", stroke = .5) +
+  scale_radius(breaks = sqrt(c(1.2, 5, 20, 53, 180, 500)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 12)) +
+  scale_fill_viridis_c() +
+  facet_grid(Kingdom~Depth, drop = TRUE, scales = "free", space = "free") + 
+  labs(y = "Phylum", x = "Station", size = "Size Class", fill = "log10(Copies/mg)") +
+  theme_bw()
+  ```
+  
+  
