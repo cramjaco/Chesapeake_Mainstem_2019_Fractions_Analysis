@@ -108,7 +108,8 @@ attachedPhyla <- nsPhylum %>%
   pull(Phylum)
 
 minCpMg <- 4
-maxCpMg <- 7.5
+#maxCpMg <- 7.5
+macCpMg <- 6
 nsPhylum %>%
   arrange(-Size_Class) %>%
   #filter(Kingdom == "Bacteria", Phylum %in% attachedPhyla, Size_Class >= 1.2) %>%

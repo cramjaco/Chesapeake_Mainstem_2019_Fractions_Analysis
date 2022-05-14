@@ -255,13 +255,19 @@ snowDwellers_prok <- mainHabitats_prok %>%
   filter(Size_Class >= 20) %>%
   pull(Tag_ASV)
 
-ches_brigandine_L(ASV, Class,
+snowDwellers_plt <- ches_brigandine_L(ASV, Class,
                 taxa %>% filter(Tag_ASV %in% snowDwellers_prok) %>% pull(Class) %>% unique() %>% na.omit,
                 min = 3, max = 7, 
                 ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
                   filter(ASV %in% snowDwellers_prok) %>%
                   mutate(ASV = recode(ASV, `Arachnida;7` = "Acartia;7")),
                 thresh = 10^5)
+snowDwellers_plt
+
+ggsave(here::here("Figures", "SnowDwellers.png"),
+       snowDwellers_plt,
+       width = 8, height = 4, units = "in")
+
 ## Chrysomicrobia tend to be isolated from sediment
 # Midocloria are symbionts, consume mitocondria, 
 # previously only in ticks (is it associated with acartia tonsa?)

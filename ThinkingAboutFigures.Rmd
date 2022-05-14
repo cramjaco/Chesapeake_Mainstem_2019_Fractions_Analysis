@@ -1,0 +1,30 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Things that need to happen for the manuscript.
+
+A good version of the Grace Martinez microscopy vs 18s plot. (Fig S1)
+
+?Explore rolling in 5.1 Bottom
+
+A figure of total microbial abundance vs size (per mass or per volume or both -- maybe both) (Fig 1)
+Top and bottom
+
+Some exemplars of taxon abundance patterns- 
+A microbe that is most abundant on large particles per mass but not volume (one of clara's planktos for instance). Paracoccus sp (abundant on intermediate particles) a SAR11 (ostensibly free)
+Top and bottom (six panels)
+
+Plot each as relative abundance, cells/mg, cells/L/mm (Fig 2)
+
+CCA of micobes vs size and location. (Fig 3)
+
+Something about richness (and evenness). (Fig 4)
+
+Brigandine plots -- phylum (Fig 5)
+ASVs within some group. (Fig 6)
+ASVs that are mostly on particles 20 microns or larger (Fig 7)
+
+
+
