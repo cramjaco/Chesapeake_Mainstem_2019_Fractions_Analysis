@@ -1,0 +1,248 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+## Other way of doing things
+Conversation on 29 June 2021
+Load in libraries
+```{r}
+library(tidyverse)
+library(readxl)
+```
+This is a file that says where to find stuff. Grace has to make this bigger so it can find all the data.
+
+```{r}
+library(here)
+```
+
+
+```{r}
+DataLocations <- read_csv("data/WhereToFindMicroscopy.csv")
+```
+Where to find the actual data
+```{r}
+Data_File <- "data/CBMicroscopy.xlsx"
+```
+A function that downloads all the things, if you specify the right input data, and returns a nice tibble with the appropriate information.
+```{r}
+StuffGetter <- function(Station, SizeRange, BoxesRange, DataRange){
+  Sizes <- read_excel(Data_File, sheet = as.character(Station), range = as.character(SizeRange), col_names = FALSE) %>%
+    as.matrix() %>% as.vector()
+  Boxes <- read_excel(Data_File, sheet = as.character(Station), range = as.character(BoxesRange), col_names = FALSE) %>%
+    as.matrix() %>% as.vector()
+  Data <- read_excel(Data_File, sheet = as.character(Station), range = as.character(DataRange),col_names = FALSE) %>%
+    as.matrix()
+  Mean <- apply(Data, 2, mean) %>% as.vector()
+  SD <- apply(Data, 2, sd) %>% as.vector()
+  #list(Sizes, Boxes, Data, Mean, SD)
+  tibble(Sizes, Boxes, Mean, SD)
+}
+```
+Test Stuff Getter
+```{r}
+test <- StuffGetter(DataLocations[1,"Station"],
+            SizeRange = DataLocations[1,"SizeRange"],
+            BoxesRange = DataLocations[1, "BoxesRange"],
+            DataRange = DataLocations[1, "DataRange"]) 
+test
+```
+This function only neeeds a row number as input and tells stuffgetter where to find the other data.
+```{r}
+GetRowStuff <- function(rowN){
+  StuffGetter(DataLocations[rowN,"Station"],
+            SizeRange = DataLocations[rowN,"SizeRange"],
+            BoxesRange = DataLocations[rowN, "BoxesRange"],
+            DataRange = DataLocations[rowN, "DataRange"])
+}
+```
+Testing GetRowStuff, any number seems to work
+```{r}
+GetRowStuff(1)
+```
+Run row-getter on ever row, makes a *list* of five tables
+```{r}
+AllTheStuff <- map(1:7, GetRowStuff)
+```
+Converts the list of five tables into one big table
+```{r}
+bind_rows(AllTheStuff)
+```
+This only almost works, because it throws out our actual which sample is which data.
+We're going to try something a little diferent.
+```{r}
+StuffWithMetadata <- DataLocations %>% mutate(RowNum = 1:9) %>%
+  mutate(Data = map(RowNum, GetRowStuff)) %>%
+  unnest(Data) %>%
+  select(-c(SizeRange, BoxesRange, DataRange))
+```
+
+```{r}
+head(StuffWithMetadata)
+```
+Do some calculations
+--
+Area of the circle in mm
+```{r}
+pi * (13/2)^2
+```
+Grid area in mm
+```{r}
+0.1 * 0.1
+```
+How many little boxes in the big circle
+```{r}
+GridsPerFilter <- (pi * (13/2)^2)/(0.1 * 0.1)
+GridsPerFilter
+```
+Big Table Calculations Function
+```{r}
+library(dplyr)
+library(readr)
+CalculationsWithMetadata <- StuffWithMetadata %>%
+  mutate(CellsPer100Boxes = Mean/Boxes * 100)%>%
+  mutate(CellsPerFilter = GridsPerFilter * CellsPer100Boxes) %>%
+  mutate(CellsPermL = CellsPerFilter/Volume) %>%
+  mutate(CellsPerLiterofBackrinse = CellsPermL * 1000) %>%
+  filter(Sizes != "<1.2") %>%
+  mutate(NSize = if_else(Sizes == "<5", 0.2, parse_number(Sizes))) %>%
+  mutate(Sizes2 = gsub(",", "", Sizes)) %>%
+  ungroup()%>%
+mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
+  mutate(Depth2 = recode(Depth2, Oxy = "Oxycline"))
+```
+
+```{r}
+install.packages("Rtools")
+install.packages("ggplot2")
+```
+```{r}
+library(ggplot2)
+```
+
+```{r}
+read_csv=("SizeVSBinSize.csv")
+SizevsBinSize <- read_csv("SizeVSBinSize.csv")
+CalculationsWithMetadata01 <- left_join(CalculationsWithMetadata, SizevsBinSize, by =c("NSize"="Size")) %>%
+  mutate(CellsPerLiterofBackrinsePermm = CellsPerLiterofBackrinse / BinSize)%>%
+  mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
+  mutate(Depth2 = recode(Depth2, Oxy = "Oxycline"))
+```
+
+```{r}
+ggplot(CalculationsWithMetadata01, aes(x=NSize, y=CellsPerLiterofBackrinsePermm, color=as.factor(Station))) + labs(color= "Station", y= "Cells / Liter of Backrinse / mm", x="Size (mm)")+
+  geom_point() + 
+  geom_path() + 
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) + facet_wrap(~Depth2, ncol = 1) + scale_y_log10() + scale_x_log10()
+ggsave("SizevsCellsPerLiterPermm.pdf")
+
+```
+
+
+
+```{r}
+read_csv=("mass_supplement.csv")
+MassSupplement <- read_csv("mass_supplement.csv")
+```
+```{r}
+BigDataTable <- left_join(CalculationsWithMetadata, MassSupplement, 
+              by=c("Station","Depth2"="Depth", "NSize"="Size_Class"))%>%
+  filter(Sizes2 != "<5") %>%
+mutate(CellsPermgofParticles = CellsPerLiterofBackrinse / MassperLiter)%>%
+mutate(MicrobesPerParticle = CellsPerLiterofBackrinse / ParticlesPerLiter)%>%
+mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
+  mutate(Depth2 = recode (Depth2, Oxy = "Oxycline"))
+
+ggplot(BigDataTable, aes(x=NSize, y=MicrobesPerParticle, color=as.factor(Station))) + labs(color= "Station", y= "Microbes Per Particle", x="Size (mm)")+
+  geom_point() + geom_path() + theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) + facet_wrap(~Depth2, ncol = 1) + scale_y_log10() + scale_x_log10() 
+ggsave("MicrobesPerParticlevsSize.pdf")
+```
+data input for amplicon abundance
+```{r}
+read_csv = ("AmpliconAbundance.csv")
+AmpliconAbundance <- read.csv("AmpliconAbundance.csv") %>%
+  mutate(DNAPerParticle = DNAperLiter / ParticlesPerLiter)%>%
+filter(Station !="3.1")%>%
+  filter(Station !="3.2")
+```
+plot for DNA per particle vs size
+```{r}
+ggplot(AmpliconAbundance, aes(x=Size_Class, y=DNAPerParticle, color=as.factor(Station))) + labs(color="Station", y="DNA Per Particle", x="Size (mm)")+ geom_point() + geom_path() + theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )  + facet_wrap(~Depth, ncol = 1) + scale_y_log10() + scale_x_log10()
+```
+plot cells per liter vs copies per liter (same thing but 2 different ways of doing it)
+```{r}
+AmpliconComparison = left_join(CalculationsWithMetadata, AmpliconAbundance, by=c("Depth","Station","NSize"="Size_Class"))%>%
+   mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
+  mutate(Depth2 = recode(Depth2, Oxy = "Oxycline"))
+
+ggplot(AmpliconComparison, aes(x=copiesPerL/Bin_Size, y=CellsPerLiterofBackrinse/Bin_Size, color=as.factor(Station))) + 
+  labs(color= "Station", y= "Cells Per Liter of Backrinse", x="Copies Per Liter of 16s Amplicon Gene in Backrinse")+
+  geom_point() + geom_path() + theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )  + #facet_wrap(~Depth2, ncol = 1) +
+  scale_y_log10() + scale_x_log10() +
+  geom_abline(intercept=0, slope=1)
+```
+plot cells per liter vs size & copies per liter vs size
+```{r}
+ggplot(AmpliconComparison, aes(x=NSize, y=CellsPerLiterofBackrinse / Bin_Size, color=as.factor(Station))) + labs(color= "Station", y= "Cells Per Liter of Backrinse", x="Size (mm)")+
+  geom_point() + geom_path() + theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )  + facet_wrap(~Depth2, ncol = 1) + scale_y_log10() + scale_x_log10()
+
+ggplot(AmpliconComparison, aes(x=NSize, y=copiesPerL / Bin_Size, color=as.factor(Station))) + labs(color= "Station", y= "Copies Per Liter of Backrinse", x="Size (mm)")+
+  geom_point() + geom_path() + theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )  + facet_wrap(~Depth2, ncol = 1) + scale_y_log10() + scale_x_log10()
+```
+```{r}
+AmpliconComparisonForModel <- AmpliconComparison %>% filter(is.finite(CellsPerLiterofBackrinse), is.finite(copiesPerL))
+
+mod <- lm(log10(CellsPerLiterofBackrinse/Bin_Size) ~ log10(copiesPerL/Bin_Size), data = AmpliconComparisonForModel)
+mod
+summary(mod)
+```
+How many cells in backrinse total (using cells per liter)= same number that got caught in mesh filters
+convert cells per backrinse total to cells per liter in backrinse
+
+```{r}
+read_csv = ("DNA_and_POM (1).csv")
+DNA_and_POM <- read_csv("DNA_and_POM (1).csv")
+BackRinseCalc <- left_join(DNA_and_POM, CalculationsWithMetadata, by=c("Station","Depth","Size_Class"="NSize"))%>%
+mutate(Cells_Collected_Total = CellsPerLiterofBackrinse * Backrinse)%>%
+mutate(Cells_Per_Liter_Total = Cells_Collected_Total / Volume_through_mesh)%>%
+  filter(Station != "3.1")%>%
+  filter(Station != "3.2")%>%
+filter(Sizes != "<5")
+
+BackRinseCalc2 <- left_join(BackRinseCalc, 
+                            AmpliconAbundance, by=c("Station","Depth","Size_Class"))
+
+ggplot(BackRinseCalc2, aes(x=copiesPerL/Bin_Size, y=Cells_Per_Liter_Total/Bin_Size, color=as.factor(Station), shape=as.factor(Depth))) + labs(color= "Station", y= "Total Cells Per Liter", x="Copies Per Liter")+
+  geom_point(aes(size=Size_Class)) + geom_path() + theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )  + #facet_wrap(~Depth2, ncol = 1) +
+  scale_y_log10() + scale_x_log10() +
+  geom_abline(intercept=0, slope=1) +
+  theme_bw()
+```
+```{r}
+BackRinseCalc2forModel <- BackRinseCalc2 %>% filter(is.finite(Cells_Per_Liter_Total), is.finite(copiesPerL))
+
+mod <- lm(log10(Cells_Per_Liter_Total/Bin_Size) ~ log10(copiesPerL/Bin_Size), data = BackRinseCalc2)
+mod
+summary(mod)
+```
+

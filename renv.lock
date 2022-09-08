@@ -75,6 +75,13 @@
       "Source": "Bioconductor",
       "Hash": "2d7498bcee6497bfb16433828cca25fe"
     },
+    "DT": {
+      "Package": "DT",
+      "Version": "0.23",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d8f1498dc47763ce4647c8d03214d30b"
+    },
     "DelayedArray": {
       "Package": "DelayedArray",
       "Version": "0.12.3",
@@ -136,6 +143,12 @@
       "Version": "2.20.2",
       "Source": "Bioconductor",
       "Hash": "148fe882b25f679b03afc45da15e760c"
+    },
+    "KEGGREST": {
+      "Package": "KEGGREST",
+      "Version": "1.26.1",
+      "Source": "Bioconductor",
+      "Hash": "36a919e3c81748d5e4206064b74d7da1"
     },
     "KernSmooth": {
       "Package": "KernSmooth",
@@ -436,6 +449,13 @@
       "Repository": "CRAN",
       "Hash": "21e67b67356e9b0ee4b89a0315401152"
     },
+    "bslib": {
+      "Package": "bslib",
+      "Version": "0.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "56ae7e1987b340186a8a5a157c2ec358"
+    },
     "cachem": {
       "Package": "cachem",
       "Version": "1.0.5",
@@ -527,6 +547,13 @@
       "Repository": "CRAN",
       "Hash": "6baccb763ee83c0bd313460fdb8b8a84"
     },
+    "commonmark": {
+      "Package": "commonmark",
+      "Version": "1.7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0f22be39ec1d141fd03683c06f3a6e67"
+    },
     "corpcor": {
       "Package": "corpcor",
       "Version": "1.6.9",
@@ -554,6 +581,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "0a6a65d92bd45b47b94b84244b528d17"
+    },
+    "crosstalk": {
+      "Package": "crosstalk",
+      "Version": "1.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "6aa54f69598c32177e920eb3402e8293"
     },
     "curl": {
       "Package": "curl",
@@ -646,6 +680,18 @@
       "Repository": "CRAN",
       "Hash": "7426a46e210d9f3815ed793e7112f582"
     },
+    "ecoflux": {
+      "Package": "ecoflux",
+      "Version": "0.3.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "ecoflux",
+      "RemoteUsername": "jpshanno",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "26788b6708736a322a7be974d9b7ae396dbc9dab",
+      "Hash": "6e54ee16e568cdff04fb5d79f735fe42"
+    },
     "ellipsis": {
       "Package": "ellipsis",
       "Version": "0.3.2",
@@ -687,6 +733,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "77bd60a6157420d4ffa93b27cf6a58b8"
+    },
+    "fontawesome": {
+      "Package": "fontawesome",
+      "Version": "0.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "55624ed409e46c5f358b2c060be87f67"
     },
     "forcats": {
       "Package": "forcats",
@@ -838,6 +891,13 @@
       "Repository": "CRAN",
       "Hash": "9ace652bffef34af558eb5d70903ac2f"
     },
+    "here": {
+      "Package": "here",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "24b224366f9c2e7534d2344d10d59211"
+    },
     "highr": {
       "Package": "highr",
       "Version": "0.9",
@@ -861,10 +921,10 @@
     },
     "htmltools": {
       "Package": "htmltools",
-      "Version": "0.5.1.1",
+      "Version": "0.5.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "af2c2531e55df5cf230c4b5444fc973c"
+      "Hash": "526c484233f42522278ab06fb185cb26"
     },
     "htmlwidgets": {
       "Package": "htmlwidgets",
@@ -872,6 +932,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "6fdaa86d0700f8b3e92ee3c445a5a10d"
+    },
+    "httpuv": {
+      "Package": "httpuv",
+      "Version": "1.6.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "97fe71f0a4a1c9890e6c2128afa04bc0"
     },
     "httr": {
       "Package": "httr",
@@ -956,6 +1023,13 @@
       "Repository": "CRAN",
       "Hash": "b1e925c4b9ffeb901bacf812cbe9a6ad"
     },
+    "later": {
+      "Package": "later",
+      "Version": "1.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7e7b457d7766bc47f2a5f21cc2984f8e"
+    },
     "lattice": {
       "Package": "lattice",
       "Version": "0.20-44",
@@ -969,6 +1043,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "590829599d6182cf7461787af34666ee"
+    },
+    "lazyeval": {
+      "Package": "lazyeval",
+      "Version": "0.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d908914ae53b04d4c0c0fd72ecc35370"
     },
     "lifecycle": {
       "Package": "lifecycle",
@@ -1026,6 +1107,13 @@
       "Repository": "CRAN",
       "Hash": "da367a2d39d112439bcb784f87b59ba8"
     },
+    "measurements": {
+      "Package": "measurements",
+      "Version": "1.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7d491085f997665f4e9f9735b9110979"
+    },
     "memoise": {
       "Package": "memoise",
       "Version": "2.0.0",
@@ -1046,6 +1134,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "8974a907200fc9948d636fe7d85ca9fb"
+    },
+    "miniUI": {
+      "Package": "miniUI",
+      "Version": "0.1.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fec5f52652d60615fdb3957b3d74324a"
     },
     "minqa": {
       "Package": "minqa",
@@ -1116,12 +1211,19 @@
       "Repository": "CRAN",
       "Hash": "f4dbc5a47fd93d3415249884d31d6791"
     },
-    "permute": {
-      "Package": "permute",
-      "Version": "0.9-5",
+    "pander": {
+      "Package": "pander",
+      "Version": "0.6.5",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e367efa1f0d52cb753bdb9163b63f528"
+      "Hash": "737924139a1e4fc96356ff377c754c35"
+    },
+    "permute": {
+      "Package": "permute",
+      "Version": "0.9-7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "abf0ca85c1c752e0d04f46334e635046"
     },
     "phyloseq": {
       "Package": "phyloseq",
@@ -1218,6 +1320,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "14dc9f7a3c91ebb14ec5bb9208a07061"
+    },
+    "promises": {
+      "Package": "promises",
+      "Version": "1.2.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "4ab2c43adb4d4699cf3690acd378d75d"
     },
     "proxy": {
       "Package": "proxy",
@@ -1393,6 +1502,13 @@
       "Repository": "CRAN",
       "Hash": "fb018249cc4b7ae7147d511fd33ddf82"
     },
+    "sass": {
+      "Package": "sass",
+      "Version": "0.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f37c0028d720bab3c513fd65d28c7234"
+    },
     "scales": {
       "Package": "scales",
       "Version": "1.1.1",
@@ -1414,6 +1530,13 @@
       "Repository": "CRAN",
       "Hash": "464dca3e4f0bb13cf202630bfed2753a"
     },
+    "shiny": {
+      "Package": "shiny",
+      "Version": "1.7.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "00344c227c7bd0ab5d78052c5d736c44"
+    },
     "sigclust": {
       "Package": "sigclust",
       "Version": "1.1.0",
@@ -1427,6 +1550,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "11b822ad6214111a4188d5e5fd1b144c"
+    },
+    "sourcetools": {
+      "Package": "sourcetools",
+      "Version": "0.1.7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "947e4e02a79effa5d512473e10f41797"
     },
     "sp": {
       "Package": "sp",
@@ -1561,10 +1691,15 @@
     },
     "vegan": {
       "Package": "vegan",
-      "Version": "2.5-7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "01771d8de354fa30c87c68e599e2429b"
+      "Version": "2.6-3",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "vegan",
+      "RemoteUsername": "vegandevs",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "1213712c7fb1ea90e0b65b156ab03e48c7753778",
+      "Hash": "c840b5b4925db448e1d60b454dbe1e22"
     },
     "viridis": {
       "Package": "viridis",

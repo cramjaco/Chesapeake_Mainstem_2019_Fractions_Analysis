@@ -26,5 +26,9 @@ Brigandine plots -- phylum (Fig 5)
 ASVs within some group. (Fig 6)
 ASVs that are mostly on particles 20 microns or larger (Fig 7)
 
+## Exemplar Figure 2
+
+
+
 
 

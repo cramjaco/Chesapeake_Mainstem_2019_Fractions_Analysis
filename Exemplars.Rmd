@@ -1,0 +1,150 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+The goal of this notebook is to generate some example plots of how relative abundance
+is related to (less useful than) concentration and density.
+
+I think a good ASV is Pirellulaceae;14 -- aka ASV_14 a Planktomycetes. 
+It follows the standard particle attached paradoxical distribution (dense on big particles, mostly on small particles)
+
+```{r}
+library(here)
+source(here("RScripts", "InitialProcessing_2.R"))
+
+source(here("ChesapeakePersonalLibrary.R"))
+```
+
+Our target bacteria
+```{r}
+target <- nonSpikes20 %>%
+  #filter(ASV == "ASV_14")
+  #filter(nASV %in% c(14, 17, 47, 48))
+  filter(nASV == 47)
+  #filter(nASV %in% c(459))
+```
+
+```{r}
+target %>%
+  filter(Depth != "Oxy") %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(x = Size_Class, y = RA, fill = as.factor(Station), shape = as.factor(Station))) + facet_wrap(~Depth, nrow = 2) +
+  geom_point() +
+  ches_plot_options
+```
+```{r fig.height=4, fig.width = 2.5}
+target %>%
+  filter(Depth == "Bottom") %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  pivot_longer(cols = c("RA", "copiesPerL", "copiesPerMg"), names_to = "metric", values_to = "abund") %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(x = Size_Class, y = abund, shape = as.factor(Station), fill = as.factor(Station))) + 
+  facet_grid(metric~ Tag_ASV, scales = "free_y") +
+  ches_plot_options
+```
+
+```{r}
+
+
+log_breaks_fn <- function(bob){
+  minBob <- min(bob)
+  maxBob <- max(bob)
+  prang = 10^floor(log10(minBob))
+  bls <- NULL
+  while(prang < maxBob){
+    lorder <- floor(log10(prang))
+    loc_seq <- seq(from = 10^lorder, to = 10^(lorder + 1), by = 10^lorder)
+    bls <- c(bls, loc_seq)
+    prang <- 10^(lorder + 1)
+  }
+  bls
+}
+```
+
+
+```{r}
+library(ecoflux)
+```
+
+```{r}
+scientific_10 <- function(x) {
+    xout <- gsub("1e", "10^{", format(x),fixed=TRUE)
+    xout <- gsub("{-0", "{-", xout,fixed=TRUE)
+    xout <- gsub("{+", "{", xout,fixed=TRUE)
+    xout <- gsub("{0", "{", xout,fixed=TRUE)
+    xout <- paste(xout,"}",sep="")
+    return(parse(text=xout))
+}
+```
+
+```{r fig.height=2, fig.width = 3.5}
+target %>%
+  #filter(Depth == "Bottom", Station == 4.3) %>%
+  filter(Depth == "Bottom", Station == 3.3) %>%
+  mutate(RA = RA * 100) %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  mutate(copiesPerParticle = copiesPerL/ParticlesPerLiter) %>%
+  pivot_longer(cols = c("RA", "copiesPerL", "copiesPerMg", "copiesPerParticle"), names_to = "metric", values_to = "abund") %>%
+  arrange(Size_Class) %>%
+  mutate(metric = factor(metric, levels = c("RA", "copiesPerMg", "copiesPerL", "copiesPerParticle"))) %>%
+  mutate(metric = fct_recode(metric, "Rel. Abun. (%)" = "RA", "Copies/mg" = "copiesPerMg", "Copies/L" = "copiesPerL", "Copies/Particle"= "copiesPerParticle")) %>%
+  ggplot(aes(x = Size_Class, y = abund)) + 
+  facet_wrap(~metric, scales = "free_y", switch = "y") +
+  geom_point(color = "Black") + geom_path() +
+  #scale_y_log10nice() +
+  scale_y_log10(minor_breaks = log_breaks_fn) +
+    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  theme_bw() +
+  ylab(NULL)+
+  theme(strip.background = element_blank(),
+           strip.placement = "outside",
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+```{r}
+target_01 <- target %>%
+  #filter(Depth == "Bottom", Station == 4.3) %>%
+  filter(Depth == "Bottom", Station == 3.3) %>%
+  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  arrange(Size_Class)
+
+ra_example <- target_01 %>%
+  ggplot(aes(x = Size_Class, y = RA * 100)) + 
+  geom_point(color = "Black") + geom_path() +
+  scale_y_log10(breaks = 100 *c(seq(from = 0.001, to = 0.003, by = 0.001),seq(from = 0.003, to = 0.013, by = 0.002))) +
+    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  labs(y = "Relative Abundance (%)") +
+  theme_bw()
+
+ra_example
+```
+
+```{r}
+cpl_example <- target_01 %>%
+  ggplot(aes(x = Size_Class, y = copiesPerL)) + 
+  geom_point(color = "Black") + geom_path() +
+  scale_y_log10() +
+    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  labs(y = "Copies/L") +
+  theme_bw()
+cpl_example
+```
+
+
+```{r}
+cpmg_example <- target_01 %>%
+  ggplot(aes(x = Size_Class, y = copiesPerMg)) + 
+  geom_point(color = "Black") + geom_path() +
+  #scale_y_log10() +
+  scale_y_log10(breaks = c(seq(from = 3e4, to = 1e5, by = 2e4),seq(from = 1e5, to = 3e5, by = 1e5))) +
+    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  labs(y = "Copies/mg") +
+  theme_bw()
+cpmg_example
+```
+
+```{r fig.height = 4, fig.width = 1.5}
+cowplot::plot_grid(ra_example, cpl_example, cpmg_example, ncol = 1)
+```
+
