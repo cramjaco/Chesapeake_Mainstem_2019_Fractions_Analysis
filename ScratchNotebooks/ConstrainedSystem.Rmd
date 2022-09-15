@@ -20,8 +20,9 @@ library(ggvegan)
 library(vegan)
 library(tidyverse)
 library(cowplot)
-source("InitialProcessing.R")
-source("ChesapeakePersonalLibrary.R")
+library(here)
+source(here("RScripts", "InitialProcessing_3.R"))
+source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
 ```
 
 # Setup
@@ -217,9 +218,27 @@ ccaConstrainedPlot <- ccaConstrainedFort %>%
 ccaConstrainedPlot
 ```
 
-This should run vs lat, not station.
-And names should be easier.
-Done
+```{r}
+ccaConstrainedPlot13 <- ccaConstrainedFort %>%
+  filter(Score == "sites") %>%
+  mutate(Depth = recode(Depth, `Oxy` = "Oxycline")) %>%
+  select(Station, Depth, Size_Class, everything()) %>%
+  ggplot(aes(x = CCA1, y = CCA3,
+             fill = as.factor(Station),
+             shape = as.factor(Station),
+             size = sqrt(Size_Class),
+             color = as.factor(Depth)
+             )) + 
+ geom_point() +
+ coord_fixed(sqrt(ccaConstrained$CCA$eig[3]/ccaConstrained$CCA$eig[1])) +
+ geom_text(aes(label = Label2, x = CCA1 * 2, y = CCA3 * 2), color = "black", inherit.aes = FALSE,
+           data = ccaConstrainedBiplotLabels
+             ) +
+  geom_segment(aes(x = 0, y = 0, xend  = CCA1 * 1.7, yend = CCA3 * 1.7), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.5, arrow = arrow(length = unit(0.1, "in"))) +
+  #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
+  myPlotDetails
+ccaConstrainedPlot13
+```
 
 # Constrained ordination with respect to size (all sizes included), conditioned on lat and depth
 

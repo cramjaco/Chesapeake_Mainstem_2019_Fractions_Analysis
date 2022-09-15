@@ -7,8 +7,9 @@ Goal here is to get breakaway richness and evenness from all of the samples. Plo
 
 ```{r}
 library(breakaway)
-source("InitialProcessing.R")
-source("ChesapeakePersonalLibrary.R")
+library(flextable)
+source(here::here("RScripts", "InitialProcessing_3.R"))
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 ```
 ```{r}
 otuTable <- nonSpikes %>% select(ID, ASV, reads) %>% pivot_wider(names_from = ASV, values_from = reads, id_cols = ID)
@@ -114,5 +115,9 @@ Apparently my R2 is like 15 percent so no wonder everything looks terrible
 
 ```{r}
 kable(myBet$table)
+```
+
+```{r}
+myBet$table %>% as.data.frame() %>% flextable() %>% theme_vanilla()
 ```
 

@@ -8,8 +8,8 @@ output: html_notebook
 Load in Initial Processing file (and dependencies)
 
 ```{r}
-source("InitialProcessing.R")
-source("ChesapeakePersonalLibrary.R")
+source(here::here("RScripts", "InitialProcessing_3.R"))
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 ```
 
 
@@ -115,7 +115,7 @@ ParticleMassPlot
 I need to load over data from the CB-Bay project
 
 ```{r}
-source("CBMap.R")
+source(here("RScripts", "CBMap.R_Transect"))
 ```
 
 ```{r}
@@ -161,7 +161,7 @@ Plot their abundance.
 Pick the prettiest few and plot
 
 ```{r}
-source("ClusteringCore.R")
+source(here::here("RScripts", "ClusteringCore.R"))
 ```
 
 
@@ -373,7 +373,7 @@ nonSpikes20 %>%
   filter(ASV == "ASV_7") %>%
   ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
   scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
-  facet_grid(Depth ~ Tag) +
+  #facet_grid(Depth ~ Tag) +
   geom_point(size = 2) +
   geom_path(aes(color = as.factor(Station))) +
   scale_shape_manual(values = rep(21:25, 2)) +
