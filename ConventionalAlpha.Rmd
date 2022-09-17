@@ -2,17 +2,20 @@
 title: "R Notebook"
 output: html_notebook
 ---
-
+# Setup
 ```{r}
-source("InitialProcessing.R")
+source(here::here("RScripts", "InitialProcessing_3.R"))
 ```
 
 ```{r}
 library(vegan)
+library(cowplot)
+library(flextable)
+library(ftExtra)
 ```
 
 ```{r}
-source("ChesapeakePersonalLibrary.R")
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 ```
 
 
@@ -47,6 +50,7 @@ min(seqDep)
 sampleRichness <- rarefy(countMat, min(seqDep))
 ```
 
+rarefy everything to the minimum depth (852)
 ```{r}
 countRare <- rrarefy(countMat, min(seqDep))
 ```
@@ -56,32 +60,29 @@ Gamma diversity
 specpool(countRare)
 ```
 
-# Doesn't finish
+ Doesn't finish
 
 ```{r}
 #specpool(countMat)
 ```
 
-
+# Calculate diversity indeces
+All richness estimates
 ```{r}
 richnessRare <- estimateR(countRare)
 ```
 
+Shannon diversity
 ```{r}
 shan <- diversity(countRare)
 shan
 ```
-
+Evenness
 ```{r}
 pielouJ <- shan/richnessRare["S.chao1",]
 pielouJ
 ```
-
-```{r}
-shan %>% enframe(name = "ID", value = "shannonH")
-```
-
-
+## Combine diversity data
 ```{r}
 diversityData <- sampleData %>% 
   left_join(richnessRare %>% t() %>% as.data.frame() %>% rownames_to_column("ID"), by = "ID") %>%
@@ -90,6 +91,10 @@ diversityData <- sampleData %>%
   arrange(Size_Class)
 ```
 
+
+# Generate plots of diversity estimates
+
+Parameters for all plots
 ```{r}
 plotSpecs <- list(
   facet_wrap(~Depth, ncol = 1) ,
@@ -106,56 +111,70 @@ plotSpecs <- list(
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
         axis.title.x = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = .5),
-        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0))
+        axis.title.y = element_text(margin = unit(c(3, 3, 3, 3), "mm"), vjust = 0))
 )
 ```
 
+Observed species counts, on rarefied data
 ```{r}
-diversityData %>%
+plotObs <- diversityData %>%
 filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = S.obs, shape = as.factor(Station), fill = as.factor(Station))) +
-  plotSpecs + scale_y_log10()
+  plotSpecs +ylab("Observed ASVs (Rarefied)")#+ scale_y_log10()
+plotObs
 ```
-
+Estemated Chao1 Richness
 ```{r}
-diversityData %>%
+plotChao1 <- diversityData %>%
 filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = S.chao1, shape = as.factor(Station), fill = as.factor(Station))) +
-  plotSpecs + scale_y_log10() +
-  geom_errorbar(aes(ymin = S.chao1 -2 * se.chao1, ymax = S.chao1 + 2* se.chao1), width = -.1)
+  plotSpecs +
+  geom_errorbar(aes(ymin = S.chao1 -2 * se.chao1, ymax = S.chao1 + 2* se.chao1), width = -.1) + 
+  scale_y_log10() +
+  ylab("Richness (Chao1)")
+plotChao1
 ```
 
 
-
+Shannon diversity
 ```{r}
-diversityData %>%
+plotShan <- diversityData %>%
 filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = shannonH, shape = as.factor(Station), fill = as.factor(Station))) +
-  plotSpecs
+  plotSpecs +
+  ylab("Diversity (Shannon H)") +
+  lims(y = c(2.5, 6))
+plotShan
 ```
 
-
+Evenness
 ```{r}
-diversityData %>%
+plotPielou <- diversityData %>%
 
 filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pielouJ, shape = as.factor(Station), fill = as.factor(Station))) +
-  plotSpecs + scale_y_log10()
+  plotSpecs +scale_y_log10() +ylab("Evenness (PielouJ)")
+plotPielou
 ```
-Ok, evenness looks like a mess,and maybe I trust shannon more than these non div-net diversity values. Do we see trends with lat and size?
-```{r}
-shanMod <- lm(shannonH ~ log(Size_Class) + I(log(Size_Class)^2) + lat + I(lat^2) + depth, data = diversityData)
-```
-
-
-```{r}
-summary(shanMod)
-```
-```{r}
-shanModSimple <- lm(shannonH ~ log(Size_Class) + I(log(Size_Class)^2), data = diversityData)
-summary(shanModSimple)
+All plots together
+```{r fig.width = 11, fig.height = 4}
+plotAlpha <- plot_grid(plotObs, plotChao1, plotShan, plotPielou, nrow = 1, labels = LETTERS)
+plotAlpha
+ggsave(here::here("Figures", "ConventionalAlpha.png"), plotAlpha, width = 11, height = 4)
 ```
 
+
+## Do we see trends with lat and size?
+
+## Observed Species
+Rarefied
+
+```{r}
+obsMod <- lm(S.obs ~ log(Size_Class) + I(log(Size_Class)^2) + I(log(Size_Class)^2) + lat + I(lat^2) + depth, data = diversityData)
+summary(obsMod)
+```
+
+## Richness
 ```{r}
 chao1Mod <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2) + I(log(Size_Class)^2) + lat + I(lat^2) + depth, data = diversityData)
 summary(chao1Mod)
@@ -166,12 +185,173 @@ chao1ModSimple <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2), data = di
 summary(chao1ModSimple)
 ```
 
+## Shannon Diversity
+
+```{r}
+shanMod <- lm(shannonH ~ log(Size_Class) + I(log(Size_Class)^2) + lat + I(lat^2) + depth, data = diversityData)
+```
+
+
+```{r}
+summary(shanMod)
+```
+## Evenness
+
 ```{r}
 pielouMod <- lm(pielouJ ~ log(Size_Class) + I(log(Size_Class)^2) + lat + I(lat^2) + depth, data = diversityData)
 summary(pielouMod)
 ```
 
+
 uomisto H (2010a). “A diversity of beta diver-
 sities: straightening up a concept gone awry. 1.
 Defining beta diversity as a function of alpha and
 gamma diversity.” Ecography, 33, 2–2
+
+# Prediction plots 
+
+## Observed Species
+
+```{r}
+predict(obsMod, se.fit = TRUE)
+diversityData$pred_obs = predict(obsMod, se.fit = TRUE)$fit
+diversityData$se_obs = predict(obsMod, se.fit = TRUE)$se.fit
+```
+
+```{r}
+plotObs_pred <-  diversityData %>%
+
+filter(Depth %in% c("Surface", "Bottom")) %>%
+  ggplot(aes(x = Size_Class, y = pred_chao1, shape = as.factor(Station), fill = as.factor(Station))) +
+  geom_segment(aes(y = pred_chao1 - 2 * se_chao1, yend = pred_chao1 + 2 * se_chao1, xend = Size_Class, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"), alpha = 0.5)  +
+  plotSpecs2 + ylab("Predicted  ASVs") 
+plotObs_pred
+```
+
+## Richness
+
+```{r}
+predict(chao1Mod, se.fit = TRUE)
+diversityData$pred_chao1 = predict(chao1Mod, se.fit = TRUE)$fit
+diversityData$se_chao1 = predict(chao1Mod, se.fit = TRUE)$se.fit
+```
+
+```{r}
+plotChao1_pred <-  diversityData %>%
+
+filter(Depth %in% c("Surface", "Bottom")) %>%
+  ggplot(aes(x = Size_Class, y = pred_chao1, shape = as.factor(Station), fill = as.factor(Station))) +
+  geom_segment(aes(y = pred_chao1 - 2 * se_chao1, yend = pred_chao1 + 2 * se_chao1, xend = Size_Class, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"), alpha = 0.5)  +
+  plotSpecs2 + ylab("Predictd Richness (Chao1)") + scale_y_log10()
+plotChao1_pred
+```
+
+## Shannon Diversity
+```{r}
+predict(shanMod, se.fit = TRUE)
+diversityData$pred_shanH = predict(shanMod, se.fit = TRUE)$fit
+diversityData$se_shanH = predict(shanMod, se.fit = TRUE)$se.fit
+```
+
+```{r}
+plotShannonH_pred <- diversityData %>%
+
+ filter(Depth %in% c("Surface", "Bottom")) %>%
+  ggplot(aes(x = Size_Class, y = pred_shanH, shape = as.factor(Station), fill = as.factor(Station))) +
+  geom_segment(aes(y = pred_shanH - 2 * se_shanH, yend = pred_shanH + 2 * se_shanH, xend = Size_Class, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"),  alpha = 0.5)  +
+  plotSpecs2 + ylab("Predicted Diversity (Shannon H)") #+ scale_y_log10()
+plotShannonH_pred
+```
+
+## Evenness
+```{r}
+predict(pielouMod, se.fit = TRUE)
+diversityData$pred_pielouJ = predict(pielouMod, se.fit = TRUE)$fit
+diversityData$se_pielouJ = predict(pielouMod, se.fit = TRUE)$se.fit
+```
+
+```{r}
+plotSpecs2 <- list(
+  facet_wrap(~Depth, ncol = 1) ,
+  theme_bw(base_size = 16) ,
+  #geom_point(size = 4) ,
+  geom_path(aes(color = as.factor(Station))) ,
+  scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) ,
+  #scale_y_log10nice() ,
+  scale_shape_manual(values = rep(21:25, 2)) ,
+  scale_fill_viridis_d(option = "plasma") ,
+  scale_color_viridis_d(option = "plasma") ,
+  labs(x = expression(paste("Particle Size (", mu, "m)"))) ,
+  theme(legend.position = "none",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(3, 3, 3, 3), "mm"), vjust = 0))
+)
+```
+
+
+```{r}
+plot_pielouJ_pred <- diversityData %>%
+
+filter(Depth %in% c("Surface", "Bottom")) %>%
+  ggplot(aes(x = Size_Class, y = pred_pielouJ, shape = as.factor(Station), fill = as.factor(Station))) +
+  geom_segment(aes(y = pred_pielouJ - 2 * se_pielouJ, yend = pred_pielouJ + 2 * se_pielouJ, xend = Size_Class, color = as.factor(Station), alpha = 0.5), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"))  +
+  plotSpecs2 + ylab("Predicted Evenness (Pielou J)") + scale_y_log10()
+plot_pielouJ_pred
+```
+
+## Combined prediction plot
+
+```{r fig.width=11, fig.height=4}
+plotPredictions <- plot_grid(plotObs_pred, plotChao1_pred, plotShannonH_pred, plot_pielouJ_pred, nrow = 1, labels = LETTERS)
+plotPredictions
+ggsave(here::here("Figures", "ConventionalAlphaPredictions.png"), plotPredictions, width = 11, height = 4)
+```
+
+## Even combindeder
+
+```{r fig.width=11, fig.height = 8}
+plot_grid(plotObs, plotChao1, plotShan, plotPielou,
+          plotObs_pred, plotChao1_pred, plotShannonH_pred, plot_pielouJ_pred,
+          nrow = 2, labels = LETTERS)
+```
+
+# Combined summary table
+
+```{r}
+alphaSummary <- tibble(
+  metric = c("Observed ASVs", "Richness (Chao1)", "Diversity (Shannon H)", "Evenness (Pielou J)"),
+  model = list(obsMod, chao1Mod, shanMod, pielouMod)
+)
+
+alphaSummary <- alphaSummary %>%
+  mutate(df = map(model, ~broom::tidy(summary(.))))
+
+alphaSummary <- alphaSummary %>%
+  select(-model) %>%
+  unnest(df)
+
+alphaSummary <- alphaSummary %>%
+  rename(Metric = metric, Term = term, Estimate = estimate, `Standard Error` = std.error, `T Value` = statistic, p = p.value) %>%
+  mutate(Term = str_replace(Term, "^I?\\((.*)\\)", "\\1"),
+         Term = str_replace(Term, "\\^2", "\\^2\\^"),
+         Term = str_replace(Term, "depth", "Depth"),
+         Term = str_replace(Term, "lat", "Latitude"),
+         Term = str_replace(Term, "_", " ")# BOOKMARK!!
+         ) %>%
+  mutate(Estimate = format(Estimate, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+         ) %>%
+  mutate(`Standard Error` = format(`Standard Error`, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+  ) %>%
+  mutate(`T Value` = format(`T Value`, digits = 2, scientific = FALSE)) %>%
+  mutate(p = if_else(p < 0.001, "< 0.001", format(round(p, digits = 3)))) %>%
+  rename(`Standard\nError` = `Standard Error`) %>%
+  identity()
+
+alphaSummary %>% flextable() %>% merge_v(j = 1) %>% theme_vanilla() %>% bold(i = ~ p< 0.05, j = "p") %>% colformat_md() %>% set_table_properties(layout = "autofit") %>%
+  align(j = -c(1:2), align = "right")
+```
+

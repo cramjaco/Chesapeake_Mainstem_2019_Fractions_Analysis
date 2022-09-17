@@ -9,6 +9,7 @@ scientific_10_c <- function(x) {
     
 }
 
+
 scale_y_log10nice <- function(name=NULL,omag=seq(-10,20),...) {
     breaks10 <- 10^omag
     scale_y_log10(breaks=breaks10,labels=scientific_10_c(breaks10),...)
@@ -23,3 +24,10 @@ ches_plot_options <- list(
   scale_fill_viridis_d(option = "plasma") ,
   scale_color_viridis_d(option = "plasma")
 )
+
+reformat_sci <- function(x){
+  x %>%
+    str_replace("e\\+0", " x 10^") %>%
+           str_replace("e\\-0", " x 10^-") %>%
+           paste0("^")
+}

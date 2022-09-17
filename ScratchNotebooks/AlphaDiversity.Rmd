@@ -8,6 +8,7 @@ Goal here is to get breakaway richness and evenness from all of the samples. Plo
 ```{r}
 library(breakaway)
 library(flextable)
+library(ftExtra)
 source(here::here("RScripts", "InitialProcessing_3.R"))
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 ```
@@ -113,11 +114,38 @@ Apparently my R2 is like 15 percent so no wonder everything looks terrible
 
 ## What if I split off the surface and bottom
 
-```{r}
-kable(myBet$table)
-```
+
+
+
 
 ```{r}
-myBet$table %>% as.data.frame() %>% flextable() %>% theme_vanilla()
+
+
+
+myBet$table %>% as.data.frame() %>% rownames_to_column(var = "Parameter") %>%
+  mutate(Estimates = format(Estimates, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+         ) %>%
+  mutate(`Standard Errors` = format(`Standard Errors`, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+  ) %>%
+  mutate(`p` = if_else(`p-values` < 0.001, "<0.001", paste(" ", as.character(`p-values`)))) %>%
+  select(-`p-values`) %>%
+  #mutate(Parameter = str_remove_all(Parameter, "I\\(|^\\(|\\)$")) %>% # why won't it remove left facing parentheses
+  #mutate(Parameter = str_remove(Parameter, "\\)")) %>%
+  mutate(Parameter = str_replace(Parameter, "^I?\\((.*)\\)", "\\1"),
+         Parameter = str_replace(Parameter, "\\^2", "\\^2\\^"),
+         Parameter = str_replace(Parameter, "depth", "Depth"),
+         Parameter = str_replace(Parameter, "lat", "Latitude"),
+         Parameter = str_replace(Parameter, "_", " ")# BOOKMARK!!
+         ) %>%
+  flextable() %>%
+  colformat_md() %>%
+  identity()
+```
+
+
+```{r}
+
 ```
 
