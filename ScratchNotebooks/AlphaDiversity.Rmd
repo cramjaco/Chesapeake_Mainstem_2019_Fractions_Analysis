@@ -144,8 +144,14 @@ myBet$table %>% as.data.frame() %>% rownames_to_column(var = "Parameter") %>%
   identity()
 ```
 
+## How does the model look if I just linearly regress the estemated beta diversity values?
 
 ```{r}
-
+breakLm <- lm(estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + lat +  I(lat^2) + depth ,data = richSummaryExpanded)
+summary(breakLm)
 ```
+Same overall pattern with less statistical significance
 
+
+## To do
+Calculate evenness by dividing shannon H by breakaway richness. (The values will be a lot smaller I think, but generally less affected by rarefaction because shannon is less affected (mostly driven by larger species)). I anticipate a more extreme curve.
