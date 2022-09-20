@@ -5,6 +5,8 @@ library(tidyverse)
 
 library(here)
 
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
+
 ## Load in Main data types
 counts <- read_tsv(here("DadaData",'ASVs_counts.tsv')) %>% rename(ASV = "...1")
 taxa0 <- read_tsv(here("DadaData", "ASVs_taxonomy.tsv")) %>% rename(ASV = "...1")
@@ -273,6 +275,21 @@ stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
 sampleData <- microbialAbundance %>%
   left_join(stations01 %>% mutate(Station = as.numeric(Station)), by = "Station") %>%
   mutate(Depth2 = if_else(Depth == "Surface", "Surface", "NotSurface"))
+
+
+## Dependent library functions
+
+ches_plot_options <- list(
+  scale_y_log10nice() ,
+    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) ,
+  geom_point(size = 2) ,
+  geom_path(aes(color = as.factor(Station))) ,
+  scale_shape_manual(values = rep(21:25, 2)) ,
+  scale_fill_viridis_d(option = "plasma") ,
+  scale_color_viridis_d(option = "plasma")
+)
+
+
 
 save.image(here("RDataFiles", "InitialProcessing_3.RData"))
 
