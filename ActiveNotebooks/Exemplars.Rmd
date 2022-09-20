@@ -11,12 +11,17 @@ It follows the standard particle attached paradoxical distribution (dense on big
 
 ```{r}
 library(here)
-source(here("RScripts", "InitialProcessing_2.R"))
+library(tidyverse)
+source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
+load(here("RDataFiles", "InitialProcessing_3.RData"))
 
-source(here("ChesapeakePersonalLibrary.R"))
+
 ```
 
 Our target bacteria
+{No longer works because the asvs got renmbered when I added the last batch of samples}
+I want a paracoccus ASV that has a regualr abundance pattern
+To do *after* the brigandine plots.
 ```{r}
 target <- nonSpikes20 %>%
   #filter(ASV == "ASV_14")
