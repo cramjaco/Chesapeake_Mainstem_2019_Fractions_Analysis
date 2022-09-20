@@ -3,8 +3,10 @@ title: "R Notebook"
 output: html_notebook
 ---
 # Setup
+Run AlphaDiversity in scratchnotebooks
 ```{r}
 #source(here::here("RScripts", "InitialProcessing_3.R"))
+ksource(here::here("ScratchNotebooks", "AlphaDiv"))
 ```
 
 ```{r}
@@ -416,13 +418,13 @@ diversityDataWB$se_pielouJ2 = predict(pielouMod2, se.fit = TRUE)$se.fit
 
 
 ```{r}
-plot_pielouJ_pred <- diversityDataWB %>%
+plot_pielouJ2_pred <- diversityDataWB %>%
 
 filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pred_pielouJ2, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_pielouJ2 - 2 * se_pielouJ2, yend = pred_pielouJ2 + 2 * se_pielouJ2, xend = Size_Class, color = as.factor(Station), alpha = 0.5), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"))  +
   plotSpecs2 + ylab("Predicted Evenness (Pielou J2)") #+ scale_y_log10()
-plot_pielouJ_pred
+plot_pielouJ2_pred
 ```
 
 ## Breakaway richness subplots
@@ -438,20 +440,39 @@ filter(Depth %in% c("Surface", "Bottom")) %>%
 plotBreakaway
 ```
 ```{r}
-predict(breakLm, se.fit = TRUE)
-diversityDataWB$pred_break = predict(breakLm, se.fit = TRUE)$fit
-diversityDataWB$se_break = predict(breakLm, se.fit = TRUE)$se.fit
+#predict(breakLm, se.fit = TRUE)
+# doesn't work because built with a different data frame
 ```
+
+Why are these not smooth curves?!! 
+What if I redo the model, this time with the same data frame
+
+```{r}
+breakLm2 <- lm(break_estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + lat +  I(lat^2) + depth ,data = diversityDataWB)
+breakLm2 %>% summary()
+```
+Note the non statistical significance overall
+
+```{r}
+#predict(breakLm2, se.fit = TRUE)
+diversityDataWB$pred_break = predict(breakLm2, se.fit = TRUE)$fit
+diversityDataWB$se_break = predict(breakLm2, se.fit = TRUE)$se.fit
+```
+
 ```{r}
 plot_break_pred <- diversityDataWB %>%
 
 filter(Depth %in% c("Surface", "Bottom")) %>%
+#  filter(Station == 4.3) %>%
   ggplot(aes(x = Size_Class, y = pred_break, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_break - 2 * se_break, yend = pred_break + 2 * se_break, xend = Size_Class, color = as.factor(Station), alpha = 0.5), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"))  +
   plotSpecs2 + ylab("Predicted Richness (Breakaway -- LM)") #+ scale_y_log10()
 plot_break_pred
 
 ```
+
+
+
 
 ## Rebuilding combined products
 
@@ -527,8 +548,11 @@ alphaSummary2 <- alphaSummary2 %>%
 
 alphaSummary2
 
-alphaSummary2 %>% flextable() %>% merge_v(j = 1) %>% theme_vanilla() %>% bold(i = ~ p< 0.05, j = "p") %>% colformat_md() %>% set_table_properties(layout = "autofit") %>%
+alphaTable2 <- alphaSummary2 %>% flextable() %>% merge_v(j = 1) %>% theme_vanilla() %>% bold(i = ~ p< 0.05, j = "p") %>% colformat_md() %>% set_table_properties(layout = "autofit") %>%
   align(j = -c(1:2), align = "right")
+alphaTable2
+
+alphaTable2 %>% save_as_docx(path = here::here("Tables", "alphaTable2.docx"))
 ```
 
 myBet$table
@@ -536,7 +560,7 @@ myBet$table
 ## And finally predictions from richness, diversity evenness again.
 
 
-```{r}
-plot_grid(,plot_j2_pred)
+```{r fig.width = 11, fig.height = 4}
+plot_grid(plot_break_pred,plotShannonH_pred,plot_pielouJ2_pred, nrow = 1, labels = LETTERS)
 ```
 

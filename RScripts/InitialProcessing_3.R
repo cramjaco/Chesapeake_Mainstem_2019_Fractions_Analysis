@@ -274,4 +274,5 @@ sampleData <- microbialAbundance %>%
   left_join(stations01 %>% mutate(Station = as.numeric(Station)), by = "Station") %>%
   mutate(Depth2 = if_else(Depth == "Surface", "Surface", "NotSurface"))
 
+save.image(here("RDataFiles", "InitialProcessing_3.RData"))
 

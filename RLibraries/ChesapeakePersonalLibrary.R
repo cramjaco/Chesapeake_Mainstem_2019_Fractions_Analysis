@@ -31,3 +31,10 @@ reformat_sci <- function(x){
            str_replace("e\\-0", " x 10^-") %>%
            paste0("^")
 }
+
+
+# https://stackoverflow.com/questions/10966109/how-to-source-r-markdown-file-like-sourcemyfile-r
+ksource <- function(x, ...) {
+  library(knitr)
+  source(purl(x, output = tempfile()), ...)
+}
