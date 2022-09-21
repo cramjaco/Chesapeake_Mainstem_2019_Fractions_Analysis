@@ -21,9 +21,16 @@ library(vegan)
 library(tidyverse)
 library(cowplot)
 library(here)
-source(here("RScripts", "InitialProcessing_3.R"))
+#source(here("RScripts", "InitialProcessing_3.R"))
 source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
+env1 <- attach(here("RDataFiles", "InitialProcessing_3.RData"))
 ```
+
+```{r}
+nonSpikes20 <- env1$nonSpikes20
+sampleData <- env1$sampleData
+```
+
 
 # Setup
 

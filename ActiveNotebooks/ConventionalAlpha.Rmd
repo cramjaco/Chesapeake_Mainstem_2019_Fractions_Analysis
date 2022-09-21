@@ -352,7 +352,10 @@ alphaSummary <- alphaSummary %>%
   rename(`Standard\nError` = `Standard Error`) %>%
   identity()
 
-alphaSummary %>% flextable() %>% merge_v(j = 1) %>% theme_vanilla() %>% bold(i = ~ p< 0.05, j = "p") %>% colformat_md() %>% set_table_properties(layout = "autofit") %>%
+alphaSummary %>% flextable() %>% merge_v(j = 1) %>% theme_vanilla() %>%
+  bold(i = ~ p< 0.05, j = "p") %>%
+  colformat_md() %>%
+  set_table_properties(layout = "autofit") %>%
   align(j = -c(1:2), align = "right")
 ```
 
