@@ -1,13 +1,16 @@
 library(here)
+library(tidyverse)
+
 # Bring in data
-source(here("RScripts", "InitialProcessing_3.R"))
+#source(here("RScripts", "InitialProcessing_3.R"))
+load(here::here("RDataFiles", "InitialProcessing_3.RData"))
 source(here("RLibraries", "Brigandine_Library.R"))
 
 # Phylum Level Plots
 phylum_mg_plot <- ches_brigandine(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 7)
 phylum_L_plot <- ches_brigandine_L(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 9)
 
-ggsave(here("Figures", "Phylum_per_mg_brig.png"), height = 4.5, width = 7.5, plot = phylum_mg_plot)
+ggsave(here("Figures", "Phylum_per_mg_brig.png"), height = 5.5, width = 6.5, plot = phylum_mg_plot)
 ggsave(here("Figures", "Phylum_per_L_brig.png"), height = 4.5, width = 7.5, plot = phylum_L_plot)
 
 ## Planktomycetes ASVs
@@ -38,7 +41,8 @@ snow_dwellers_plot <- ches_brigandine_L(ASV, Phylum,
                 min = 3, max = 7, 
                 ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
                   filter(ASV %in% snowDwellers) %>%
-                  mutate(ASV = recode(ASV, `Arachnida;7` = "Acartia;7")),
+                  #mutate(ASV = recode(ASV, `Arachnida;9` = "Acartia;9")), # If you blast the "arachnid" sequence, it turns out to be Acartia tonsa
+                  mutate(ASV = str_replace(ASV, "Arachnida", "Acartia")), # more general solution than the above line
                 thresh = 10^3)
 
 ggsave(here("Figures", "SnowDwellers_per_L_brig.png"), height = 4.5, width = 7.5, plot = snow_dwellers_plot)

@@ -84,7 +84,10 @@ ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, m
   facet_grid(rows = vars(!!broadlevel), cols= vars(Depth), drop = TRUE, scales = "free", space = "free") +
   labs(y = quo_name(taxlevel), x = "Station", size = "Size Class", fill = "log10(Copies/mg)") +
   theme_bw() +
-    theme(strip.text.y = element_text(angle = 0))
+    theme(strip.text.y = element_text(angle = 0),
+          legend.position = "bottom",
+          legend.box.margin = margin(0,0,0.0)) + # legend.box.margin doesn't do anything different
+    guides(size = guide_legend(nrow = 1, label.position = "bottom", title.vjust = .7))
 
   locPlot
   
@@ -145,7 +148,9 @@ ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20,
   facet_grid(rows = vars(!!broadlevel), cols= vars(Depth), drop = TRUE, scales = "free", space = "free") +
   labs(y = quo_name(taxlevel), x = "Station", size = "Size Class", fill = "log10(Copies/L)") +
   theme_bw() +
-    theme(strip.text.y = element_text(angle = 0))
+    theme(strip.text.y = element_text(angle = 0),
+          legend.position = "bottom") +
+    guides(size = guide_legend(nrow = 1, label.position = "bottom", title.vjust = .7))
 
   locPlot
   #list(toPlotFree, toPlotAttached)

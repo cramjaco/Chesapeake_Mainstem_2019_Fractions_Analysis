@@ -1,0 +1,73 @@
+---
+title: "Mock Explore"
+output: html_notebook
+---
+
+My goal in this notebook is to explore mock communities and make sure they align with my expectations.
+
+Bring in data
+
+```{r}
+library(here)
+library(tidyverse)
+
+# Bring in data
+#source(here("RScripts", "InitialProcessing_3.R"))
+load(here::here("RDataFiles", "InitialProcessing_3.RData"))
+```
+
+Subset out mocks
+```{r}
+counts_long %>% pull(ID) %>% unique()
+```
+
+```{r}
+mock_key <- key2 %>% filter(Type == "Mock", ReadDir == 1) %>%
+  # If I forget to specify forward reads only, we get doubles in the counts_long_mock table
+  mutate(SubType = case_when(
+    str_detect(ID, "Even|_E") ~ "Even",
+    str_detect(ID, "Staggered|_S") ~ "Staggered",
+    TRUE ~ NA_character_,
+  )) %>%
+  select(ID, Run, Type, SubType)
+```
+
+
+```{r}
+counts_long_mock <- counts_ra %>%
+  inner_join(mock_key %>% select(Run, Type, SubType, ID), by = "ID") %>%
+  filter(reads > 0)
+```
+
+```{r}
+counts_long_mock %>% filter(nASV <= 100) %>% group_by(ID, ASV) %>% summarise(n = n()) %>% ungroup() %>% summarise(mn = max(n))
+```
+
+
+Ok. So there is a bit too much diversity in the mocks. Which is worrysome.
+Maybe I should also plot the negatives.
+
+Can I get like a rank abundance curve for each?
+
+
+```{r}
+counts_long_mock_01 <- counts_long_mock %>%
+  group_by(ID) %>%
+  arrange(ID, -RA) %>%
+  mutate(rank = 1:n()) %>%
+  identity()
+```
+
+```{r}
+counts_long_mock_01 %>%
+  filter(rank < 40) %>%
+  ggplot(aes(x = rank, y = RA)) +
+  facet_wrap(~Run + Type + SubType) +
+  geom_point()
+```
+
+Why are there doubles of each ASV?
+Is this true of my dataset overall?
+
+And if you just look at the speces that are left, a bunch of them don't look like the input
+species (which are in the `Info` directory)

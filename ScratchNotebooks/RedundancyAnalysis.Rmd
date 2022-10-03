@@ -94,31 +94,7 @@ rdaConstrained
 anova(rdaConstrained)
 ```
 
-```{r}
-CCA_Eigen_Plot <- function(CCA){
-  CCAPctVarPlot <- enframe(c(CCA$CCA$eig/CCA$tot.chi,CCA$CA$eig/CCA$tot.chi), name = "CA", value = "PctVarExplained") %>%
-  mutate(CAN = parse_number(CA)) %>%
-    mutate(Type = str_remove(CA, "[:digit:].*")) %>%
-    mutate(Type = factor(Type, levels = c("CCA", "CA"))) %>%
-  ggplot(aes(x = CAN, y = PctVarExplained)) + 
-  geom_point() +
-  geom_segment(aes(x = CAN, xend = CAN, y = 0, yend = PctVarExplained)) + 
-  labs(y = "Percent Variance Explained", x = NULL) +
-  geom_vline(xintercept = 7.5, color = "grey") +
-    facet_grid(~Type, scales = "free_x", space = "free_x", switch = "both") + 
-    #scale_x_continuous(expand = c(0.1,0)) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-           strip.placement = "outside", legend.position = "none")
-CCAPctVarPlot
-}
 
-CCA_Eigen_Plot(rdaConstrained)
-```
-
-```{r}
-anova(rdaConstrained)
-```
 
 ```{r}
 mooAnova <- anova(rdaConstrained, by = "margin", permutations = 9999)
@@ -153,10 +129,29 @@ betaTable
 
 betaTable %>% save_as_docx(path = here::here("Tables", "betaTable.docx"))
 ```
-Deal with this later.
 
-## Bookmark
+```{r}
+CCA_Eigen_Plot <- function(CCA){
+  CCAPctVarPlot <- enframe(c(CCA$CCA$eig/CCA$tot.chi,CCA$CA$eig/CCA$tot.chi), name = "CA", value = "PctVarExplained") %>%
+  mutate(CAN = parse_number(CA)) %>%
+    mutate(Type = str_remove(CA, "[:digit:].*")) %>%
+    mutate(Type = factor(Type, levels = c("RDA", "PC"))) %>%
+  ggplot(aes(x = CAN, y = PctVarExplained)) + 
+  geom_point() +
+  geom_segment(aes(x = CAN, xend = CAN, y = 0, yend = PctVarExplained)) + 
+  labs(y = "Percent Variance Explained", x = NULL) +
+   #geom_vline(xintercept = 7.5, color = "grey") +
+    facet_grid(~Type, scales = "free_x", space = "free_x", switch = "both") + 
+  scale_x_continuous(expand = c(0.1,0)) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+           strip.placement = "outside", legend.position = "none")
+CCAPctVarPlot
+}
 
+CCA_Eigen_Plot(rdaConstrained)
+```
+This looks pretty awful, but Its not going in the paper I don't think so I'll leave it for now.
 
 ```{r}
 my_fortify_function <- function(ccaConstrained){
@@ -222,51 +217,11 @@ My_Constrained_RDA_Plot_Type1_wFort <- function(ccaConstrained){
 
 My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained)
 ```
-
-
+Axis 1 vs 3
+Not the most dry code I've ever done, but I'm not sure how to actually do this, so I'm manually changing the axes
 ```{r}
-rdaConstrainedFort <- fortify(rdaConstrained) %>% filter(Score %in% c("sites", "biplot")) %>% # not sure what constraints are
- left_join(microbialAbundance, by = c("Label" = "ID"))
-```
-
-```{r}
-rdaConstrainedBiplotLabels <- rdaConstrainedFort %>%
-  filter(Score == "biplot") %>%
-  mutate(Label = recode(Label, lat = "Lat",
-                        `sqrt(Size_Class)` = "Size",
-                        `Depth2Surface` = "Surface"
-  )
-  ) %>%
-  select(Score:RDA3) %>%
-  mutate(PctExplained = mooAnova$Variance[1:3]/sum(mooAnova$Variance)) %>%
-  mutate(Label2 = paste0(Label, "\n", round(PctExplained, 3) * 100, "%"))
-rdaConstrainedBiplotLabels
-```
-
-
-```{r}
-rdaConstrainedPlot <- rdaConstrainedFort %>%
-  filter(Score == "sites") %>%
-  mutate(Depth = recode(Depth, `Oxy` = "Oxycline")) %>%
-  select(Station, Depth, Size_Class, everything()) %>%
-  ggplot(aes(x = RDA1, y = RDA2,
-             fill = as.factor(Station),
-             shape = as.factor(Station),
-             size = sqrt(Size_Class),
-             color = as.factor(Depth)
-             )) + 
- geom_point() +
- coord_fixed(sqrt(rdaConstrained$CCA$eig[2]/rdaConstrained$CCA$eig[1])) +
- geom_text(aes(label = Label2, x = RDA1 * 8, y = RDA2 * 8), color = "black", inherit.aes = FALSE,
-           data = rdaConstrainedBiplotLabels
-             ) +
-  geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 5.7, yend = RDA2 * 5.7), data = rdaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.5, arrow = arrow(length = unit(0.1, "in"))) +
-  #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
-  myPlotDetails
-rdaConstrainedPlot
-```
-```{r}
-rdaConstrainedPlot13 <- rdaConstrainedFort %>%
+My_Constrained_RDA_Plot_Type1_13 <- function(ccaConstrainedFort, ccaConstrained){
+  ccaConstrainedPlot <- ccaConstrainedFort %>%
   filter(Score == "sites") %>%
   mutate(Depth = recode(Depth, `Oxy` = "Oxycline")) %>%
   select(Station, Depth, Size_Class, everything()) %>%
@@ -277,37 +232,103 @@ rdaConstrainedPlot13 <- rdaConstrainedFort %>%
              color = as.factor(Depth)
              )) + 
  geom_point() +
- coord_fixed(sqrt(rdaConstrained$CCA$eig[2]/rdaConstrained$CCA$eig[1])) +
- geom_text(aes(label = Label2, x = RDA1 * 8, y = RDA3 * 8), color = "black", inherit.aes = FALSE,
-           data = rdaConstrainedBiplotLabels
-             ) +
-  geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 5.7, yend = RDA3 * 5.7), data = rdaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.5, arrow = arrow(length = unit(0.1, "in"))) +
+ coord_fixed(sqrt(ccaConstrained$CCA$eig[2]/ccaConstrained$CCA$eig[1])) +
+
+  geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 7, yend = RDA3 * 7), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.9, arrow = arrow(length = unit(0.1, "in")), color = "black") +
   #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
-  myPlotDetails
-rdaConstrainedPlot13
+    labs(x = paste0("RDA1 (", round(ccaConstrained$CCA$eig[1]/ccaConstrained$tot.chi, 3) * 100, "%)"),
+       y = paste0("RDA3 (", round(ccaConstrained$CCA$eig[3]/ccaConstrained$tot.chi, 3) * 100, "%)"),
+       col = "Depth (Outline Color)",
+       fill = "Station",
+       shape = "Station",
+       size = "Size Class") +
+     geom_label(aes(label = Label2, x = RDA1 * 9, y = RDA3 * 9),
+            color = "black", fill = "white", alpha = 0.6,
+            show.legend = FALSE,
+           data = ccaConstrainedFort %>%
+             filter(Score == "biplot") %>%
+             mutate(Label = recode(Label, lat = "Lat",
+                                   `sqrt(Size_Class)` = "Size",
+                                   `Depth2Surface` = "Surface"
+                                   )) %>%
+             mutate(PctExplained = my_percent_explained(ccaConstrained)) %>%
+             mutate(Label2 = paste0(Label, "\n", round(PctExplained, 3) * 100, "%"))
+             ) +
+    lims(x = c(range(ccaConstrainedFort$RDA1)[1] * 1.1, range(ccaConstrainedFort$RDA1)[2] * 1.5), y = range(ccaConstrainedFort$RDA3 * 1.1)) +
+  myPlotDetails +
+  guides(color = guide_legend(override.aes = list(shape = 21, size = 2, stroke = 2, fill = "gray")),
+         shape = guide_legend(override.aes = list(size = 3)),
+         size = guide_legend(override.aes = list(shape = 21, color = "black", fill = "gray"))
+         )
+ccaConstrainedPlot
+}
+
+My_Constrained_RDA_Plot_Type1_wFort_13 <- function(ccaConstrained){
+  ccaConstrainedFort <- my_fortify_function(ccaConstrained)
+  My_Constrained_RDA_Plot_Type1_13(ccaConstrainedFort, ccaConstrained)
+}
+  
+
+My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained)
 ```
-### End of edits
+
+
 ```{r}
-ccaConstrainedPlot13 <- ccaConstrainedFort %>%
-  filter(Score == "sites") %>%
-  mutate(Depth = recode(Depth, `Oxy` = "Oxycline")) %>%
-  select(Station, Depth, Size_Class, everything()) %>%
-  ggplot(aes(x = CCA1, y = CCA3,
-             fill = as.factor(Station),
-             shape = as.factor(Station),
-             size = sqrt(Size_Class),
-             color = as.factor(Depth)
-             )) + 
- geom_point() +
- coord_fixed(sqrt(ccaConstrained$CCA$eig[3]/ccaConstrained$CCA$eig[1])) +
- geom_text(aes(label = Label2, x = CCA1 * 2, y = CCA3 * 2), color = "black", inherit.aes = FALSE,
-           data = ccaConstrainedBiplotLabels
-             ) +
-  geom_segment(aes(x = 0, y = 0, xend  = CCA1 * 1.7, yend = CCA3 * 1.7), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.5, arrow = arrow(length = unit(0.1, "in"))) +
-  #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
-  myPlotDetails
-ccaConstrainedPlot13
+rdaConstrainedFort <- fortify(rdaConstrained) %>% filter(Score %in% c("sites", "biplot")) %>% # not sure what constraints are
+ left_join(microbialAbundance, by = c("Label" = "ID"))
 ```
+
+## BOOKMARK
+
+# As above, but this time without the 0.2 micron data
+```{r}
+sampleData_NoFree <- sampleData01 %>% filter(Size_Class > 1)
+wideASVs_log_NoFree <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoFree$ID,]
+wideASVs_log_NoFree <- wideASVs_log_NoFree[match(sampleData_NoFree$ID, rownames(wideASVs_log_NoFree)),]
+```
+
+```{r}
+rdaConstrained_NoFree <- rda(wideASVs_log_NoFree ~ lat + Depth2 + sqrt(Size_Class), data = sampleData_NoFree)
+```
+
+```{r}
+rdaConstrained_NoFree
+anova(rdaConstrained_NoFree, by = "margin", permutations = how(nperm=9999))
+```
+```{r}
+plotNoFreeRda <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoFree)
+plotNoFreeRda
+```
+
+
+# As above but without 0.2 or 1.2 micron data
+
+```{r}
+sampleData_NoSmall <- sampleData01 %>% filter(Size_Class > 2)
+wideASVs_log_NoSmall <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoSmall$ID,]
+wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID, rownames(wideASVs_log_NoSmall)),]
+```
+
+```{r}
+rdaConstrained_NoSmall <- rda(wideASVs_log_NoSmall ~ lat + Depth2 + sqrt(Size_Class), data = sampleData_NoSmall)
+```
+
+```{r}
+rdaConstrained_NoSmall
+anova(rdaConstrained_NoSmall, by = "margin", permutations = how(nperm=9999))
+```
+```{r}
+plotNoSmallRda<- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoSmall) + lims(x = c(-10, 11))
+plotNoSmallRda
+```
+Cowplot the last two together so they can be one supplemental figure
+
+```{r fig.width = 7, fig.height = 8}
+plot_grid(plotNoFreeRda, plotNoSmallRda, labels = LETTERS, nrow = 2)
+```
+
+
+#### Old stuff #####
 
 # Constrained ordination with respect to size (all sizes included), conditioned on lat and depth
 
