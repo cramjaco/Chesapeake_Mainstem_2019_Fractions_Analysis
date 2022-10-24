@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+The point of this notebook is to get summary statistics for the DADA2 run
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+summaryIn <- read_csv(here("DadaData", "RunSummaryStatistics.csv")) %>% 
+  rename(ID = 1)
+
+key1 <- read_csv(here("Keys", "SampleKey1.csv"))
+
+summaryData <- summaryIn %>% left_join(key1 %>% filter(ReadDir == 1), by = "ID")
+```
+
+Subset just the samples that hed enough reads that we actually used them
+```{r}
+ActuallyUsed <- summaryData %>%
+  filter(Type == "Sample", input_fwd > 1000) %>% arrange(input_fwd)
+```
+
+Data about starting reads
+```{r}
+ActuallyUsed %>%
+  summarize(median = median(input_fwd), mad = mad(input_fwd), min = min(input_fwd), max = max(input_fwd))
+```
+
+Data about fraction of chimeras
+
+```{r}
+ActuallyUsed %>%
+  summarize(median = median(100-non_chimeric_reads_pct), mad = mad(100-non_chimeric_reads_pct), min = min(100-non_chimeric_reads_pct), max = max(100-non_chimeric_reads_pct))
+```
+```{r}
+ActuallyUsed %>%
+  summarize(median = median(nonchim), mad = mad(nonchim), min = min(nonchim), max = max(nonchim))
+```

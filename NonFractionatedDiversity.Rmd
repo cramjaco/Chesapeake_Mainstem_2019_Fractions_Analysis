@@ -1,0 +1,64 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(vegan)
+library(tidyverse)
+library(here)
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
+```
+
+```{r}
+env1 <- load(here::here("RDataFiles", "InitialProcessing_3.RData"))
+```
+
+```{r}
+countMat <-  nonSpikes %>%
+  pivot_wider(id_cols = ID, names_from = ASV, values_from = reads, values_fill = 0) %>%
+  column_to_rownames("ID") %>% as.matrix()
+```
+
+
+```{r}
+seqDep <- countMat %>% apply(1, sum)
+min(seqDep)
+```
+
+```{r}
+bulkSample <- nonSpikes %>% 
+  select(ASV, Station, Depth, Size_Class, copiesPerL) %>%
+  group_by(Station, Depth, ASV) %>%
+  summarise(copiesPerL = sum(copiesPerL), .groups = "keep")
+bulkSample
+```
+```{r}
+copies_to_ra <- function(vec){
+  vsum <- sum(vec)
+  vec/vsum
+}
+
+bulkSample01 <- bulkSample %>%
+  group_by(Station, Depth) %>%
+  mutate(RA = copies_to_ra(copiesPerL))
+bulkSample01
+```
+
+
+```{r}
+bulkSample01 %>% 
+  group_by(Station, Depth) %>%
+  summarise(totalCopies = sum(copiesPerL), totalRA = sum(RA))
+```
+Great, working.
+
+```{r}
+test_vecRA <- bulkSample01 %>% filter(Station == 4.3, Depth == "Surface") %>% pull(RA)
+# vecRA is a vector of relative abundnaces
+chao_from_ra <- function(vecRA, samples = 852, niter = 100){
+  for()
+}
+```
+
+I don't wan't to do this right now.

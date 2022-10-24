@@ -69,3 +69,50 @@ ches_brigandine_RA <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20
 ches_brigandine_RA(Tag_ASV, Order, taxa01 %>% filter(Phylum == "Planctomycetes") %>% pull(Order) %>% unique() %>% na.omit(), thresh = 10^6, min = 1)
 ```
 
+# 20 October 2022
+Looking for sulfate reducers and methanogenes
+
+```{r}
+source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
+env1 <- attach(here("RDataFiles", "InitialProcessing_3.RData"))
+nonSpikes20 <- env1$nonSpikes20
+nonSpikes <- env1$nonSpikes
+```
+
+```{r}
+nonSpikes20$Genus %>% unique() %>% sort()
+```
+
+nonSpikes20$Genus %>% unique() %>% str_detect("Desulfo") -> isDesulfo
+SulfateReducers <- nonSpikes20$Genus %>% unique() %>% .[isDesulfo] %>% .[-1]
+
+nonSpikes$Genus %>% unique() %>% str_detect("Desulfo") -> isDesulfo
+nonSpikes$Genus %>% unique() %>% .[isDesulfo]
+
+nonSpikes$Genus %>% unique() %>% str_detect("Methano") -> isMethano
+
+nonSpikes$Genus %>% unique() %>% .[isMethano]
+
+source(here("RLibraries", "Brigandine_Library.R"))
+
+## Planktomycetes ASVs
+
+
+sulfate_reducers_plot <- ches_brigandine_L(ASV, Order,
+taxa %>% filter(Genus %in% SulfateReducers) %>% pull(Order) %>% unique() %>% na.omit,
+min = 4, max = 7, 
+ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+filter(Genus %in% SulfateReducers),
+thresh = 10^3)
+                
+                
+sulfate_reducers_plot
+
+sulfate_reducers_plot_mg <- ches_brigandine(ASV, Order,
+taxa %>% filter(Genus %in% SulfateReducers) %>% pull(Order) %>% unique() %>% na.omit,
+min = 4, max = 7, 
+ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+filter(Genus %in% SulfateReducers),
+thresh = 10^3)
+sulfate_reducers_plot_mg
+

@@ -8,7 +8,7 @@ INFO Selected: Automatic switching of use of per rate scalers
 INFO Selected: Preserving the root of the input tree
 INFO Selected: Specified model file: /home/jcram/miniconda3/envs/picrust2/lib/python3.8/site-packages/picrust2/default_files/prokaryotic/pro_ref/pro_ref.model
 INFO Selected: Reading queries in chunks of: 5000
-INFO Selected: Using threads: 2
+INFO Selected: Using threads: 1
 INFO     ______ ____   ___           _   __ ______
         / ____// __ \ /   |         / | / // ____/
        / __/  / /_/ // /| | ______ /  |/ // / __  
@@ -19,6 +19,6 @@ INFO    Rate heterogeneity: GAMMA (4 cats, mean),  alpha: 0.453141 (user),  weig
         Base frequencies (user): 0.229585 0.22008 0.298596 0.251739 
         Substitution rates (user): 1.00319 2.79077 1.5301 0.87441 3.83966 1
 INFO Output file: intermediate/place_seqs/epa_out/epa_result.jplace
-INFO 724 Sequences done!
-INFO Time spent placing: 56s
-INFO Elapsed Time: 61s
+INFO 704 Sequences done!
+INFO Time spent placing: 86s
+INFO Elapsed Time: 90s

@@ -1,15 +1,18 @@
 library(KEGGREST)
 library(broom)
-source("ChesapeakePersonalLibrary.R")
-source(here::here("RScripts", "InitialProcessing_2.R"))
+library(here)
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
+source(here::here("RLibraries", "Brigandine_Library.R"))
+# source(here::here("RScripts", "InitialProcessing_2.R"))
+load(here::here("RDataFiles", "InitialProcessing_3.RData"))
 listDatabases()
-org <- keggList("organism")
-head(org)
+#org <- keggList("organism")
+#head(org)
 keggGet("EC 1.1.1.102") -> eceg
 
 eceg %>% class()
 
-keggGet("1.1.1.102")
+#keggGet("1.1.1.102")
 
 EC_predicted <- read_tsv(here("PiCrustStuff", "EC_predicted.tsv.gz"))
 EC_nonzero <- EC_predicted %>%
@@ -33,10 +36,13 @@ test_EC_list <- my_kegGet("EC 1.1.1.103")
 
 ECs_tib0 <- tibble(EC = ECs2)
 
-ECs_tib <- ECs_tib0 %>%
-  #head() %>%
-  mutate(kdata = map(EC, my_kegGet)) %>%
-  unnest(kdata)
+# # Blows everyting up and isn't used again
+# ECs_tib <- ECs_tib0 %>%
+#   #head() %>%
+#   mutate(kdata = map(EC, ~possibly(my_kegGet, otherwise = "error here")(.x))) %>%
+#   unnest(kdata)
+
+## Here I look for nitrite reductase containing bugs
 
 #keggFind("enzyme", c(" nitrate reductase")) -> red
 keggFind("enzyme", c(" nitrite reductase")) -> red
@@ -49,7 +55,6 @@ redDf <- EC_nonzero %>%
   select(sequence, any_of(red_ec3)) %>%
   mutate(sum = rowSums(across(contains("EC")))) %>%
   filter(sum >=1)
-keggGet("EC 1.7.7.2")
 
 redDf$sequence -> redASVs
 
@@ -65,7 +70,6 @@ keggGet("EC 1.7.7.1")
 
 keggGet(red_ec2) -> kgls
 
-redASVs
 
 ## Brigandine plots
 
