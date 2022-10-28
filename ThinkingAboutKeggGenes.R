@@ -1,10 +1,11 @@
 library(KEGGREST)
 library(broom)
 library(here)
+load(here::here("RDataFiles", "InitialProcessing_3.RData"))
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 source(here::here("RLibraries", "Brigandine_Library.R"))
 # source(here::here("RScripts", "InitialProcessing_2.R"))
-load(here::here("RDataFiles", "InitialProcessing_3.RData"))
+
 listDatabases()
 #org <- keggList("organism")
 #head(org)
@@ -134,3 +135,249 @@ ecDf2 %>%
   theme_bw()
 
 # Nitrate reducing orgnaisms
+
+## Other organissms
+keggFindAndProcess <- function(fname){
+  keggFind("enzyme", fname) -> red
+  
+  red_ec <- names(red)
+  red_ec2 <- str_replace(red_ec, ":", " ")
+  red_ec3 <- str_replace(red_ec, "ec", "EC")
+  
+  redDf <- EC_nonzero %>% 
+    select(sequence, any_of(red_ec3)) %>%
+    mutate(sum = rowSums(across(contains("EC")))) %>%
+    filter(sum >=1)
+  
+  redDf$sequence -> redASVs
+  
+  return(list(enzymes = red, ec = red_ec, ec2 = red_ec2, ec3 = red_ec3, df = redDf, ASV = redASVs))
+}
+
+nitriteRed <- keggFindAndProcess("dissimilatory nitrite reductase") # empty
+nitrateRed <- keggFindAndProcess(" nitrate reductase")
+nitriteOx <- keggFindAndProcess(" nitrite oxidase") # empty
+nitrateOx <- keggFindAndProcess(" nitrate oxidase") # empty
+
+sulfateRed <- keggFindAndProcess("dissimilatory sulfite reductase") # note, this is sulfite
+sulfateRed$enzymes %>% length()
+sulfateRed$ASV %>% length()
+
+sulfred_plot <- ches_brigandine(ASV, Class,
+                taxa %>% filter(ASV %in% sulfateRed$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% sulfateRed$ASV & Phylum != "Cyanobacteria"),
+                thresh = 1 * 10^0)
+sulfred_plot
+
+sulfred_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% sulfateRed$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% sulfateRed$ASV & Phylum != "Cyanobacteria"),
+                thresh = 1 * 10^0)
+sulfred_plot_L
+
+
+
+keggFindAndProcess("methanogenisis") %>% .$enzymes %>% length()
+
+keggFindAndProcess(" formylmethanofuran:tetrahydromethanopterin formyltransferase") %>% .$enzymes %>% length()
+
+methano <- keggFindAndProcess(" formylmethanofuran:tetrahydromethanopterin formyltransferase")
+
+methano_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% methano$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 7, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% methano$ASV & Phylum != "Cyanobacteria"),
+                thresh = 4 * 10^5)
+methano_plot_L
+
+
+
+## Clara suggestions
+# oxidizes methane
+keggFindAndProcess("particulate methane monooxygenase") %>% .$enzymes %>% length()
+keggFindAndProcess("particulate methane monooxygenase") %>% .$ASV %>% length()
+pmoa <- keggFindAndProcess("particulate methane monooxygenase")
+
+pmoa_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% pmoa$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% pmoa$ASV & Phylum != "Cyanobacteria"),
+                thresh = 0 * 10^5)
+pmoa_plot_L
+
+pmoa_plot <- ches_brigandine(ASV, Class,
+                taxa %>% filter(ASV %in% pmoa$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% pmoa$ASV & Phylum != "Cyanobacteria"),
+                thresh = 0 * 10^5)
+pmoa_plot
+
+
+keggFindAndProcess("meth") %>% .$enzymes %>% length()
+
+keggFindAndProcess("Methyl Coenzyme M Reductase") %>% .$enzymes %>% length()
+
+keggFindAndProcess("Methyl Coenzyme M Reductase") %>% .$enzymes %>% length()
+keggFindAndProcess("Methyl Coenzyme M Reductase") %>% .$ASV %>% length()
+methano <- keggFindAndProcess("Methyl Coenzyme M Reductase")
+
+methano_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% methano$ASV) %>% filter(Kingdom == "Archaea") %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% methano$ASV & Phylum != "Cyanobacteria"),
+                thresh = 0 * 10^5)
+methano_plot_L
+
+keggFindAndProcess("EC:2.8.4.1") # no asvs with that gene
+amo <- keggFindAndProcess("ammonia monooxygenase") # has one asv
+
+amo_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% amo$ASV)  %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% amo$ASV & Phylum != "Cyanobacteria"),
+                thresh = 0 * 10^5)
+amo_plot_L # meh, also where is MG1?
+
+nitriteox <- keggFindAndProcess("EC 1.7.5.1  ")
+
+
+nitriteox_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% nitriteox$ASV)  %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% nitriteox$ASV & Phylum != "Cyanobacteria"),
+                thresh = 1 * 10^6)
+nitriteox_plot_L  # this gene looks too general
+
+## so lets show the following:
+# dissimilatory sulfite reductase havers
+# the one bug with pmoa
+# Anyone with Nitro in their genus name (ammonium oxidizers)
+
+# Cowplot all of those together
+
+sulfred_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% sulfateRed$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% sulfateRed$ASV & Phylum != "Cyanobacteria"),
+                thresh = 2 * 10^4)
+sulfred_plot_L
+
+nitrite_oxidizers <- nonSpikes$Genus %>% unique() %>% .[str_detect(.,"Nitro")]
+
+pmoa_plot_L <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% pmoa$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+                min = 3, max = 6, 
+                ns = nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(ASV0 %in% pmoa$ASV & Phylum != "Cyanobacteria"),
+                thresh = 2 * 10^4)
+pmoa_plot_L
+
+ammonium_oxidizers_plot <- ches_brigandine_L(ASV, Kingdom,
+taxa %>% filter(Genus %in% nitrite_oxidizers) %>% pull(Kingdom) %>% unique() %>% na.omit,
+min = 3, max = 6, 
+ns = nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+filter(Genus %in% nitrite_oxidizers[-1]),
+thresh = 0 * 10^4)
+
+ammonium_oxidizers_plot
+
+cowplot::plot_grid(
+  sulfred_plot_L + theme(legend.position="none"),
+  pmoa_plot_L + theme(legend.position="none"),
+  ammonium_oxidizers_plot ,
+  ncol = 1,
+  rel_heights = c(3,0.7,2.2), 
+  labels = LETTERS
+)
+
+ggsave(here("Figures", "BiogeochemicalCyclers.png"), height = 11, width = 7)
+# now all with the same thresholds
+# I need to mess with margins
+
+## I want a prettier plot and I plan to use nested facets to get there
+library(ggh4x)
+
+# Notes: 
+# Desulfovibreo are oxidizing sulfate
+# Sedimenticola are probably doing the opposite, reducing HS
+# Chromatiales are purple sulfur bacteria. They use H2S and light to get high energy electrons for growing
+# Clara thinks they shouldn't be particle attached. Maybe they are just big. (Zaar ea. 2003)
+# Rhodospirillaceae are purple nonsulfur bacteria -- they use reduced sulfur containing compounds, they are photosynthetic
+# purpul sulfur use sulfide, purple nonsulfer use organic compounds
+
+nsBiogeo <- nonSpikes %>%
+  mutate(Biogeo = case_when(
+    ASV %in% sulfateRed$ASV ~ "Sulfur Cycling",
+    ASV %in% pmoa$ASV ~ "Methanotrophy",
+    str_detect(Genus, "Nitro") ~ "Nitrogen Cycling"
+  )) %>%
+  filter(!is.na(Biogeo)) %>%
+  mutate(Family = case_when(
+    Biogeo == "Nitrogen Cycling" ~ case_when(
+      Family %in% c("Nitrosopumilaceae", "Nitrosomonadaceae") ~ paste0(Family, "\n(Ammonium Oxidizing)"),
+      Family %in% c("Nitrospiraceae") ~ paste0(Family, "\n(Nitrite Oxidizing)"),
+      
+      TRUE ~ Family
+    ),
+    Biogeo == "Sulfur Cycling" ~ case_when(
+      Family %in% c("Rhodospirillaceae") ~ paste0(Family, "\n(Purple nonsulfur)"),
+      Family %in% c("Sedimenticolaceae") ~ paste0(Family, "\n(Sulfur Oxidizing)"),
+      Order == "Chromatiales" ~ "Unk. Chromatiales\n(Purple Sulfur)",
+      TRUE ~ Family
+    ),
+    TRUE ~ Family
+  ),
+  Class = case_when(
+    (Biogeo == "Nitrogen Cycling" & Class == "Nitrososphaeria") ~ paste0(Class, "\n(Archaea)"),
+    (Biogeo == "Sulfur Cycling" & Class == "Deltaproteobacteria") ~ paste0(Class, "\n(Sulfate Reducing)"),
+    TRUE ~ Class
+  )
+           )
+  
+  # mutate(Class = case_when(
+  #   Biogeo == "Nitrogen Cycling" ~ case_when(
+  #   Class == "Nitrososphaeria" ~ "Nitrososphaeria\n(Archaea)\n(Ammonium Oxidizing)",
+  #   Class == "Gammaproteobacteria" ~ "Gammaproteobacteria\n(Ammonium Oxidizing)",
+  #   Class == "Nitrospira" ~ "Nitrospira\n(Nitrite Oxidizing)",
+  #   TRUE ~ Class
+  #   ),
+  #   Biogeo == "Sulfur Cycling" ~ case_when(
+  #     Class == "Alphaproteobacteria" ~ "Alphaproteobacteria\n(Purple Nonsulfur)",
+  #     Class == "Deltaproteobacteria" ~ "Deltaproteobacteria\n(Sulfate Oxidizing)",
+  #     TRUE ~ Class
+  #   ),
+  #   TRUE ~ Class
+  # )) %>%
+  # mutate(Family = case_when(
+  #   (is.na(Family) & Order == "Chromatiales") ~ "Unknown\nChromatiales",
+  #   TRUE ~ Family
+  # ))
+
+biogeo_plot <- ches_brigandine_L2(ASV, Biogeo, NULL,
+min = 3, max = 6, 
+ns = nsBiogeo %>% rename(ASV0 = ASV, ASV = Tag_ASV),
+thresh = 2 * 10^4) +
+  facet_nested(Biogeo +  Class  + Family ~ Depth, drop = TRUE, scales = "free", space = "free") +
+  theme(panel.spacing = unit(2, "points"))
+  
+
+bigoeo_plot_annotated <- cowplot::ggdraw(biogeo_plot) +
+  cowplot::draw_label("Process", x = 0.93, y = .98) +
+  cowplot::draw_label("Class", x = 0.805, y = .98) +
+  cowplot::draw_label("Family", x = 0.685, y = .98)
+  
+
+ggsave(here("Figures", "BiogeochemicalCyclers_better.png"), height = 8, width = 11, plot = bigoeo_plot_annotated)
+# lets get rid of kingdom and rename Nitrosophaeria as Nitrosophaeria (Archaea)
+               

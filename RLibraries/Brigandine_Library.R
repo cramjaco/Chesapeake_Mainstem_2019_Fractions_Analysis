@@ -102,8 +102,89 @@ ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20,
   taxlevel <- enquo(taxlevel)
   broadlevel <- enquo(broadlevel)
   ns_loc0 <- aglom(!!taxlevel, !!broadlevel, ns)
+  
+  if(!is.null(broadkeep)){
   ns_loc <- ns_loc0 %>%
     filter(!!broadlevel %in% broadkeep)
+  } else {
+    ns_loc <- ns_loc0
+  }
+  
+  attached_loc <- find_attached(ns_loc, threshold = thresh)
+  
+  ## Pre plotting
+  
+  toPlot <- ns_loc %>%
+    ungroup() %>%
+    arrange(-Size_Class) %>% # this stops working with more than one phylum # are there NA values?
+    filter(!!taxlevel %in% attached_loc) %>%
+    #mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+    mutate(copiesPerL = case_when(
+      log10(copiesPerL) > maxCpL ~ 10^(maxCpL),
+      log10(copiesPerL) < minCpL ~ 10^(minCpL),
+      TRUE ~ copiesPerL
+    )) %>%
+    mutate(!!quo_name(taxlevel) := fct_rev(!!taxlevel))
+  
+  toPlotFree <- toPlot %>% filter(Size_Class == 0.2)
+  toPlotAttached <- toPlot %>% filter(Size_Class >= 1.2)
+  
+  # Plotting
+  
+  # set breaks and labels
+  if(is.na(minCpL)){minCpL = log10(min(toPlot$copiesPerL))}
+  if(is.na(maxCpL)){maxCpL = log10(max(toPlot$copiesPerL))}
+  loc_breaks = seq(from = minCpL, to = maxCpL, by = 1)
+  loc_labels = loc_breaks
+  if(!is.na(min)){loc_labels[1] = paste0("≤", loc_labels[1])}
+  if(!is.na(max)){loc_labels[length(loc_labels)] = paste0("≥", loc_labels[length(loc_labels)])}
+  
+  
+  # main
+  locPlot <- toPlot %>%
+  ggplot() +
+  geom_point(shape = 22, color = "black", stroke = .5, size = 12, data = toPlotFree,
+             aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL))) +
+  geom_point(shape = 21, color = "black", stroke = .5, data = toPlotAttached,
+             aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL), size = sqrt(Size_Class))) +
+  
+  scale_radius(breaks = sqrt(c(1.2, 5, 20, 53, 180, 500)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 10)) +
+  scale_fill_viridis_c(breaks = loc_breaks, labels = loc_labels) +
+  facet_grid(rows = vars(!!broadlevel), cols= vars(Depth), drop = TRUE, scales = "free", space = "free") +
+  labs(y = quo_name(taxlevel), x = "Station", size = "Size Class", fill = "log10(Copies/L)") +
+  theme_bw() +
+    theme(strip.text.y = element_text(angle = 0),
+          legend.position = "bottom") +
+    guides(size = guide_legend(nrow = 1, label.position = "bottom", title.vjust = .7))
+
+  locPlot
+  #list(toPlotFree, toPlotAttached)
+}
+
+## For two level plots
+aglom2 <- function(taxlevel, broadlevel, ns = nonSpikes20){
+  taxlevel <- enquo(taxlevel)
+  broadlevel <- enquo(broadlevel)
+  ns %>% group_by(!!taxlevel, ID) %>%
+  summarise(across(.cols = c(!!broadlevel, Kingdom:Genus, Station:ParticlesPerLiter), .fns = first),
+            across(.cols = c(RA, copiesPerL), .fns = sum)) %>%
+    filter(!is.na(!!taxlevel))
+}
+
+ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6){
+  minCpL <- min # 4
+  maxCpL <- max # 7.5
+  
+  taxlevel <- enquo(taxlevel)
+  broadlevel <- enquo(broadlevel)
+  ns_loc0 <- aglom2(!!taxlevel, !!broadlevel, ns)
+  
+  if(!is.null(broadkeep)){
+  ns_loc <- ns_loc0 %>%
+    filter(!!broadlevel %in% broadkeep)
+  } else {
+    ns_loc <- ns_loc0
+  }
   
   attached_loc <- find_attached(ns_loc, threshold = thresh)
   

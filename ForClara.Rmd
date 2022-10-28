@@ -89,7 +89,7 @@ SulfateReducers <- nonSpikes20$Genus %>% unique() %>% .[isDesulfo] %>% .[-1]
 nonSpikes$Genus %>% unique() %>% str_detect("Desulfo") -> isDesulfo
 nonSpikes$Genus %>% unique() %>% .[isDesulfo]
 
-nonSpikes$Genus %>% unique() %>% str_detect("Methano") -> isMethano
+nonSpikes$Genus %>% unique() %>% str_detect("Meth") -> isMethano # was methano, these are all methyl group users
 
 nonSpikes$Genus %>% unique() %>% .[isMethano]
 
@@ -115,4 +115,22 @@ ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>%
 filter(Genus %in% SulfateReducers),
 thresh = 10^3)
 sulfate_reducers_plot_mg
+
+## These turn out to be ammonium oxidizers
+# I don't know why amoa isn't finding these
+nitrite_oxidizers <- nonSpikes$Genus %>% unique() %>% .[str_detect(.,"Nitro")]
+
+ammonium_oxidizers_plot <- ches_brigandine_L(ASV, Kingdom,
+taxa %>% filter(Genus %in% nitrite_oxidizers) %>% pull(Kingdom) %>% unique() %>% na.omit,
+min = 4, max = 7, 
+ns = nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+filter(Genus %in% nitrite_oxidizers[-1]),
+thresh = 1 * 10^5)
+
+ammonium_oxidizers_plot
+
+# ASV 227 and 423: Candidatus Nitrosopumuls sp. SW (Kim 2019) -- thats an ammoinium oxidizing archaea so is nitrospira and nitrosomonas
+
+
+
 

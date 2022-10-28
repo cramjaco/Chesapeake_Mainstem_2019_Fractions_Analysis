@@ -1,4 +1,4 @@
-ASVSeq <- read_lines(here("ASVs.fa"))
+ASVSeq <- read_lines(here("DadaData","ASVs.fa"))
 
 ASVs20 <- nonSpikes20 %>% pull(ASV) %>% unique()
 
