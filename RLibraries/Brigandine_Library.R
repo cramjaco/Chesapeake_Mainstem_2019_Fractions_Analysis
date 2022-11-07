@@ -29,16 +29,31 @@ find_attached <- function(adf, threshold = 10^6){
   filter(Size_Class >= 1.2) %>%
   group_by_at(1) %>%
   summarise(max_copiesPerMg = max(copiesPerMg)) %>%
-  mutate(isAttached = max_copiesPerMg > threshold) %>%
+  mutate(isAttached = max_copiesPerMg >= threshold) %>%
   filter(isAttached) %>%
   .[[1]]
   
   attached
 }
 
+find_present <- function(adf, threshold = 0){
+  #taxlevel <- enquo(taxlevel)
+  
+  present <- adf %>%
+  #mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
+  #filter(Size_Class >= 1.2) %>%
+  group_by_at(1) %>%
+  summarise(max_copiesPerL = max(copiesPerL)) %>%
+  mutate(isAttached = max_copiesPerL >= threshold) %>%
+  filter(isAttached) %>%
+  .[[1]]
+  
+  present
+}
+
 
 # Brigandine plot relative to mass
-ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6){
+ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6, thresL = 0){
   minCpMg <- min # 4
   maxCpMg <- max # 7.5
   
@@ -48,14 +63,16 @@ ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, m
   ns_loc <- ns_loc0 %>%
     filter(!!broadlevel %in% broadkeep)
   
-  attached_loc <- find_attached(ns_loc, threshold = thresh)
+    attached_loc <- find_attached(ns_loc, threshold = thresh) 
+  present_loc <- find_present(ns_loc, threshold = threshL)
+  keep_loc <- intersect(attached_loc, present_loc)
   
   ## Pre plotting
   
   toPlot <- ns_loc %>%
     ungroup() %>%
     arrange(-Size_Class) %>% # this stops working with more than one phylum # are there NA values?
-    filter(!!taxlevel %in% attached_loc, Size_Class >= 1.2) %>%
+    filter(!!taxlevel %in% keep_loc, Size_Class >= 1.2) %>%
     mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
     mutate(copiesPerMg = case_when(
       log10(copiesPerMg) > maxCpMg ~ 10^(maxCpMg),
@@ -95,7 +112,7 @@ ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, m
 
 ## Plot relative to volume
 
-ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6){
+ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6, threshL = 0){
   minCpL <- min # 4
   maxCpL <- max # 7.5
   
@@ -110,14 +127,16 @@ ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20,
     ns_loc <- ns_loc0
   }
   
-  attached_loc <- find_attached(ns_loc, threshold = thresh)
+  attached_loc <- find_attached(ns_loc, threshold = thresh) 
+  present_loc <- find_present(ns_loc, threshold = threshL)
+  keep_loc <- intersect(attached_loc, present_loc)
   
   ## Pre plotting
   
   toPlot <- ns_loc %>%
     ungroup() %>%
     arrange(-Size_Class) %>% # this stops working with more than one phylum # are there NA values?
-    filter(!!taxlevel %in% attached_loc) %>%
+    filter(!!taxlevel %in% keep_loc) %>%
     #mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
     mutate(copiesPerL = case_when(
       log10(copiesPerL) > maxCpL ~ 10^(maxCpL),
@@ -171,7 +190,7 @@ aglom2 <- function(taxlevel, broadlevel, ns = nonSpikes20){
     filter(!is.na(!!taxlevel))
 }
 
-ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6){
+ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6, threshL = 0){
   minCpL <- min # 4
   maxCpL <- max # 7.5
   
@@ -186,14 +205,16 @@ ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20
     ns_loc <- ns_loc0
   }
   
-  attached_loc <- find_attached(ns_loc, threshold = thresh)
+  attached_loc <- find_attached(ns_loc, threshold = thresh) 
+  present_loc <- find_present(ns_loc, threshold = threshL)
+  keep_loc <- intersect(attached_loc, present_loc)
   
   ## Pre plotting
   
   toPlot <- ns_loc %>%
     ungroup() %>%
     arrange(-Size_Class) %>% # this stops working with more than one phylum # are there NA values?
-    filter(!!taxlevel %in% attached_loc) %>%
+    filter(!!taxlevel %in% keep_loc) %>%
     #mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
     mutate(copiesPerL = case_when(
       log10(copiesPerL) > maxCpL ~ 10^(maxCpL),
@@ -221,10 +242,10 @@ ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20
   ggplot() +
   geom_point(shape = 22, color = "black", stroke = .5, size = 12, data = toPlotFree,
              aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL))) +
-  geom_point(shape = 21, color = "black", stroke = .5, data = toPlotAttached,
-             aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL), size = sqrt(Size_Class))) +
+  geom_point(shape = 21, color = "black", stroke = .3, data = toPlotAttached,
+             aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL), size = (Size_Class)^(1/3))) +
   
-  scale_radius(breaks = sqrt(c(1.2, 5, 20, 53, 180, 500)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 10)) +
+  scale_radius(breaks = (c(1.2, 5, 20, 53, 180, 500))^(1/3), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 10)) +
   scale_fill_viridis_c(breaks = loc_breaks, labels = loc_labels) +
   facet_grid(rows = vars(!!broadlevel), cols= vars(Depth), drop = TRUE, scales = "free", space = "free") +
   labs(y = quo_name(taxlevel), x = "Station", size = "Size Class", fill = "log10(Copies/L)") +
@@ -236,3 +257,4 @@ ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20
   locPlot
   #list(toPlotFree, toPlotAttached)
 }
+

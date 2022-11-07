@@ -187,12 +187,28 @@ keggFindAndProcess(" formylmethanofuran:tetrahydromethanopterin formyltransferas
 
 methano <- keggFindAndProcess(" formylmethanofuran:tetrahydromethanopterin formyltransferase")
 
-methano_plot_L <- ches_brigandine_L(ASV, Class,
-                taxa %>% filter(ASV %in% methano$ASV) %>% pull(Class) %>% unique() %>% na.omit,
+nonSpikes$Phylum %>% unique() %>% .[str_detect(.,"Verstraetearchaeota")] %>% na.omit() # we don't have any of these either
+
+methano_order <- nonSpikes$Order %>% unique() %>% .[str_detect(.,"Methano")] %>% na.omit()
+ nonSpikes$Class %>% unique() %>% .[str_detect(.,"Methano")] %>% na.omit()
+ nonSpikes$Order %>% unique() %>% .[str_detect(.,"Methano")] %>% na.omit()
+ nonSpikes$Family %>% unique() %>% .[str_detect(.,"Methano")]
+  nonSpikes$Genus %>% unique() %>% .[str_detect(.,"Methano")]
+
+  nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                   filter(Order %in% methano_order) %>% group_by(ASV) %>% summarise(mra = max(copiesPerL))
+  
+  nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                   filter(Order %in% methano_order) %>% filter(ASV0 == "ASV_12803") %>% arrange(RA) %>% View()
+  
+methano_plot_L <- ches_brigandine_L(ASV, Order,
+                NULL,
                 min = 3, max = 7, 
-                ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
-                  filter(ASV0 %in% methano$ASV & Phylum != "Cyanobacteria"),
-                thresh = 4 * 10^5)
+                ns = nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
+                  filter(Order %in% methano_order) %>% 
+                  #filter(ASV %in% "Methanofastidiosales;12803") %>%
+                  identity(),
+                thresh = 0, threshL = 10)
 methano_plot_L
 
 
@@ -228,13 +244,15 @@ keggFindAndProcess("Methyl Coenzyme M Reductase") %>% .$enzymes %>% length()
 keggFindAndProcess("Methyl Coenzyme M Reductase") %>% .$ASV %>% length()
 methano <- keggFindAndProcess("Methyl Coenzyme M Reductase")
 
-methano_plot_L <- ches_brigandine_L(ASV, Class,
-                taxa %>% filter(ASV %in% methano$ASV) %>% filter(Kingdom == "Archaea") %>% pull(Class) %>% unique() %>% na.omit,
+methano_plot_L_pi <- ches_brigandine_L(ASV, Class,
+                taxa %>% filter(ASV %in% methano$ASV & Class == "Bacteroidia") %>%
+                  #filter(Kingdom == "Archaea") %>%
+                  pull(Class) %>% unique() %>% na.omit,
                 min = 3, max = 6, 
                 ns = nonSpikes20 %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
                   filter(ASV0 %in% methano$ASV & Phylum != "Cyanobacteria"),
-                thresh = 0 * 10^5)
-methano_plot_L
+                thresh = 0 * 10^6)
+methano_plot_L_pi
 
 keggFindAndProcess("EC:2.8.4.1") # no asvs with that gene
 amo <- keggFindAndProcess("ammonia monooxygenase") # has one asv
@@ -292,6 +310,18 @@ thresh = 0 * 10^4)
 
 ammonium_oxidizers_plot
 
+phylaLs <- nonSpikes$Phylum %>% unique()
+phylaLs[str_detect(phylaLs, "Planc")]
+
+keggFindAndProcess("hydrazine dehydrogenase") %>% .$enzymes %>% length()
+keggFindAndProcess("hydrazine dehydrogenase") %>% .$ASV %>% length()
+pmoa <- keggFindAndProcess("particulate methane monooxygenase")
+
+genusLs <- nonSpikes$Phylum %>% unique()
+# https://en.wikipedia.org/wiki/Anammox # Jetten
+anammoxGenera <- c("Scalindua", "Brocadia", "Kuenenia", "Anammoxoglobus", "Jettenia")
+genusLs[genusLs %in% anammoxGenera]
+
 cowplot::plot_grid(
   sulfred_plot_L + theme(legend.position="none"),
   pmoa_plot_L + theme(legend.position="none"),
@@ -319,14 +349,18 @@ library(ggh4x)
 nsBiogeo <- nonSpikes %>%
   mutate(Biogeo = case_when(
     ASV %in% sulfateRed$ASV ~ "Sulfur Cycling",
-    ASV %in% pmoa$ASV ~ "Methanotrophy",
+    # ASV %in% pmoa$ASV ~ "Methanotrophy",
+    # str_detect(Order, "Methano") ~ "Methanogenisis",
+    ASV %in% pmoa$ASV ~ "Methane Cycling",
+    str_detect(Order, "Methano") ~ "Methane Cycling",
     str_detect(Genus, "Nitro") ~ "Nitrogen Cycling"
   )) %>%
   filter(!is.na(Biogeo)) %>%
   mutate(Family = case_when(
+    (Biogeo == "Methane Cycling" & Order == "Methanofastidiosales" & is.na(Family)) ~ "Unknown\nMethanofastidiosales",
     Biogeo == "Nitrogen Cycling" ~ case_when(
-      Family %in% c("Nitrosopumilaceae", "Nitrosomonadaceae") ~ paste0(Family, "\n(Ammonium Oxidizing)"),
-      Family %in% c("Nitrospiraceae") ~ paste0(Family, "\n(Nitrite Oxidizing)"),
+      #Family %in% c("Nitrosopumilaceae", "Nitrosomonadaceae") ~ paste0(Family, "\n(Ammonium Oxidizing)"),
+      #Family %in% c("Nitrospiraceae") ~ paste0(Family, "\n(Nitrite Oxidizing)"),
       
       TRUE ~ Family
     ),
@@ -339,11 +373,27 @@ nsBiogeo <- nonSpikes %>%
     TRUE ~ Family
   ),
   Class = case_when(
-    (Biogeo == "Nitrogen Cycling" & Class == "Nitrososphaeria") ~ paste0(Class, "\n(Archaea)"),
+    (Biogeo == "Nitrogen Cycling" & Class == "Nitrososphaeria") ~ paste0(Class, "\n(Archaea)\n(Ammonium Oxidizing)"),
+    (Biogeo == "Nitrogen Cycling" & Class == "Gammaproteobacteria") ~ paste0(Class, "\n(Ammonium Oxidizing)"),
+    (Biogeo == "Nitrogen Cycling" & Class == "Nitrospira") ~ paste0(Class, "\n(Nitrite Oxidizing)"),
     (Biogeo == "Sulfur Cycling" & Class == "Deltaproteobacteria") ~ paste0(Class, "\n(Sulfate Reducing)"),
+    (Biogeo == "Methane Cycling" & Class == "Thermococci") ~ paste0(Class, "\n(Methanogenisis)"),
+    (Biogeo == "Methane Cycling" & Class == "Gammaproteobacteria") ~ paste0(Class, "\n(Methanotrophy)"),
     TRUE ~ Class
   )
-           )
+           ) %>%
+  mutate(Class = factor(Class,
+                           levels = c(
+                             "Nitrososphaeria\n(Archaea)\n(Ammonium Oxidizing)",
+                             "Thermococci\n(Methanogenisis)",
+                             "Alphaproteobacteria",
+                             "Gammaproteobacteria\n(Ammonium Oxidizing)",
+                             "Gammaproteobacteria\n(Methanotrophy)",
+                             "Gammaproteobacteria",
+                             "Deltaproteobacteria\n(Sulfate Reducing)",
+                              "Nitrospira\n(Nitrite Oxidizing)"
+  ))) %>%
+  identity()
   
   # mutate(Class = case_when(
   #   Biogeo == "Nitrogen Cycling" ~ case_when(
@@ -367,7 +417,7 @@ nsBiogeo <- nonSpikes %>%
 biogeo_plot <- ches_brigandine_L2(ASV, Biogeo, NULL,
 min = 3, max = 6, 
 ns = nsBiogeo %>% rename(ASV0 = ASV, ASV = Tag_ASV),
-thresh = 2 * 10^4) +
+threshL = 3 * 10^5, thresh = 0) + # cuts cools stuff
   facet_nested(Biogeo +  Class  + Family ~ Depth, drop = TRUE, scales = "free", space = "free") +
   theme(panel.spacing = unit(2, "points"))
   
@@ -378,6 +428,25 @@ bigoeo_plot_annotated <- cowplot::ggdraw(biogeo_plot) +
   cowplot::draw_label("Family", x = 0.685, y = .98)
   
 
-ggsave(here("Figures", "BiogeochemicalCyclers_better.png"), height = 8, width = 11, plot = bigoeo_plot_annotated)
-# lets get rid of kingdom and rename Nitrosophaeria as Nitrosophaeria (Archaea)
+ggsave(here("Figures", "BiogeochemicalCyclers_better1.png"), height = 8, width = 11, plot = bigoeo_plot_annotated)
+# Whats up with ASV 6673 and why is it replacing my good looking bugs
+# Oh dear. I can't see my 5 micron size class when the 1.2 is visible.
+# I can see it if my line thickness is 0.2 or less.
+# But really I should make the 180, 53 and 20 bigger
+# Ok. I cube rooted everything. And that works. Should cascade forward for other plots.
+
+# I might want an extended version for the supplement with more things
+
+biogeo_plot_detailed <- ches_brigandine_L2(ASV, Biogeo, NULL,
+min = 3, max = 6, 
+ns = nsBiogeo %>% rename(ASV0 = ASV, ASV = Tag_ASV),
+threshL = 1 * 10^5, thresh = 0) + # cuts cools stuff
+  facet_nested(Biogeo +  Class  + Family ~ Depth, drop = TRUE, scales = "free", space = "free") +
+  theme(panel.spacing = unit(2, "points"))
+
+bigoeo_plot_detailed_annotated <- cowplot::ggdraw(biogeo_plot_detailed) +
+  cowplot::draw_label("Process", x = 0.93, y = .98) +
+  cowplot::draw_label("Class", x = 0.805, y = .98) +
+  cowplot::draw_label("Family", x = 0.685, y = .98)
+ggsave(here("Figures", "BiogeochemicalCyclers_detailed1.png"), height = 8, width = 11, plot = bigoeo_plot_detailed_annotated)
                
