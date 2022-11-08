@@ -295,3 +295,4 @@ ches_plot_options <- list(
 save.image(here("RDataFiles", "InitialProcessing_3.RData"))
 save(nonSpikes20, file = here::here("RDataFiles", "nonSpikes20.RData"))
 
+write_csv(nonSpikes, file = gzfile(here::here("Tables", "nonSpikes.csv.gz")))
