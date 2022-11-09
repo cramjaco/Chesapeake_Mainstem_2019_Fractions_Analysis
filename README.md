@@ -20,3 +20,6 @@ Directory Structure follows:
     * `AmpliconsBiogeochem`: Identify amplicons with names or closest sequenced relatives involved in key biogeochemical cycles. Returns a plot of the organisms' abundances.
     
 * `ActiveNotebooks`: Notebook files in which much of the analysis in the manuscript took place.
+  * `BreakawayAlphaDiversity`: Calculations of alpha diversity using the breakaway package. Called by `ConventioanlAlpha.Rmd`
+  * `ConventionalAlpha.Rmd` All of the alpha diversity calculations, including the ones for the manuscript.
+     Note that we settled on sharing Breakaway richness, Shannon Diversity and Evenness (Breakawy/Shannon)

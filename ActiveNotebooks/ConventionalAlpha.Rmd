@@ -2,12 +2,16 @@
 title: "R Notebook"
 output: html_notebook
 ---
+
+The goal here is to use conventional alpha diversity metrics to see how Chao1 richness, shannon diversity and evenness change across samples and to compare those to the values seen using breakaway in the AlphaDiversity.Rmd file
+
 # Setup
 Run AlphaDiversity in scratchnotebooks
+That file calculates richness in breakawy which I will combine here
 ```{r}
 #source(here::here("RScripts", "InitialProcessing_3.R"))
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
-ksource(here::here("ActiveNotebooks", "AlphaDiversity.Rmd"))
+ksource(here::here("ActiveNotebooks", "BreakawayAlphaDiversity.Rmd"))
 ```
 
 ```{r}
@@ -167,7 +171,7 @@ ggsave(here::here("Figures", "ConventionalAlpha.png"), plotAlpha, width = 11, he
 ## Do we see trends with lat and size?
 
 ## Observed Species
-Rarefied
+Rarefied observed species numbers
 
 ```{r}
 obsMod <- lm(S.obs ~ log(Size_Class) + I(log(Size_Class)^2) + I(log(Size_Class)^2) + lat + I(lat^2) + depth, data = diversityData)
@@ -175,11 +179,12 @@ summary(obsMod)
 ```
 
 ## Richness
+Rarified chao1 estimates
 ```{r}
 chao1Mod <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2) + I(log(Size_Class)^2) + lat + I(lat^2) + depth, data = diversityData)
 summary(chao1Mod)
 ```
-
+As above but without latitude and depth
 ```{r}
 chao1ModSimple <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2), data = diversityData)
 summary(chao1ModSimple)
