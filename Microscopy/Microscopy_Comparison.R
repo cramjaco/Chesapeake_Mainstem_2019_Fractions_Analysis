@@ -116,7 +116,7 @@ AmpliconAbundance <- read.csv(here("AmpliconAbundance.csv")) %>%
 
 # Input more data "DNA and POM", then join with old CalculationsWithMetadata
 
-DNA_and_POM <- read_csv(here(REUDir, "DNA_and_POM (1).csv"))
+DNA_and_POM <- read_csv(here(MicroscopyDir, "DNA_and_POM (1).csv"))
 BackRinseCalc <- left_join(DNA_and_POM, CalculationsWithMetadata, by=c("Station","Depth","Size_Class"="NSize"))%>%
 mutate(Cells_Collected_Total = CellsPerLiterofBackrinse * Backrinse)%>%
 mutate(Cells_Per_Liter_Total = Cells_Collected_Total / Volume_through_mesh)%>%
