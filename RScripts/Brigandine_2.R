@@ -1,3 +1,6 @@
+## This file returns the brigandine style plots for total bacteria, planktomycetes and the abundant bacteria that
+# are primarely on large size fractions.
+
 library(here)
 library(tidyverse)
 

@@ -53,7 +53,7 @@ find_present <- function(adf, threshold = 0){
 
 
 # Brigandine plot relative to mass
-ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6, thresL = 0){
+ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 0, threshL = 0){
   minCpMg <- min # 4
   maxCpMg <- max # 7.5
   
@@ -112,7 +112,7 @@ ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, m
 
 ## Plot relative to volume
 
-ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6, threshL = 0){
+ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 0, threshL = 0){
   minCpL <- min # 4
   maxCpL <- max # 7.5
   
@@ -190,7 +190,7 @@ aglom2 <- function(taxlevel, broadlevel, ns = nonSpikes20){
     filter(!is.na(!!taxlevel))
 }
 
-ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 10^6, threshL = 0){
+ches_brigandine_L2 <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, min = NA, max = NA, thresh = 0, threshL = 0){
   minCpL <- min # 4
   maxCpL <- max # 7.5
   

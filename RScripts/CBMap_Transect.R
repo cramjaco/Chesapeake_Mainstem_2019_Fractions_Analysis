@@ -1,6 +1,7 @@
 library("tidyverse")
 library("rnaturalearth")
 library("rnaturalearthdata")
+library(here)
 
 world <- ne_countries( returnclass = "sf", scale = 10)
 class(world)
@@ -9,7 +10,7 @@ class(world)
 
 library(ggrepel)
 
-stations <- read_csv(here::here("stations.csv"))
+stations <- read_csv(here::here("InputData","stations.csv"))
 stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
   mutate(isWest = str_detect(Station, "W")) %>% filter(!isWest) %>% mutate(Station = str_remove(Station, "C")) %>%
   select(-isWest) %>%
@@ -42,3 +43,4 @@ cbMap <- ggplot(data = world ) + geom_sf(color = "grey30", fill = "grey90", alph
 cbMap
 
 ggsave(here("Figures", "cbMap.png"), height = 6, width = 4)
+

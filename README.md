@@ -12,3 +12,11 @@ Authors: Jacob Cram, Ashley Hollins, Alexandra McCarty, Grace Martinez, Clara Fu
 Data were collected by Jacob Cram, Ashley Hollins, Emily Dougherty, Mekayla Reynolds
 
 Directory Structure follows:
+
+ *  `RScripts`: Some produce intermediate output used by other things and some produce figures.
+    * `InitalProcessing_3.R`: Data wrangling and pre-processing of ASV and environmental data.
+    * `Brigandine_2.R `: Abundances of bacteria on different sizes of particles. Phyla, Planktomycetes ASVs, abundant ASVs on > 5 micron particles
+    * `CBMap_Transect.R`: Make a map of all stations.
+    * `AmpliconsBiogeochem`: Identify amplicons with names or closest sequenced relatives involved in key biogeochemical cycles. Returns a plot of the organisms' abundances.
+    
+* `ActiveNotebooks`: Notebook files in which much of the analysis in the manuscript took place.
