@@ -17,6 +17,7 @@ source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 ```
 
 # Example
+
 Show how one species can be described differently with normalizations
 
 # Total microbes Abundance
@@ -26,10 +27,10 @@ Show how one species can be described differently with normalizations
 ```{r}
 source(here("RScripts", "CBMap_Transect.R"))
 ```
+
 ```{r}
 cbMap
 ```
-
 
 ## Microbes per mg particle
 
@@ -84,11 +85,11 @@ combinedPlot <- plot_grid(abunPlot_perL, abunPlot_perMg, nrow = 1, labels = c("B
 combinedPlot_xg <- grid.arrange(arrangeGrob(combinedPlot, x.grob, heights = c(10, 1)))
 ```
 
-
 ```{r fig.height=3, fig.width = 6}
 TotalAbundanceFigure <- plot_grid(cbMap, combinedPlot_xg, rel_widths = c(1,2.5), labels = c("A", ""))
 TotalAbundanceFigure
 ```
+
 ```{r}
 ggsave(here::here("Figures", "TotalAbundanceFigure.png"), height = 4, width = 6)
 ```
@@ -100,4 +101,3 @@ ggsave(here::here("Figures", "TotalAbundanceFigure.png"), height = 4, width = 6)
 Please see AlphaDiversity.Rmd
 
 ## Vegan
-

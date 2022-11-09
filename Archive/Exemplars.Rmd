@@ -26,8 +26,9 @@ To do *after* the brigandine plots.
 target <- nonSpikes20 %>%
   #filter(ASV == "ASV_14")
   #filter(nASV %in% c(14, 17, 47, 48))
-  filter(nASV == 47)
+  filter(nASV == 17)
   #filter(nASV %in% c(459))
+target %>% head
 ```
 
 ```{r}
@@ -85,8 +86,8 @@ scientific_10 <- function(x) {
 
 ```{r fig.height=2, fig.width = 3.5}
 target %>%
-  #filter(Depth == "Bottom", Station == 4.3) %>%
-  filter(Depth == "Bottom", Station == 3.3) %>%
+  filter(Depth == "Bottom", Station == 4.3) %>%
+  #filter(Depth == "Bottom", Station == 3.3) %>%
   mutate(RA = RA * 100) %>%
   mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
   mutate(copiesPerParticle = copiesPerL/ParticlesPerLiter) %>%
