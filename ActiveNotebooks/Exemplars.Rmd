@@ -22,11 +22,24 @@ Our target bacteria
 {No longer works because the asvs got renmbered when I added the last batch of samples}
 I want a paracoccus ASV that has a regualr abundance pattern
 To do *after* the brigandine plots.
+
+I want one of the planktos
+```{r}
+nonSpikes20 %>%
+  filter(Family == "Pirellulaceae", Station == 3.3, Depth == "Bottom", Size_Class == 5) %>%
+  arrange(-copiesPerL)
+```
+
+
+```{r}
+```
+
+
 ```{r}
 target <- nonSpikes20 %>%
   #filter(ASV == "ASV_14")
   #filter(nASV %in% c(14, 17, 47, 48))
-  filter(nASV == 17)
+  filter(nASV == 13)
   #filter(nASV %in% c(459))
 target %>% head
 ```
@@ -85,8 +98,8 @@ scientific_10 <- function(x) {
 ```
 
 ```{r fig.height=2, fig.width = 3.5}
-target %>%
-  filter(Depth == "Bottom", Station == 4.3) %>%
+plt1 <- target %>%
+  filter(Depth == "Bottom", Station == 3.3) %>%
   #filter(Depth == "Bottom", Station == 3.3) %>%
   mutate(RA = RA * 100) %>%
   mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
@@ -100,57 +113,18 @@ target %>%
   geom_point(color = "Black") + geom_path() +
   #scale_y_log10nice() +
   scale_y_log10(minor_breaks = log_breaks_fn) +
-    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
-  theme_bw() +
-  ylab(NULL)+
+  scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  theme_bw(base_size = 14) +
+  ylab(NULL)+ xlab("Size Class") + 
   theme(strip.background = element_blank(),
            strip.placement = "outside",
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+plt1
 ```
-
 ```{r}
-target_01 <- target %>%
-  #filter(Depth == "Bottom", Station == 4.3) %>%
-  filter(Depth == "Bottom", Station == 3.3) %>%
-  mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
-  arrange(Size_Class)
-
-ra_example <- target_01 %>%
-  ggplot(aes(x = Size_Class, y = RA * 100)) + 
-  geom_point(color = "Black") + geom_path() +
-  scale_y_log10(breaks = 100 *c(seq(from = 0.001, to = 0.003, by = 0.001),seq(from = 0.003, to = 0.013, by = 0.002))) +
-    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
-  labs(y = "Relative Abundance (%)") +
-  theme_bw()
-
-ra_example
-```
-
-```{r}
-cpl_example <- target_01 %>%
-  ggplot(aes(x = Size_Class, y = copiesPerL)) + 
-  geom_point(color = "Black") + geom_path() +
-  scale_y_log10() +
-    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
-  labs(y = "Copies/L") +
-  theme_bw()
-cpl_example
+ggsave(here::here("Figures", "Exemplar_ASV13_CB3.3_Bottom.png"), plot = plt1, height = 3, width = 5)
 ```
 
 
-```{r}
-cpmg_example <- target_01 %>%
-  ggplot(aes(x = Size_Class, y = copiesPerMg)) + 
-  geom_point(color = "Black") + geom_path() +
-  #scale_y_log10() +
-  scale_y_log10(breaks = c(seq(from = 3e4, to = 1e5, by = 2e4),seq(from = 1e5, to = 3e5, by = 1e5))) +
-    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
-  labs(y = "Copies/mg") +
-  theme_bw()
-cpmg_example
-```
 
-```{r fig.height = 4, fig.width = 1.5}
-cowplot::plot_grid(ra_example, cpl_example, cpmg_example, ncol = 1)
-```
 
