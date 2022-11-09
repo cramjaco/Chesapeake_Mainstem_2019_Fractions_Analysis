@@ -16,28 +16,96 @@ Steps:
 ```{r}
 library(tidyverse)
 library(cowplot)
-source("InitialProcessing.R")
-source("ChesapeakePersonalLibrary.R")
+library(here)
+source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
+env1 <- attach(here("RDataFiles", "InitialProcessing_3.RData"))
+set.seed(10033)
+nonSpikes <- env1$nonSpikes
 ```
 
 ```{r}
 onePercenters <- nonSpikes %>% 
   select(ID, Station, Size_Class, Depth, ASV, RA) %>%
+  # filter(Station %in% c(3.1, 3.2, 4.3)) %>%
+  # filter(Depth == "Surface") %>%
+  filter(Size_Class == 0.2, RA > 0.01) %>%
+  pull(ASV) %>% unique()
+
+onePercenters_Surface <- nonSpikes %>% 
+  select(ID, Station, Size_Class, Depth, ASV, RA) %>%
   filter(Station %in% c(3.1, 3.2, 4.3)) %>%
   filter(Depth == "Surface") %>%
   filter(Size_Class == 0.2, RA > 0.01) %>%
   pull(ASV) %>% unique()
+
+onePercenters_Bottom <- nonSpikes %>% 
+  select(ID, Station, Size_Class, Depth, ASV, RA) %>%
+  #filter(Station %in% c(3.1, 3.2, 4.3)) %>%
+  filter(Depth == "Bottom") %>%
+  filter(Size_Class == 0.2, RA > 0.01) %>%
+  pull(ASV) %>% unique()
+
 onePercenters
+onePercenters_Surface
+onePercenters_Bottom
 ```
+
+
+
 There are only ~41 ASV that show up ever with at least 1% relative abundance
 
+Lets look at their taxonomy
 ```{r}
-nonSpikes1pct
+onePercentFreeTaxa <- taxa01 %>% filter(ASV %in% onePercenters)
 ```
 
 
 ```{r}
 nonSpikes1pct <- nonSpikes %>% filter(ASV %in% onePercenters)
+nonSpikes1pct_Surface <- nonSpikes %>% filter(ASV %in% onePercenters_Surface)
+nonSpikes1pct_Bottom <- nonSpikes %>% filter(ASV %in% onePercenters_Bottom)
+```
+
+```{r}
+surfaceNSPlot <- nonSpikes1pct_Surface %>% filter(Depth == "Surface") %>% 
+  #filter(ASV == "ASV_2") %>%
+  #filter(Tag == "Clade_III") %>%
+  filter(Station %in% c(3.1, 3.2, 4.3)) %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_wrap(~Tag_ASV, ncol = 4) +
+  geom_point(size = 3) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
+  theme_bw(base_size = 14) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")  +
+  theme(axis.text.x = element_text(angle = 90), strip.text = element_text(size = 8))
+ggsave(here("Figures", "surfaceNS.png"), plot = surfaceNSPlot, height = 8, width = 8.5, limitsize = FALSE)
+```
+
+```{r}
+bottomNSPlot <- nonSpikes1pct_Bottom %>% filter(Depth == "Bottom") %>% 
+  #filter(ASV == "ASV_2") %>%
+  #filter(Tag == "Clade_III") %>%
+  #filter(Station %in% c(3.1, 3.2, 4.3)) %>%
+  arrange(Size_Class) %>%
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_wrap(~Tag_ASV, ncol = 4) +
+  geom_point(size = 3) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_color_viridis_d(option = "plasma") +
+  theme_bw(base_size = 12) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
+  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station") +
+  theme(axis.text.x = element_text(angle = 90), strip.text = element_text(size = 8))
+ggsave(here("Figures", "bottomNS.png"), plot = bottomNSPlot, height = 11, width = 8.5, limitsize = FALSE)
 ```
 
 ```{r}
@@ -61,7 +129,7 @@ nonSpikes1pct %>% filter(Depth == "Surface") %>%
 
 ```{r}
 nonSpikes1pct %>% filter(Depth == "Surface") %>% 
-  filter(ASV == "ASV_2") %>%
+  filter(ASV == "ASV_3") %>%
   filter(Tag == "Clade_III") %>%
   filter(Station %in% c(3.1)) %>%
   arrange(Size_Class) 
