@@ -11,7 +11,7 @@ source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 counts <- read_tsv(here("DadaData",'ASVs_counts.tsv')) %>% rename(ASV = "...1")
 taxa0 <- read_tsv(here("DadaData", "ASVs_taxonomy.tsv")) %>% rename(ASV = "...1")
 key2 <- read_csv(here("Keys", "SampleKey2.csv"))
-sample0 <- read_csv(here("EnvDataForAmplicons.csv"))
+sample0 <- read_csv(here("InputData", "EnvDataForAmplicons.csv"))
 flags <- read_csv(here("Keys", "ManualFlags2.csv")) %>%
   mutate(Flag = if_else(Flag == "Bad", TRUE, FALSE, missing = FALSE)) %>%
   select(ID, Flag)
@@ -146,7 +146,7 @@ microbialAbundance <- nonSpikes %>%
  left_join(sample, by = "ID") %>%
  arrange(Station, Depth, Size_Class)
 
-write_csv(microbialAbundance, "AmpliconAbundance.csv")
+write_csv(microbialAbundance, here("IntermediateData","AmpliconAbundance.csv"))
 
 # maPlot <- microbialAbundance %>%
 #   filter(!Flag) %>%

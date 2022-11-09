@@ -1,0 +1,103 @@
+---
+title: "ManuscriptFigures"
+author: "Jacob Cram"
+format: html
+editor: visual
+---
+
+# Initial Stuff
+
+Load in Initial Processing file (and dependencies)
+
+```{r}
+source(here::here("RScripts", "InitialProcessing_3.R"))
+
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
+
+```
+
+# Example
+Show how one species can be described differently with normalizations
+
+# Total microbes Abundance
+
+## Map
+
+```{r}
+source(here("RScripts", "CBMap_Transect.R"))
+```
+```{r}
+cbMap
+```
+
+
+## Microbes per mg particle
+
+```{r}
+abunPlot_perMg <- microbialAbundance %>% 
+  filter(is.finite(MassperLiter)) %>%
+  filter(Depth %in% c("Surface", "Bottom")) %>%
+  mutate(copiesPerMg = copiesPerL / MassperLiter) %>%
+  ggplot(aes(x = Size_Class, y = copiesPerMg, shape = as.factor(Station), fill = as.factor(Station))) +
+  facet_wrap(~Depth, ncol = 1) +
+  ches_plot_options  +
+theme_bw(base_size = 14) +
+
+   labs(y = "16s + 18s Genes / mg Particles", x = expression(paste("Particle Size (", mu, "m)")))+
+  theme(legend.position = "none",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0))
+abunPlot_perMg
+```
+
+## Microbes per L of water?
+
+```{r}
+abunPlot_perL <- microbialAbundance %>% 
+  #filter(is.finite(MassperLiter)) %>%
+  filter(Depth %in% c("Surface", "Bottom")) %>%
+  mutate(copiesPerMg = copiesPerL/Bin_Size) %>%
+  ggplot(aes(x = Size_Class, y = copiesPerMg, shape = as.factor(Station), fill = as.factor(Station))) +
+  facet_wrap(~Depth, ncol = 1) +
+  ches_plot_options  +
+  scale_y_log10nice(omag = seq(from = 3, to = 11, by = 2)) +
+theme_bw(base_size = 14) +
+
+   labs(y = "16s + 18s Genes / L/mm", x = expression(paste("Particle Size (", mu, "m)")))+
+  theme(legend.position = "none",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0))
+abunPlot_perL
+```
+
+## Compound figure
+
+```{r}
+x.grob <- textGrob(expression(paste("Particle Size (", mu, "m)")), 
+                   gp=gpar(fontsize=14))
+
+combinedPlot <- plot_grid(abunPlot_perL, abunPlot_perMg, nrow = 1, labels = c("B", "C"))
+combinedPlot_xg <- grid.arrange(arrangeGrob(combinedPlot, x.grob, heights = c(10, 1)))
+```
+
+
+```{r fig.height=3, fig.width = 6}
+TotalAbundanceFigure <- plot_grid(cbMap, combinedPlot_xg, rel_widths = c(1,2.5), labels = c("A", ""))
+TotalAbundanceFigure
+```
+```{r}
+ggsave(here::here("Figures", "TotalAbundanceFigure.png"), height = 4, width = 6)
+```
+
+# Alpha diversity
+
+## Breakaway
+
+Please see AlphaDiversity.Rmd
+
+## Vegan
+
