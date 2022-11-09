@@ -1,0 +1,10 @@
+Station,Depth,BoxesRange,SizeRange,DataRange,Volume
+4.3,Surface,B12:H12,B13:H13,B26:H35,10
+4.3,Oxy,B12:H12,B13:H13,B14:H23,10
+4.3,Bottom,B12:H12,B13:H13,B37:H46,10
+3.3,Surface,B7:H7,B8:H8,B9:H18,5
+3.3,Bottom,B20:H20,B21:H21,B22:H31,5
+5.5,Surface,B7:H7,B8:H8,B9:H18,5
+5.5,Bottom,B20:H20,B21:H21,B22:H31,5
+5.1,Surface,B7:H7,B8:H8,B9:H18,5
+5.1,Bottom,B20:H20,B21:H21,B22:H31,5
