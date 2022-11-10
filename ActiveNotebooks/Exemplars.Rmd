@@ -13,8 +13,8 @@ It follows the standard particle attached paradoxical distribution (dense on big
 library(here)
 library(tidyverse)
 source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
-load(here("RDataFiles", "InitialProcessing_3.RData"))
-
+#load(here("RDataFiles", "InitialProcessing_3.RData"))
+load(here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 
 ```
 

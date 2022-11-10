@@ -27,6 +27,5 @@ Directory Structure follows:
   * `AllMicrobesFigures.qmd`: Plots of total microbial abundance per L and per mg of particles.
   * `MockExplore.Rmd`: Provides a sanity check of the mock community data. In the manuscript, I mostly go so far as to say "looks good" but anyone is welcome to explore these more.
   * `OstensiblyFree`: Exploration of the bacteria that are "free living" in that they comprise at least 1% of the microbial community. Here I show that *all* of these microbes are also found on some particle size fractions.
-  * 
-     
+  * `SummaryDataOverview.Rmd`: Some overview data about amplicon sequence quality
 * Archive

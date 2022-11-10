@@ -18,9 +18,13 @@ library(tidyverse)
 library(cowplot)
 library(here)
 source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
+# I had been bringing in all the data and just using one variable, but then I didn't.
 env1 <- attach(here("RDataFiles", "InitialProcessing_3.RData"))
+#load(here("RDataFiles", "nonSpikes.RData"))
 set.seed(10033)
 nonSpikes <- env1$nonSpikes
+## somewhat to my suprise, variables such as taxa01 appear to be globally available even though they should be only in env1
+# I'm going to leave things like this since code runs and I'm running out of steam on this code wrangling
 ```
 
 ```{r}
@@ -145,6 +149,7 @@ check12 <- nonSpikes %>%
   pivot_wider(names_from = Size_Class, values_from = RA) %>%
   filter(!is.na(`0.2`) & !is.na(`1.2`)) %>%
   #filter(`0.2` > .03, `1.2` == 0) # never happens at 3%, happens 4 times at 1%
+  identity()
 check12
 ```
 

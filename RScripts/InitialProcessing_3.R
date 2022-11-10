@@ -257,6 +257,7 @@ checkHits <- nonSpikes %>% group_by(nASV, ASV) %>%
 
 checkHits %>% summarise(sum(freq > 0.2))
 
+# Only ASVs that show up in at least 20% of samples
 nonSpikes20 <- nonSpikes %>% left_join(checkHits %>% select(-nASV), by = "ASV") %>%
   filter(hits/uniqueSamples > 0.2) 
 #%>% na.omit() # why are there NAs left? NAs are in non critial columns

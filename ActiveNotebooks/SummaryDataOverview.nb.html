@@ -1772,23 +1772,57 @@ pre code {
 run</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5gYGAifQ== -->
+<pre class="r"><code>library(tidyverse)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2RzIG92ZXJ3cml0dGVuIGJ5ICdkYnBseXInOlxuICBtZXRob2QgICAgICAgICBmcm9tXG4gIHByaW50LnRibF9sYXp5ICAgICBcbiAgcHJpbnQudGJsX3NxbCAgICAgIFxu4pSA4pSAIEF0dGFjaGluZyBwYWNrYWdlcyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgdGlkeXZlcnNlIDEuMy4yIOKUgOKUgOKclCBnZ3Bsb3QyIDMuMy42ICAgICAg4pyUIHB1cnJyICAgMC4zLjQgXG7inJQgdGliYmxlICAzLjEuOCAgICAgIOKclCBkcGx5ciAgIDEuMC4xMFxu4pyUIHRpZHlyICAgMS4yLjEgICAgICDinJQgc3RyaW5nciAxLjQuMSBcbuKclCByZWFkciAgIDIuMS4zICAgICAg4pyUIGZvcmNhdHMgMC41LjIg4pSA4pSAIENvbmZsaWN0cyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgdGlkeXZlcnNlX2NvbmZsaWN0cygpIOKUgOKUgFxu4pyWIGRwbHlyOjpmaWx0ZXIoKSBtYXNrcyBzdGF0czo6ZmlsdGVyKClcbuKcliBkcGx5cjo6bGFnKCkgICAgbWFza3Mgc3RhdHM6OmxhZygpXG4ifQ== -->
+<pre><code>Registered S3 methods overwritten by &#39;dbplyr&#39;:
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.2 ──✔ ggplot2 3.3.6      ✔ purrr   0.3.4 
+✔ tibble  3.1.8      ✔ dplyr   1.0.10
+✔ tidyr   1.2.1      ✔ stringr 1.4.1 
+✔ readr   2.1.3      ✔ forcats 0.5.2 ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShoZXJlKVxuYGBgIn0= -->
+<pre class="r"><code>library(here)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiaGVyZSgpIHN0YXJ0cyBhdCAvaG9tZS9qYWNvYi9Qcm9qZWN0cy9DaGVzYXBlYWFrZU1haW5zdGVtQW5hbHlzaXNcbiJ9 -->
+<pre><code>here() starts at /home/jacob/Projects/ChesapeaakeMainstemAnalysis</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeUluIDwtIHJlYWRfY3N2KGhlcmUoXCJEYWRhRGF0YVwiLCBcIlJ1blN1bW1hcnlTdGF0aXN0aWNzLmNzdlwiKSkgJT4lIFxuICByZW5hbWUoSUQgPSAxKVxuXG5gYGAifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeUluIDwtIHJlYWRfY3N2KGhlcmUoXCJEYWRhRGF0YVwiLCBcIlJ1blN1bW1hcnlTdGF0aXN0aWNzLmNzdlwiKSkgJT4lIFxuICByZW5hbWUoSUQgPSAxKVxuYGBgIn0= -->
 <pre class="r"><code>summaryIn &lt;- read_csv(here(&quot;DadaData&quot;, &quot;RunSummaryStatistics.csv&quot;)) %&gt;% 
-  rename(ID = 1)
-</code></pre>
+  rename(ID = 1)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiTmV3IG5hbWVzOlJvd3M6IDExMCBDb2x1bW5zOiA54pSA4pSAIENvbHVtbiBzcGVjaWZpY2F0aW9uIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgFxuRGVsaW1pdGVyOiBcIixcIlxuY2hyICgxKTogLi4uMVxuZGJsICg4KTogaW5wdXRfZndkLCBpbnB1dF9yZXYsIGRhZGFfZiwgZGFkYV9yLCBtZXJnZWQsIG5vbmNoaW0sIG5vbl9jaGltZXJpY19yZWFkc19wY3QsIGZpbmFsX3BlcmNfcmVhZHNfcmV0YWluZWRcbuKEuSBVc2UgYHNwZWMoKWAgdG8gcmV0cmlldmUgdGhlIGZ1bGwgY29sdW1uIHNwZWNpZmljYXRpb24gZm9yIHRoaXMgZGF0YS5cbuKEuSBTcGVjaWZ5IHRoZSBjb2x1bW4gdHlwZXMgb3Igc2V0IGBzaG93X2NvbF90eXBlcyA9IEZBTFNFYCB0byBxdWlldCB0aGlzIG1lc3NhZ2UuXG4ifQ== -->
-<pre><code>New names:Rows: 110 Columns: 9── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+<!-- rnb-output-begin eyJkYXRhIjoiTmV3IG5hbWVzOlJvd3M6IDExMCBDb2x1bW5zOiA54pSA4pSAIENvbHVtbiBzcGVjaWZpY2F0aW9uIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgFxuRGVsaW1pdGVyOiBcIixcIlxuY2hyICgxKTogLi4uMVxuZGJsICg4KTogaW5wdXRfZndkLCBpbnB1dF9yZXYsIGRhZGFfZiwgZGFkYV9yLCBtZXJnZWQsIG5vbmNoaW0sIG5vbl9jaGltZXJpY19yZWFkc19wY3QsIGZpbmFsX3BlcmNfcmVhZHNfcmV0YWluZWRcbuKEuSBVc2UgYHNwZWMoKWAgdG8gcmV0cmlldmUgdGhlIGZ1bGwgY29sdW1uIHNwZWNpZmljYXRpb24gZm9yIHRoaXMgZGF0YS5cbuKEuSBTcGVjaWZ5IHRoZSBjb2x1bW4gdHlwZXMgb3Igc2V0IGBzaG93X2NvbF90eXBlcyA9IEZBTFNFYCB0byBxdWlldCB0aGlzIG1lc3NhZ2UuXG4ifQ== -->
+<pre><code>New names:Rows: 110 Columns: 9── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
 Delimiter: &quot;,&quot;
 chr (1): ...1
 dbl (8): input_fwd, input_rev, dada_f, dada_r, merged, nonchim, non_chimeric_reads_pct, final_perc_reads_retained
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxua2V5MSA8LSByZWFkX2NzdihoZXJlKFwiS2V5c1wiLCBcIlNhbXBsZUtleTEuY3N2XCIpKVxuYGBgIn0= -->
+<pre class="r"><code>key1 &lt;- read_csv(here(&quot;Keys&quot;, &quot;SampleKey1.csv&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUm93czogMjIwIENvbHVtbnM6IDnilIDilIAgQ29sdW1uIHNwZWNpZmljYXRpb24g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAXG5EZWxpbWl0ZXI6IFwiLFwiXG5jaHIgKDYpOiBSdW4sIEZpbGVzLCBJRCwgU2FtcGxlLCBEZXB0aCwgVHlwZVxuZGJsICgzKTogUmVhZERpciwgU3RhdGlvbiwgU2l6ZVxu4oS5IFVzZSBgc3BlYygpYCB0byByZXRyaWV2ZSB0aGUgZnVsbCBjb2x1bW4gc3BlY2lmaWNhdGlvbiBmb3IgdGhpcyBkYXRhLlxu4oS5IFNwZWNpZnkgdGhlIGNvbHVtbiB0eXBlcyBvciBzZXQgYHNob3dfY29sX3R5cGVzID0gRkFMU0VgIHRvIHF1aWV0IHRoaXMgbWVzc2FnZS5cbiJ9 -->
+<pre><code>Rows: 220 Columns: 9── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+chr (6): Run, Files, ID, Sample, Depth, Type
+dbl (3): ReadDir, Station, Size
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeURhdGEgPC0gc3VtbWFyeUluICU+JSBsZWZ0X2pvaW4oa2V5MSAlPiUgZmlsdGVyKFJlYWREaXIgPT0gMSksIGJ5ID0gXCJJRFwiKVxuYGBgIn0= -->
+<pre class="r"><code>summaryData &lt;- summaryIn %&gt;% left_join(key1 %&gt;% filter(ReadDir == 1), by = &quot;ID&quot;)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Subset just the samples that hed enough reads that we actually used
@@ -1804,7 +1838,11 @@ them</p>
 <p>Data about starting reads</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6MSwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyIxIMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CbUEySldJSk9CTlRURVRkZUNnWUdGQ2NoaFpHQmg0QVRSRlVCRndrQUdDeER6Z1FRY3ZtVS9ZSUFBQ1AvUmhNcnNuVDExY1A3dUtnWmtlVWVoS1RZUUxvckJySG1KdWFuRlFJWUEySENJSUZ0dWFrcG1ZaDZVeDV5Ym1BSm5aaUtKVnFDWnhWbVVYNjRITTQ4WGlKa2FnTVIvSUVDM05Ea25zUmhtS1V5UUt5V3hKRkV2clFpb0g4ajdoNmFGUGIrZ0pETS9ENmlKQ1JRTXJHaWFHWXZRQlBoTDgwQXVTZEZOemlqTnk5WTFCVmtBbG9ZQVhpaWJFWW5OQXJHUzZUL1VLRlpZYUtUbXBXZm1wY0xjbnBPWWxKb0Q1ZkFCZlF6MnNGNUJVV1plQ2N3blFORml2Wkw4a2tTWU9xN2svQnlZQ05odkRQOEEzQ2lMTFAwQkFBQT0ifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWN0dWFsbHlVc2VkICU+JVxuICBzdW1tYXJpemUobWVkaWFuID0gbWVkaWFuKGlucHV0X2Z3ZCksIG1hZCA9IG1hZChpbnB1dF9md2QpLCBtaW4gPSBtaW4oaW5wdXRfZndkKSwgbWF4ID0gbWF4KGlucHV0X2Z3ZCkpXG5gYGAifQ== -->
+<pre class="r"><code>ActuallyUsed %&gt;%
+  summarize(median = median(input_fwd), mad = mad(input_fwd), min = min(input_fwd), max = max(input_fwd))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6MSwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyIxIMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CbUEySldJSk9CTlRURVRkZUNnWUdGQ2NoaFpHQmg0QVRSRlVCRndrQUdDeER6Z1FRY3ZtVS9ZSUFBQ1AvUmhNcnNuVDExY1A3dUtnWmtlVWVoS1RZUUxvckJySG1KdWFuRlFJWUEySENJSUZ0dWFrcG1ZaDZVeDV5Ym1BSm5aaUtKVnFDWnhWbVVYNjRITTQ4WGlKa2FnTVIvSUVDM05Ea25zUmhtS1V5UUt5V3hKRkV2clFpb0g4ajdoNmFGUGIrZ0pETS9ENmlKQ1JRTXJHaWFHWXZRQlBoTDgwQXVTZEZOemlqTnk5WTFBVmtBbG9ZQVhpaWJFWW5OQXJHUzZUL1VLRlpZYUtUbXBXZm1wY0xjbnBPWWxKb0Q1ZkFCZlF6MnNGNUJVV1plQ2N3blFORml2Wkw4a2tTWU9xN2svQnlZQ05odkRQOEEvZ3JWVC8wQkFBQT0ifQ== -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["median"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["mad"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["min"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["max"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"91838","2":"38019.79","3":"7034","4":"304399"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[1]},"pages":{}}}
@@ -1816,7 +1854,11 @@ them</p>
 <p>Data about fraction of chimeras</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6MSwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyIxIMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CbUEySldJSk9CTlRURVRkZUNnWUdGQ2NoaFpHQmg0QVRSRlVCRndrQUdDeER6Z1FRY0hDNGJnd0NjcjNURmF2bnNYWGZoZkpreklIQUJ6dmZhREZXUFlqQnJYbUp1YWpHUUlRQTJIQ0xJbHB1YWtwbVlCK1V4NXlhbXdKbVpTS0lWYUdaeEZ1V1g2OEhNNHdWaXBnWWc4UjhJMEMxTnpra3NobGtLRStSS1NTeEoxRXNyQXVvSDh2NmhhV0hQTHlqSnpNOERhbUlDQlFNcm1tYkdJalFCL3RJOGtFdFNkSk16U3ZPeWRZMUFGb0NsSVlBWHltWkVZck5BckdUNkR6V0tGUllhcVhucG1YbXBNTGZuSkNhbDVrQTVmRUFmZ3oyc1YxQ1VtVmNDOHdsUXRGaXZKTDhrRWFhT0t6ay9CeVlDOWh2RFB3QktKblAzL1FFQUFBPT0ifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWN0dWFsbHlVc2VkICU+JVxuICBzdW1tYXJpemUobWVkaWFuID0gbWVkaWFuKDEwMC1ub25fY2hpbWVyaWNfcmVhZHNfcGN0KSwgbWFkID0gbWFkKDEwMC1ub25fY2hpbWVyaWNfcmVhZHNfcGN0KSwgbWluID0gbWluKDEwMC1ub25fY2hpbWVyaWNfcmVhZHNfcGN0KSwgbWF4ID0gbWF4KDEwMC1ub25fY2hpbWVyaWNfcmVhZHNfcGN0KSlcbmBgYCJ9 -->
+<pre class="r"><code>ActuallyUsed %&gt;%
+  summarize(median = median(100-non_chimeric_reads_pct), mad = mad(100-non_chimeric_reads_pct), min = min(100-non_chimeric_reads_pct), max = max(100-non_chimeric_reads_pct))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6MSwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyIxIMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CbUEySldJSk9CTlRURVRkZUNnWUdGQ2NoaFpHQmg0QVRSRlVCRndrQUdDeER6Z1FRY0hDNGJnd0NjcjNURmF2bnNYWGZoZkpreklIQUJ6dmZhREZXUFlqQnJYbUp1YWpHUUlRQTJIQ0xJbHB1YWtwbVlCK1V4NXlhbXdKbVpTS0lWYUdaeEZ1V1g2OEhNNHdWaXBnWWc4UjhJMEMxTnpra3NobGtLRStSS1NTeEoxRXNyQXVvSDh2NmhhV0hQTHlqSnpNOERhbUlDQlFNcm1tYkdJalFCL3RJOGtFdFNkSk16U3ZPeWRVMUJGb0NsSVlBWHltWkVZck5BckdUNkR6V0tGUllhcVhucG1YbXBNTGZuSkNhbDVrQTVmRUFmZ3oyc1YxQ1VtVmNDOHdsUXRGaXZKTDhrRWFhT0t6ay9CeVlDOWh2RFB3RGx6cGdFL1FFQUFBPT0ifQ== -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["median"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["mad"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["min"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["max"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"33.65","2":"9.41451","3":"7.2","4":"53.4"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[1]},"pages":{}}}
@@ -1825,7 +1867,11 @@ them</p>
 <!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6MSwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyIxIMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CbUEySldJSk9CTlRURVRkZUNnWUdGQ2NoaFpHQmg0QVRSRlVCRndrQUdDeER6Z1FRY25qNUlZSUFBQ1AveXpwNTdsenJPd2ZrTDFqRWd5enN5cGtQVm94ak1tcGVZbTFvTVpBaUFEWWNJc3VXbXBtUW01a0Y1ekxtSktYQm1KcEpvQlpwWm5FWDU1WG93ODNpQm1La0JTUHdIQW5STGszTVNpMkdXd2dTNVVoSkxFdlhTaW9ENmdieC9hRnJZOHd0S012UHpnSnFZUU1IQWlxYVpzUWhOZ0w4MEQrU1NGTjNrak5LOGJGMWprQVZnYVFqZ2hiSVprZGdzRUN1Wi9rT05Zb1dGUm1wZWVtWmVLc3p0T1lsSnFUbFFEaC9ReDJBUDZ4VVVaZWFWd0h3Q0ZDM1dLOGt2U1lTcDQwck96NEdKZ1AzRzhBOEFLQTZML2YwQkFBQT0ifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWN0dWFsbHlVc2VkICU+JVxuICBzdW1tYXJpemUobWVkaWFuID0gbWVkaWFuKG5vbmNoaW0pLCBtYWQgPSBtYWQobm9uY2hpbSksIG1pbiA9IG1pbihub25jaGltKSwgbWF4ID0gbWF4KG5vbmNoaW0pKVxuYGBgIn0= -->
+<pre class="r"><code>ActuallyUsed %&gt;%
+  summarize(median = median(nonchim), mad = mad(nonchim), min = min(nonchim), max = max(nonchim))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6MSwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyIxIMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CbUEySldJSk9CTlRURVRkZUNnWUdGQ2NoaFpHQmg0QVRSRlVCRndrQUdDeER6Z1FRY25qNUlZSUFBQ1AveXpwNTdsenJPd2ZrTDFqRWd5enN5cGtQVm94ak1tcGVZbTFvTVpBaUFEWWNJc3VXbXBtUW01a0Y1ekxtSktYQm1KcEpvQlpwWm5FWDU1WG93ODNpQm1La0JTUHdIQW5STGszTVNpMkdXd2dTNVVoSkxFdlhTaW9ENmdieC9hRnJZOHd0S012UHpnSnFZUU1IQWlxYVpzUWhOZ0w4MEQrU1NGTjNrak5LOGJGMHprQVZnYVFqZ2hiSVprZGdzRUN1Wi9rT05Zb1dGUm1wZWVtWmVLc3p0T1lsSnFUbFFEaC9ReDJBUDZ4VVVaZWFWd0h3Q0ZDM1dLOGt2U1lTcDQwck96NEdKZ1AzRzhBOEF3NkxjeVAwQkFBQT0ifQ== -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["median"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["mad"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["min"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["max"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"44803","2":"20198.2","3":"2135","4":"142572"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[1]},"pages":{}}}

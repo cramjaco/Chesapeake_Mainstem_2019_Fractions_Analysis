@@ -10,8 +10,8 @@ load(here::here("RDataFiles", "InitialProcessing_3.RData"))
 source(here("RLibraries", "Brigandine_Library.R"))
 
 # Phylum Level Plots
-phylum_mg_plot <- ches_brigandine(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 7)
-phylum_L_plot <- ches_brigandine_L(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 9)
+phylum_mg_plot <- ches_brigandine(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 7, thresh = 10^6)
+phylum_L_plot <- ches_brigandine_L(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 9, thresh = 10^6)
 
 ggsave(here("Figures", "Phylum_per_mg_brig.png"), height = 5.5, width = 6.5, plot = phylum_mg_plot)
 ggsave(here("Figures", "Phylum_per_L_brig.png"), height = 4.5, width = 7.5, plot = phylum_L_plot)
