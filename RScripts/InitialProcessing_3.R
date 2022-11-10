@@ -291,7 +291,7 @@ ches_plot_options <- list(
   scale_color_viridis_d(option = "plasma")
 )
 
-
+dir.create("RDataFiles", showWarnings = FALSE)
 save.image(here("RDataFiles", "InitialProcessing_3.RData"))
 save(nonSpikes20, file = here::here("RDataFiles", "nonSpikes20.RData"))
 save(nonSpikes, file = here::here("RDataFiles", "nonSpikes.RData"))
