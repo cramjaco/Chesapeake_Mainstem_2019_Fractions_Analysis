@@ -269,7 +269,7 @@ my_sizes <- sort(unique(microbialAbundance$Size_Class))
 my_sizes
 
 ## Pull in stations
-stations <- read_csv(here("stations.csv"))
+stations <- read_csv(here("InputData","stations.csv"))
 stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
   mutate(isWest = str_detect(Station, "W")) %>% filter(!isWest) %>% mutate(Station = str_remove(Station, "C")) %>% select(-isWest)
 

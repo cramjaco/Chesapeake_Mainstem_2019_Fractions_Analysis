@@ -14,7 +14,7 @@ Data were collected by Jacob Cram, Ashley Hollins, Emily Dougherty, Mekayla Reyn
 Directory Structure follows:
 
  *  `RScripts`: Some produce intermediate output used by other things and some produce figures.
-    * `InitalProcessing_3.R`: Data wrangling and pre-processing of ASV and environmental data.
+    * `InitalProcessing_3.R`: Data wrangling and pre-processing of ASV and environmental data. This is slow, and so generally I used its saved environment output in most of the notebooks.
     * `Brigandine_2.R `: Abundances of bacteria on different sizes of particles. Phyla, Planktomycetes ASVs, abundant ASVs on > 5 micron particles
     * `CBMap_Transect.R`: Make a map of all stations.
     * `AmpliconsBiogeochem`: Identify amplicons with names or closest sequenced relatives involved in key biogeochemical cycles. Returns a plot of the organisms' abundances.
@@ -23,3 +23,10 @@ Directory Structure follows:
   * `BreakawayAlphaDiversity`: Calculations of alpha diversity using the breakaway package. Called by `ConventioanlAlpha.Rmd`
   * `ConventionalAlpha.Rmd` All of the alpha diversity calculations, including the ones for the manuscript.
      Note that we settled on sharing Breakaway richness, Shannon Diversity and Evenness (Breakawy/Shannon)
+  * `Exemplars.Rmd` Gives an example of the abundance patterns of one microbe at one site. Used in proposals but not the manuscript.
+  * `AllMicrobesFigures.qmd`: Plots of total microbial abundance per L and per mg of particles.
+  * `MockExplore.Rmd`: Provides a sanity check of the mock community data. In the manuscript, I mostly go so far as to say "looks good" but anyone is welcome to explore these more.
+  * `OstensiblyFree`: Exploration of the bacteria that are "free living" in that they comprise at least 1% of the microbial community. Here I show that *all* of these microbes are also found on some particle size fractions.
+  * 
+     
+* Archive
