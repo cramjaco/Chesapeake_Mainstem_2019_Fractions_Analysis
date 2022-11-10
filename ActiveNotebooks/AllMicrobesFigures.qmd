@@ -7,10 +7,22 @@ editor: visual
 
 # Initial Stuff
 
+```{r}
+library(tidyverse)
+library(here)
+library(grid)
+library(gridExtra)
+library(cowplot)
+```
+
 Load in Initial Processing file (and dependencies)
 
 ```{r}
-source(here::here("RScripts", "InitialProcessing_3.R"))
+#source(here::here("RScripts", "InitialProcessing_3.R"))
+
+load(here::here("RDataFiles", "microbialAbundance.RData"))
+
+my_sizes <- sort(unique(microbialAbundance$Size_Class))
 
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 

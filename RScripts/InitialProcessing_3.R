@@ -280,19 +280,14 @@ sampleData <- microbialAbundance %>%
 
 ## Dependent library functions
 
-ches_plot_options <- list(
-  scale_y_log10nice() ,
-    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) ,
-  geom_point(size = 2) ,
-  geom_path(aes(color = as.factor(Station))) ,
-  scale_shape_manual(values = rep(21:25, 2)) ,
-  scale_fill_viridis_d(option = "plasma") ,
-  scale_color_viridis_d(option = "plasma")
-)
+
 
 
 
 save.image(here("RDataFiles", "InitialProcessing_3.RData"))
 save(nonSpikes20, file = here::here("RDataFiles", "nonSpikes20.RData"))
+save(nonSpikes, file = here::here("RDataFiles", "nonSpikes.RData"))
+save(microbialAbundance, file = here::here("RDataFiles", "microbialAbundance.RData"))
+save(nonSpikes, nonSpikes20, microbialAbundance, sampleData, file = here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 
 write_csv(nonSpikes, file = gzfile(here::here("Tables", "nonSpikes.csv.gz")))
