@@ -68,4 +68,8 @@ but I'm afraid I'll break something
 * `ScratchFigures`: Archive, but for figures I'm not using any more
 * `ScratchNotebooks`: Like `Archive` but specifically for notebook files I'm not using anymore
 
+Note: Two files are too big for github and will need to be filtered out before posting. 
+`query_aligh.stockholm`
+`ref_seqs_hhmalign.fasta`
+
 

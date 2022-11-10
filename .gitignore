@@ -58,3 +58,6 @@ silva_nr_v132_train_set.fa.gz*
 *.Rdata
 
 *.tgz
+
+*.stockholm
+ref_seqs_hmmaligh.fasta
