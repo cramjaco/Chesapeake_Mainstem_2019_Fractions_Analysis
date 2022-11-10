@@ -61,3 +61,7 @@ silva_nr_v132_train_set.fa.gz*
 
 *.stockholm
 ref_seqs_hmmaligh.fasta
+
+# Keep main RDatafiles
+!/RDataFiles/
+!/RDataFiles/*
