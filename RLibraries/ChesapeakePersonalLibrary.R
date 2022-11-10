@@ -31,12 +31,3 @@ ksource <- function(x, ...) {
   source(purl(x, output = tempfile()), ...)
 }
 
-ches_plot_options <- list(
-  scale_y_log10nice() ,
-    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) ,
-  geom_point(size = 2) ,
-  geom_path(aes(color = as.factor(Station))) ,
-  scale_shape_manual(values = rep(21:25, 2)) ,
-  scale_fill_viridis_d(option = "plasma") ,
-  scale_color_viridis_d(option = "plasma")
-)

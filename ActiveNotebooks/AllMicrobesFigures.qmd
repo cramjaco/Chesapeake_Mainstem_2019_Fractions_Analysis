@@ -20,9 +20,9 @@ Load in Initial Processing file (and dependencies)
 ```{r}
 #source(here::here("RScripts", "InitialProcessing_3.R"))
 
-load(here::here("RDataFiles", "microbialAbundance.RData"))
+load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 
-my_sizes <- sort(unique(microbialAbundance$Size_Class))
+#my_sizes <- sort(unique(microbialAbundance$Size_Class))
 
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 

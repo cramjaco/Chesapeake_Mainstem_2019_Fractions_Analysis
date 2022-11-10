@@ -11,7 +11,13 @@ library(flextable)
 library(ftExtra)
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 #source(here::here("RScripts", "InitialProcessing_3.R"))
-load(here::here("RDataFiles", "InitialProcessing_3.RData"))
+#load(here::here("RDataFiles", "InitialProcessing_3.RData"))
+#
+## Too many random things loaded from the main environent. Speed up may be too much work.
+load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
+# load(here::here("RDataFiles", "nonSpikes.RData"))
+# load(here::here("RDataFiles", "microbialAbundance.RData"))
+my_sizes <- sort(unique(microbialAbundance$Size_Class))
 ```
 Breakaway uses frequency tables
 ```{r}
