@@ -81,7 +81,7 @@ cb_plotter <- function(Variable, logify = TRUE, lab){
     facet_wrap(~as.factor(Depth), ncol = 1) +
     ches_plot_options2 +
     theme_bw(base_size = 14) +
-    theme(legend.position = "none") +
+    theme(legend.position = "none", axis.title.x = element_blank()) +
     labs(y = lab)
   
   if(logify){
@@ -106,6 +106,67 @@ cb_plotter(`δ13CVPDB (‰)`, logify = FALSE, lab = "δ13C (‰)")
 cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = "δ15N (‰)")
 ```
 
+I think I want three plots -- all will be supplementary probably
+
+Fig SX: Mass, moles C, moles N
+Fig SX + 1: C/mass, N/mass, C:N
+Fig SX + 2: delta 13c and delta 15n
+
+Fig SX: Mass, moles C, moles N
+
+x.grob <- textGrob(expression(paste("Particle Size (", mu, "m)")), 
+                   gp=gpar(fontsize=14))
+
+combinedPlot <- plot_grid(abunPlot_perL, abunPlot_perMg, nrow = 1, labels = c("B", "C"))
+combinedPlot_xg <- grid.arrange(arrangeGrob(combinedPlot, x.grob, heights = c(10, 1)))
+
+Function to add a common x label
+
+```{r}
+append_xg <- function(plt, txt = expression(paste("Particle Size (", mu, "m)"))){
+  x.grob0 <- textGrob(expression(paste("Particle Size (", mu, "m)")), 
+                   gp=gpar(fontsize=14))
+  plot_xg <- grid.arrange(arrangeGrob(plt, x.grob0, heights = c(10, 1)))
+}
+
+```
+
+
+
+```{r}
+molarityPlot0 <- plot_grid(
+  cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)"),
+  cb_plotter(CarbonPerLiter/Bin_Size, logify = TRUE, lab = "POC (μM/mm)"),
+  cb_plotter(NitrogenPerLiter/Bin_Size, logify = TRUE, lab = "PON (μM/mm)"),
+  nrow = 1,
+  labels = LETTERS
+)
+
+molarityPlot <- append_xg(molarityPlot0)
+ggsave(here::here("Figures", "MCN_Molarity.png"), plot = molarityPlot, height = 4, width = 6)
+```
+
+```{r}
+ratioPlot <- plot_grid(
+  cb_plotter(CarbonPerLiter/MassperLiter, logify = TRUE, lab = "POC/Mass (μmol/mg)"),
+  cb_plotter(NitrogenPerLiter/MassperLiter, logify = TRUE, lab = "PON/Mass (μmol/mg)"),
+  cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = TRUE, lab = "POC/PON"),
+  nrow = 1,
+  labels = LETTERS
+) %>% append_xg()
+ggsave(here::here("Figures", "MCN_Ratios.png"), plot = ratioPlot, height = 4, width = 6)
+```
+
+
+```{r}
+deltaCNPlot <- plot_grid(
+  cb_plotter(`δ13CVPDB (‰)`, logify = FALSE, lab = "δ13C (‰)"),
+  cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = "δ15N (‰)"),
+  nrow = 1,
+  labels = LETTERS
+) %>% append_xg()
+ggsave(here::here("Figures", "CN_IsotopeRatios.png"), plot = deltaCNPlot, height = 4, width = 4)
+```
 
 
 
