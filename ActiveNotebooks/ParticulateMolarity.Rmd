@@ -107,43 +107,5 @@ cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = "δ15N (‰)")
 ```
 
 
- `δ13CVPDB (‰)`, `δ15NAir (‰)`,
-```{r}
-molarityPlus %>%
-  filter(Type == "Sample") %>%
-  filter(!is.na(Station)) %>%
-  select(Station, Depth, Size_Class, CarbonPerLiter, NitrogenPerLiter) %>%
-  pivot_longer(cols = -c(Station, Depth, Size_Class)) %>%
-  ggplot(aes(y = value, x = Size_Class, color = Depth)) +
-  facet_grid(name ~ Station, scales = "free_y") + 
-  scale_y_log10() +
-  geom_point() +
-  scale_x_log10()
-```
-```{r}
-molarityPlus %>%
-  filter(Type == "Sample") %>%
-  filter(!is.na(Station)) %>%
-  select(Station, Depth, Size_Class,  `δ13CVPDB (‰)`, `δ15NAir (‰)`) %>%
-  pivot_longer(cols = -c(Station, Depth, Size_Class)) %>%
-  ggplot(aes(y = value, x = Size_Class, color = Depth)) +
-  facet_grid(name ~ Station, scales = "free_y") + 
-  geom_point() +
-  scale_x_log10()
-```
-```{r}
-molarityPlus %>%
-  filter(Type == "Sample") %>%
-  filter(!is.na(Station)) %>%
-  select(Station, Depth, Size_Class, CarbonPerLiter, NitrogenPerLiter) %>%
-  mutate(CtoN = CarbonPerLiter/NitrogenPerLiter) %>%
-  ggplot(aes(y = CtoN, x = Size_Class, color = Depth)) +
-  facet_wrap(~ Station) + 
-  scale_y_log10() + scale_x_log10() + 
-  geom_hline(yintercept = 106/16) +
-  geom_point() 
-```
-
-
 
 
