@@ -1,0 +1,149 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+2022 November 18
+Jacob Cram
+
+We just got data back from UC dafvis of carbon and nitrogne content of particles.
+This file is for examining that data
+
+```{r}
+library(tidyverse)
+library(here)
+library(readxl)
+```
+
+```{r}
+metadata <- read_csv(here("InputData", "CB-DNAandPOM.csv"))
+molarity <- read_excel(here("InputData", "CramJ 220614 CN Chesapeake2021 A003193 EPR A003144.xlsx"), sheet = "Samples")
+```
+```{r}
+load(here("RDataFiles", "InitialProcessing_3_minimal.RData"))
+rm(nonSpikes, nonSpikes20)
+```
+
+```{r}
+bin_sizes <- data.frame(Size_Class = c(1.2, 5, 20, 53, 180, 500),
+                            Bin_Size = c( 5 - 1.2, 20 - 5, 53-20, 180-53, 500-180, 500))
+
+molarityCB21 <- molarity %>%
+  filter(str_detect(`Sample ID`, "CB19|Blank")) %>%
+  mutate(FilterID = str_extract(`Sample ID`, "(?<=-)\\d{3}") %>% parse_number()) %>%
+  mutate(Type = if_else(str_detect(`Sample ID`, "Blank"), "Blank", "Sample"))
+  
+metadata1 <- metadata %>%
+  select(FilterID = `GFF Filter ID`, Volume_through_mesh, Backrinse, Volume_through_GFF, Station, Depth ,Size_Class)
+```
+
+mutate(MassperLiter=`Mass` / (`Volume_through_mesh` * `Volume_through_GFF` / `Backrinse`))
+```{r}
+molarityPlus0 <- left_join(molarityCB21, metadata1, by = "FilterID") %>%
+  left_join(bin_sizes, by = "Size_Class") %>%
+  left_join(microbialAbundance %>% select(-Bin_Size), by = c("Station", "Size_Class", "Depth"))
+
+molarityPlus <- molarityPlus0 %>%
+  mutate(CarbonPerLiter = `Total C (µg)` * Volume_through_mesh * Volume_through_GFF/Backrinse) %>%
+  mutate(NitrogenPerLiter = `Total N (µg)`* Volume_through_mesh * Volume_through_GFF/Backrinse) %>%
+  mutate(Depth = ordered(Depth, levels = c("Surface", "Oxy", "Bottom")))
+```
+
+Compare blanks to samples
+```{r}
+molarityPlus %>%
+  select(Type, `Total C (µg)`, `Total N (µg)`) %>%
+  pivot_longer(-Type, values_to = "moles", names_to = "element") %>%
+  ggplot(aes(x = `moles`, fill = Type)) + geom_histogram() + facet_wrap(~element, ncol = 1, scales = "free_x")
+```
+I'm not subtracting blanks for now (on account of they are pretty small)
+```{r}
+ches_plot_options2 <- list(
+  #scale_y_log10nice() ,
+  scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) ,
+  geom_point(size = 2) ,
+  geom_path(aes(color = as.factor(Station))) ,
+  scale_shape_manual(values = rep(21:25, 2)) ,
+  scale_fill_viridis_d(option = "plasma") ,
+  scale_color_viridis_d(option = "plasma")
+)
+
+cb_plotter <- function(Variable, logify = TRUE, lab){
+  EVariable <- enquo(Variable)
+  
+  plt0 <- molarityPlus %>%
+    filter(Type == "Sample") %>%
+    filter(!is.na(Station)) %>%
+    arrange(Size_Class) %>%
+    filter(Depth != "Oxy") %>%
+    ggplot(aes(y = !!EVariable, x = Size_Class, shape = as.factor(Station), fill = as.factor(Station))) +
+    geom_point() +
+    facet_wrap(~as.factor(Depth), ncol = 1) +
+    ches_plot_options2 +
+    theme_bw(base_size = 14) +
+    theme(legend.position = "none") +
+    labs(y = lab)
+  
+  if(logify){
+    plt1 <- plt0 + scale_y_log10nice()
+  }else{
+    plt1 <- plt0 + scale_y_continuous()
+  }
+  
+  plt1
+}
+cb_plotter(CarbonPerLiter/Bin_Size, logify = TRUE, lab = "POC (μM/mm)")
+```
+```{r}
+cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)")
+# cb_plotter(ParticlesPerLiter/Bin_Size, logify = TRUE, lab = "Particle Abundance (#/L/mm)") -- This has been linearalized at some point. Not buying it.
+cb_plotter(CarbonPerLiter/Bin_Size, logify = TRUE, lab = "POC (μM/mm)")
+cb_plotter(NitrogenPerLiter/Bin_Size, logify = TRUE, lab = "PON (μM/mm)")
+cb_plotter(CarbonPerLiter/MassperLiter, logify = TRUE, lab = "POC/Mass (μmol/mg)")
+cb_plotter(NitrogenPerLiter/MassperLiter, logify = TRUE, lab = "PON/Mass (μmol/mg)")
+cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = TRUE, lab = "POC/PON") + geom_hline(yintercept = 106/16) 
+cb_plotter(`δ13CVPDB (‰)`, logify = FALSE, lab = "δ13C (‰)")
+cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = "δ15N (‰)")
+```
+
+
+ `δ13CVPDB (‰)`, `δ15NAir (‰)`,
+```{r}
+molarityPlus %>%
+  filter(Type == "Sample") %>%
+  filter(!is.na(Station)) %>%
+  select(Station, Depth, Size_Class, CarbonPerLiter, NitrogenPerLiter) %>%
+  pivot_longer(cols = -c(Station, Depth, Size_Class)) %>%
+  ggplot(aes(y = value, x = Size_Class, color = Depth)) +
+  facet_grid(name ~ Station, scales = "free_y") + 
+  scale_y_log10() +
+  geom_point() +
+  scale_x_log10()
+```
+```{r}
+molarityPlus %>%
+  filter(Type == "Sample") %>%
+  filter(!is.na(Station)) %>%
+  select(Station, Depth, Size_Class,  `δ13CVPDB (‰)`, `δ15NAir (‰)`) %>%
+  pivot_longer(cols = -c(Station, Depth, Size_Class)) %>%
+  ggplot(aes(y = value, x = Size_Class, color = Depth)) +
+  facet_grid(name ~ Station, scales = "free_y") + 
+  geom_point() +
+  scale_x_log10()
+```
+```{r}
+molarityPlus %>%
+  filter(Type == "Sample") %>%
+  filter(!is.na(Station)) %>%
+  select(Station, Depth, Size_Class, CarbonPerLiter, NitrogenPerLiter) %>%
+  mutate(CtoN = CarbonPerLiter/NitrogenPerLiter) %>%
+  ggplot(aes(y = CtoN, x = Size_Class, color = Depth)) +
+  facet_wrap(~ Station) + 
+  scale_y_log10() + scale_x_log10() + 
+  geom_hline(yintercept = 106/16) +
+  geom_point() 
+```
+
+
+
+

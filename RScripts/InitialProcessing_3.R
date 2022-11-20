@@ -283,7 +283,7 @@ sampleData <- microbialAbundance %>%
 
 ches_plot_options <- list(
   scale_y_log10nice() ,
-    scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) ,
+  scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) ,
   geom_point(size = 2) ,
   geom_path(aes(color = as.factor(Station))) ,
   scale_shape_manual(values = rep(21:25, 2)) ,
