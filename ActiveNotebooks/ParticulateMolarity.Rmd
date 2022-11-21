@@ -44,8 +44,8 @@ molarityPlus0 <- left_join(molarityCB21, metadata1, by = "FilterID") %>%
   left_join(microbialAbundance %>% select(-Bin_Size), by = c("Station", "Size_Class", "Depth"))
 
 molarityPlus <- molarityPlus0 %>%
-  mutate(CarbonPerLiter = `Total C (µg)` * Volume_through_mesh * Volume_through_GFF/Backrinse) %>%
-  mutate(NitrogenPerLiter = `Total N (µg)`* Volume_through_mesh * Volume_through_GFF/Backrinse) %>%
+  mutate(CarbonPerLiter = `Total C (µg)` / (Volume_through_mesh * Volume_through_GFF/Backrinse)) %>%
+  mutate(NitrogenPerLiter = `Total N (µg)`/ (Volume_through_mesh * Volume_through_GFF/Backrinse)) %>%
   mutate(Depth = ordered(Depth, levels = c("Surface", "Oxy", "Bottom")))
 ```
 
@@ -168,5 +168,16 @@ deltaCNPlot <- plot_grid(
 ggsave(here::here("Figures", "CN_IsotopeRatios.png"), plot = deltaCNPlot, height = 4, width = 4)
 ```
 
+# Primary figure
+The goal here is to remake Figure 1 so it shows
+Mass, Carbon:Mass
+16S/L/mm 16S/mg partiles
 
 
+Before I do that. Lets get carbon and nitrogen fractions
+```{r}
+cb_plotter(CarbonPerLiter/MassperLiter * (12/1000), logify = TRUE, lab = "POC/Mass (mg/mg)")
+cb_plotter(NitrogenPerLiter/MassperLiter * (14/1000), logify = TRUE, lab = "PON/Mass (mg/mg)")
+```
+
+Well, these numbers are greater than 1, which is a problem, since it implies more carbon and nitrogen mass than particle mass.
