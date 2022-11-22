@@ -1,4 +1,5 @@
 ## Initial processing
+# 2022 Nov 22; station 3.3 "Bottom" is actually an oxycline depth, updating accordingly
 
 library(tidyverse)
 #library(Rtsne)
@@ -30,10 +31,12 @@ sample <-sample0 %>%
     sep = "-"
     )
   )) %>%
+  mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>% # Station 3.3 is actually Oxycline
+  mutate(Depth == if_else(Depth == "Oxy", "Oxycline", Depth)) %>% # Lets use the full word Oxycline
   right_join(tibble(ID = unique(key2$ID)), by = "ID") %>%
   relocate(ID) %>%
   left_join(flags, by = "ID") %>%
-  mutate(Depth = factor(Depth, levels = c("Surface", "Oxy", "Bottom")))
+  mutate(Depth = factor(Depth, levels = c("Surface", "Oxycline", "Bottom")))
 
 taxa01 <- taxa0 %>%
   mutate(nASV = extract_numeric(ASV))
