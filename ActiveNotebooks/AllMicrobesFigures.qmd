@@ -20,12 +20,13 @@ Load in Initial Processing file (and dependencies)
 ```{r}
 #source(here::here("RScripts", "InitialProcessing_3.R"))
 
-load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
+#load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 
 #my_sizes <- sort(unique(microbialAbundance$Size_Class))
 
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 
+ksource(here::here("ActiveNotebooks", "ParticulateMolarity.Rmd"))
 ```
 
 # Example
@@ -106,4 +107,34 @@ TotalAbundanceFigure
 ggsave(here::here("Figures", "TotalAbundanceFigure.png"), height = 4, width = 6)
 ```
 
-# 
+# As above but with molarity
+
+```{r fig.height=6, fig.width = 11}
+combinedPlot2 <- plot_grid(
+  cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)") +
+    theme(legend.position = "none",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0)), # total particle mass
+  cb_plotter(CarbonPerLiter/MassperLiter/1000, logify = TRUE, lab = "POC/Mass") + scale_y_log10() +
+    theme(legend.position = "none",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = .5),
+        axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0)), # mg carbon per mg particle (unitless)
+  
+  abunPlot_perL, abunPlot_perMg, # bacteria
+                          
+                          nrow = 1, labels = LETTERS[2:5]) %>% append_xg()
+combinedPlot2
+```
+
+```{r fig.height=4, fig.width = 10}
+TotalMassAbundanceFigure <- plot_grid(cbMap, combinedPlot2, rel_widths = c(1,4), labels = c("A", ""))
+TotalMassAbundanceFigure
+```
+
+```{r}
+ggsave(here::here("Figures", "MassAndAbundanceFigure.png"), height = 4, width = 10 ,plot = TotalMassAbundanceFigure)
+```

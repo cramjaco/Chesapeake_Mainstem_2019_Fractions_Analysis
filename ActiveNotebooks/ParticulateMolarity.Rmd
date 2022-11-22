@@ -13,6 +13,9 @@ This file is for examining that data
 library(tidyverse)
 library(here)
 library(readxl)
+library(cowplot)
+library(grid)
+library(gridExtra)
 ```
 
 ```{r}
@@ -81,13 +84,13 @@ cb_plotter <- function(Variable, logify = TRUE, lab){
     facet_wrap(~as.factor(Depth), ncol = 1) +
     ches_plot_options2 +
     theme_bw(base_size = 14) +
-    theme(legend.position = "none", axis.title.x = element_blank()) +
+    theme(legend.position = "none", axis.title.x = element_blank(), axis.text.x = element_text(angle = 90)) +
     labs(y = lab)
   
   if(logify){
     plt1 <- plt0 + scale_y_log10nice()
   }else{
-    plt1 <- plt0 + scale_y_continuous()
+    plt1 <- plt0
   }
   
   plt1
@@ -99,9 +102,9 @@ cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)"
 # cb_plotter(ParticlesPerLiter/Bin_Size, logify = TRUE, lab = "Particle Abundance (#/L/mm)") -- This has been linearalized at some point. Not buying it.
 cb_plotter(CarbonPerLiter/Bin_Size, logify = TRUE, lab = "POC (μM/mm)")
 cb_plotter(NitrogenPerLiter/Bin_Size, logify = TRUE, lab = "PON (μM/mm)")
-cb_plotter(CarbonPerLiter/MassperLiter, logify = TRUE, lab = "POC/Mass (μmol/mg)")
-cb_plotter(NitrogenPerLiter/MassperLiter, logify = TRUE, lab = "PON/Mass (μmol/mg)")
-cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = TRUE, lab = "POC/PON") + geom_hline(yintercept = 106/16) 
+cb_plotter(CarbonPerLiter/MassperLiter, logify = FALSE, lab = "POC/Mass (μmol/mg)") + scale_y_log10()
+cb_plotter(NitrogenPerLiter/MassperLiter, logify = FALSE, lab = "PON/Mass (μmol/mg)") + scale_y_log10()
+cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = FALSE, lab = "POC/PON") + geom_hline(yintercept = 106/16)  + scale_y_log10()
 cb_plotter(`δ13CVPDB (‰)`, logify = FALSE, lab = "δ13C (‰)")
 cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = "δ15N (‰)")
 ```
@@ -136,8 +139,8 @@ append_xg <- function(plt, txt = expression(paste("Particle Size (", mu, "m)")))
 ```{r}
 molarityPlot0 <- plot_grid(
   cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)"),
-  cb_plotter(CarbonPerLiter/Bin_Size, logify = TRUE, lab = "POC (μM/mm)"),
-  cb_plotter(NitrogenPerLiter/Bin_Size, logify = TRUE, lab = "PON (μM/mm)"),
+  cb_plotter(CarbonPerLiter/Bin_Size/1000, logify = TRUE, lab = "POC (mg/L/mm)"),
+  cb_plotter(NitrogenPerLiter/Bin_Size/100, logify = TRUE, lab = "PON (mg/L/mm)"),
   nrow = 1,
   labels = LETTERS
 )
@@ -148,15 +151,15 @@ ggsave(here::here("Figures", "MCN_Molarity.png"), plot = molarityPlot, height = 
 
 ```{r}
 ratioPlot <- plot_grid(
-  cb_plotter(CarbonPerLiter/MassperLiter, logify = TRUE, lab = "POC/Mass (μmol/mg)"),
-  cb_plotter(NitrogenPerLiter/MassperLiter, logify = TRUE, lab = "PON/Mass (μmol/mg)"),
-  cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = TRUE, lab = "POC/PON"),
+  cb_plotter(CarbonPerLiter/MassperLiter/1000, logify = TRUE, lab = "POC/Mass") + scale_y_log10(),
+  cb_plotter(NitrogenPerLiter/MassperLiter/1000, logify = TRUE, lab = "PON/Mass") + scale_y_log10(),
+  cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = TRUE, lab = "POC/PON") + scale_y_log10() + geom_hline(yintercept = 106/16),
   nrow = 1,
   labels = LETTERS
 ) %>% append_xg()
 ggsave(here::here("Figures", "MCN_Ratios.png"), plot = ratioPlot, height = 4, width = 6)
 ```
-
+C:N Cite Van Mooy
 
 ```{r}
 deltaCNPlot <- plot_grid(
@@ -167,6 +170,8 @@ deltaCNPlot <- plot_grid(
 ) %>% append_xg()
 ggsave(here::here("Figures", "CN_IsotopeRatios.png"), plot = deltaCNPlot, height = 4, width = 4)
 ```
+Clara says 40 delta 15N is very very high.
+
 
 # Primary figure
 The goal here is to remake Figure 1 so it shows
@@ -176,8 +181,9 @@ Mass, Carbon:Mass
 
 Before I do that. Lets get carbon and nitrogen fractions
 ```{r}
-cb_plotter(CarbonPerLiter/MassperLiter * (12/1000), logify = TRUE, lab = "POC/Mass (mg/mg)")
-cb_plotter(NitrogenPerLiter/MassperLiter * (14/1000), logify = TRUE, lab = "PON/Mass (mg/mg)")
+# plot_grid(abunPlot_perL, abunPlot_perMg,
+# cb_plotter(CarbonPerLiter/MassperLiter/1000, logify = FALSE, lab = "POC/Mass (mg/mg)") + scale_y_log10()
+# )
 ```
 
 Well, these numbers are greater than 1, which is a problem, since it implies more carbon and nitrogen mass than particle mass.
