@@ -32,7 +32,7 @@ sample <-sample0 %>%
     )
   )) %>%
   mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>% # Station 3.3 is actually Oxycline
-  mutate(Depth = if_else(Depth == "Oxy", "Oxycline", Depth)) %>% # Lets use the full word Oxycline
+  mutate(Depth = if_else(Depth == "Oxy", "Oxycline", Depth)) %>% # Lets use the full word Oxycline; Recoding would have worked
   right_join(tibble(ID = unique(key2$ID)), by = "ID") %>%
   relocate(ID) %>%
   left_join(flags, by = "ID") %>%
