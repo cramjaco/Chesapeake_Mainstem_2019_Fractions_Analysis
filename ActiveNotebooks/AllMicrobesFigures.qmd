@@ -117,7 +117,7 @@ combinedPlot2 <- plot_grid(
         axis.title.x = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = .5),
         axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0)), # total particle mass
-  cb_plotter(CarbonPerLiter_mg, logify = TRUE, lab = "POC (mg/L/mm)") + scale_y_log10() +
+  cb_plotter(CarbonPerLiter_mg/MassperLiter, logify = TRUE, lab = "POC/Mass") + scale_y_log10() +
     theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
         axis.title.x = element_blank(),
