@@ -41,12 +41,25 @@ sample <-sample0 %>%
 taxa01 <- taxa0 %>%
   mutate(nASV = extract_numeric(ASV))
 
+# Add greek letters to proteobacteria and assign class as phylum for those
+taxa01 %>% filter(Phylum == "Proteobacteria") %>% .$Class %>% unique() # these are the proteobacteria I want to rename
+taxa02 <- taxa01 %>%
+  mutate(Class = str_replace_all(Class,
+                                 c(
+                                   "^Alpha" = "α-",
+                                   "^Beta" = "β-",
+                                   "^Gamma" = "γ-",
+                                   "^Zetta" = "ζ-"
+                                 )
+                                 )) %>%
+  mutate(Phylum = if_else(Phylum == "Proteobacteria", Class, Phylum))
+
 # give a "Tag" which is the finest level of taxa known
 TaxResTab <- tibble(
   TagLevel = c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus"),
   TaxRes = 1:6
 )
-TagDf <- taxa01 %>%
+TagDf <- taxa02 %>%
   select(-nASV) %>%
   pivot_longer(Kingdom:Genus, names_to = "TagLevel", values_to = "Tag") %>%
   left_join(TaxResTab) %>%
@@ -57,7 +70,7 @@ TagDf <- taxa01 %>%
   #mutate(ASV1 = str_extract(ASV, "\\d+")) %>%
   mutate(Tag_ASV = paste(Tag, str_extract(ASV, "\\d+"), sep = ";"))
 
-taxa <- taxa01 %>%
+taxa <- taxa02 %>%
   left_join(TagDf, by = "ASV")
   
   
