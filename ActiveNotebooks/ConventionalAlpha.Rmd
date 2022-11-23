@@ -26,12 +26,10 @@ library(ftExtra)
 This file is dedicated to conventional, non div-net/breakaway stats, since breakaway seems to choke on this data.
 
 Reshape back into an ASV matrix, but this time correcting for total abundance
-```{r}
-nonSpikes %>% head
-```
+
 
 ```{r}
-raDf <- nonSpikes %>% pivot_wider(id_cols = ID, names_from = ASV, values_from = RA, values_fill = 0)
+raDf <- nonSpikes_Remake %>% pivot_wider(id_cols = ID, names_from = ASV, values_from = RA, values_fill = 0)
 raMat <- raDf %>% column_to_rownames("ID")
 ```
 
@@ -40,7 +38,7 @@ raMat1 <- raMat %>% as.matrix()
 ```
 
 ```{r}
-countMat <-  nonSpikes %>%
+countMat <-  nonSpikes_Remake %>%
   pivot_wider(id_cols = ID, names_from = ASV, values_from = reads, values_fill = 0) %>%
   column_to_rownames("ID") %>% as.matrix()
 ```

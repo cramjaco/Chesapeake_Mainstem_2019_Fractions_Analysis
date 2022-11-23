@@ -19,9 +19,26 @@ load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 # load(here::here("RDataFiles", "microbialAbundance.RData"))
 my_sizes <- sort(unique(microbialAbundance$Size_Class))
 ```
+
+For alpha diversity analysis, I'm going to treat station 3.3 Oxycline as a bottom station.
+This will allow more consistancy with the surface samples.
+
+```{r}
+CB33Oxy_to_CB33Bottom <- function(df){
+  remake <- df %>%
+    mutate(Depth = as.character(Depth)) %>%
+    mutate(Depth = if_else(Station == 3.3 & Depth == "Oxycline", "Bottom", Depth)) %>%
+    mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom")))
+  remake
+}
+
+nonSpikes_Remake <- nonSpikes %>% CB33Oxy_to_CB33Bottom
+```
+
+
 Breakaway uses frequency tables
 ```{r}
-otuTable <- nonSpikes %>% select(ID, ASV, reads) %>% pivot_wider(names_from = ASV, values_from = reads, id_cols = ID)
+otuTable <- nonSpikes_Remake %>% select(ID, ASV, reads) %>% pivot_wider(names_from = ASV, values_from = reads, id_cols = ID)
 
 otuMatrix <- otuTable %>% column_to_rownames(var = "ID") %>% as.matrix %>% t()
 
