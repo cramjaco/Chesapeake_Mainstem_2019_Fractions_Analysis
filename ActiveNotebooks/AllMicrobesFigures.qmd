@@ -20,7 +20,7 @@ Load in Initial Processing file (and dependencies)
 ```{r}
 #source(here::here("RScripts", "InitialProcessing_3.R"))
 
-#load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
+load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 
 #my_sizes <- sort(unique(microbialAbundance$Size_Class))
 
@@ -107,7 +107,7 @@ TotalAbundanceFigure
 ggsave(here::here("Figures", "TotalAbundanceFigure.png"), height = 4, width = 6)
 ```
 
-# As above but with molarity
+# As above but with elements
 
 ```{r fig.height=6, fig.width = 11}
 combinedPlot2 <- plot_grid(
@@ -117,7 +117,7 @@ combinedPlot2 <- plot_grid(
         axis.title.x = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = .5),
         axis.title.y = element_text(margin = unit(c(0, 0, 0, 0), "mm"), vjust = 0)), # total particle mass
-  cb_plotter(CarbonPerLiter/MassperLiter/1000, logify = TRUE, lab = "POC/Mass") + scale_y_log10() +
+  cb_plotter(CarbonPerLiter_mg, logify = TRUE, lab = "POC (mg/L/mm)") + scale_y_log10() +
     theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
         axis.title.x = element_blank(),
@@ -138,3 +138,5 @@ TotalMassAbundanceFigure
 ```{r}
 ggsave(here::here("Figures", "MassAndAbundanceFigure.png"), height = 4, width = 10 ,plot = TotalMassAbundanceFigure)
 ```
+
+## 
