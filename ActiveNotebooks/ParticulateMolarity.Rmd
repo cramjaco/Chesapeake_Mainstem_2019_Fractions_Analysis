@@ -10,18 +10,22 @@ We just got data back from UC dafvis of carbon and nitrogne content of particles
 This file is for examining that data
 
 ```{r}
-source(here::here("RScripts","ElementalAnalysis.R"))
+library(tidyverse)
+library(here)
+library(readxl)
+library(cowplot)
+library(grid)
+library(gridExtra)
+
+#source(here::here("RScripts","ElementalAnalysis.R"))
+load(here::here("RDataFiles", "microbialAbundance.RData"))
+my_sizes <- sort(unique(microbialAbundance$Size_Class))
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
+
 ```
 
 
 
-Compare blanks to samples
-```{r}
-molarityPlus %>%
-  select(Type, `Total C (µg)`, `Total N (µg)`) %>%
-  pivot_longer(-Type, values_to = "moles", names_to = "element") %>%
-  ggplot(aes(x = `moles`, fill = Type)) + geom_histogram() + facet_wrap(~element, ncol = 1, scales = "free_x")
-```
 I'm not subtracting blanks for now (on account of they are pretty small)
 ```{r}
 ches_plot_options2 <- list(
@@ -37,10 +41,11 @@ ches_plot_options2 <- list(
 cb_plotter <- function(Variable, logify = TRUE, lab){
   EVariable <- enquo(Variable)
   
-  plt0 <- molarityPlus %>%
-    filter(Type == "Sample") %>%
+  plt0 <- microbialAbundance %>%
+    #filter(Type == "Sample") %>%
     filter(!is.na(Station)) %>%
     arrange(Size_Class) %>%
+    filter(Size_Class != 0.2) %>%
     #filter(Depth != "Oxy") %>%
     ggplot(aes(y = !!EVariable, x = Size_Class, shape = as.factor(Station), fill = as.factor(Station))) +
     geom_point() +
@@ -58,16 +63,16 @@ cb_plotter <- function(Variable, logify = TRUE, lab){
   
   plt1
 }
-cb_plotter(CarbonPerLiter/Bin_Size, logify = TRUE, lab = "POC (μM/mm)")
+cb_plotter(CarbonPerLiter_mg/Bin_Size, logify = TRUE, lab = "POC (μM/mm)")
 ```
 ```{r}
 cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)")
 # cb_plotter(ParticlesPerLiter/Bin_Size, logify = TRUE, lab = "Particle Abundance (#/L/mm)") -- This has been linearalized at some point. Not buying it.
-cb_plotter(CarbonPerLiter/Bin_Size, logify = TRUE, lab = "POC (μM/mm)")
-cb_plotter(NitrogenPerLiter/Bin_Size, logify = TRUE, lab = "PON (μM/mm)")
-cb_plotter(CarbonPerLiter/MassperLiter, logify = FALSE, lab = "POC/Mass (μmol/mg)") + scale_y_log10()
-cb_plotter(NitrogenPerLiter/MassperLiter, logify = FALSE, lab = "PON/Mass (μmol/mg)") + scale_y_log10()
-cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = FALSE, lab = "POC/PON") + geom_hline(yintercept = 106/16)  + scale_y_log10()
+cb_plotter(CarbonPerLiter_mg/Bin_Size, logify = TRUE, lab = "POC (mg/L/mm)")
+cb_plotter(NitrogenPerLiter_mg/Bin_Size, logify = TRUE, lab = "PON (mg/L/mm)")
+cb_plotter(CarbonPerLiter_mg/MassperLiter, logify = FALSE, lab = "POC/Mass") + scale_y_log10()
+cb_plotter(NitrogenPerLiter_mg/MassperLiter, logify = FALSE, lab = "PON/Mass") + scale_y_log10()
+cb_plotter(CarbonPerLiter_mg/NitrogenPerLiter_mg, logify = FALSE, lab = "POC/PON") + geom_hline(yintercept = 106/16)  + scale_y_log10()
 cb_plotter(`δ13CVPDB (‰)`, logify = FALSE, lab = "δ13C (‰)")
 cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = "δ15N (‰)")
 ```
@@ -102,8 +107,8 @@ append_xg <- function(plt, txt = expression(paste("Particle Size (", mu, "m)")))
 ```{r}
 molarityPlot0 <- plot_grid(
   cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)"),
-  cb_plotter(CarbonPerLiter/Bin_Size/1000, logify = TRUE, lab = "POC (mg/L/mm)"),
-  cb_plotter(NitrogenPerLiter/Bin_Size/100, logify = TRUE, lab = "PON (mg/L/mm)"),
+  cb_plotter(CarbonPerLiter_mg/Bin_Size, logify = TRUE, lab = "POC (mg/L/mm)"),
+  cb_plotter(NitrogenPerLiter_mg/Bin_Size, logify = TRUE, lab = "PON (mg/L/mm)"),
   nrow = 1,
   labels = LETTERS
 )
@@ -114,9 +119,9 @@ ggsave(here::here("Figures", "MCN_Molarity.png"), plot = molarityPlot, height = 
 
 ```{r}
 ratioPlot <- plot_grid(
-  cb_plotter(CarbonPerLiter/MassperLiter/1000, logify = TRUE, lab = "POC/Mass") + scale_y_log10(),
-  cb_plotter(NitrogenPerLiter/MassperLiter/1000, logify = TRUE, lab = "PON/Mass") + scale_y_log10(),
-  cb_plotter(CarbonPerLiter/NitrogenPerLiter, logify = TRUE, lab = "POC/PON") + scale_y_log10() + geom_hline(yintercept = 106/16),
+  cb_plotter(CarbonPerLiter_mg/MassperLiter, logify = TRUE, lab = "POC/Mass") + scale_y_log10(),
+  cb_plotter(NitrogenPerLiter_mg/MassperLiter, logify = TRUE, lab = "PON/Mass") + scale_y_log10(),
+  cb_plotter(CarbonPerLiter_mg/NitrogenPerLiter_mg, logify = TRUE, lab = "POC/PON") + scale_y_log10() + geom_hline(yintercept = 106/16),
   nrow = 1,
   labels = LETTERS
 ) %>% append_xg()
@@ -137,16 +142,4 @@ Clara says 40 delta 15N is very very high.
 
 
 # Primary figure
-The goal here is to remake Figure 1 so it shows
-Mass, Carbon:Mass
-16S/L/mm 16S/mg partiles
-
-
-Before I do that. Lets get carbon and nitrogen fractions
-```{r}
-# plot_grid(abunPlot_perL, abunPlot_perMg,
-# cb_plotter(CarbonPerLiter/MassperLiter/1000, logify = FALSE, lab = "POC/Mass (mg/mg)") + scale_y_log10()
-# )
-```
-
-Well, these numbers are greater than 1, which is a problem, since it implies more carbon and nitrogen mass than particle mass.
+Happens over in ActiveNotebooks/AllMicrobesFigures.qmd
