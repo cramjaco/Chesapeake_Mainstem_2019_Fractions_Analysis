@@ -120,7 +120,7 @@ plotSpecs <- list(
 Observed species counts, on rarefied data
 ```{r}
 plotObs <- diversityData %>%
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = S.obs, shape = as.factor(Station), fill = as.factor(Station))) +
   plotSpecs +ylab("Observed ASVs (Rarefied)")#+ scale_y_log10()
 plotObs
@@ -128,7 +128,7 @@ plotObs
 Estemated Chao1 Richness
 ```{r}
 plotChao1 <- diversityData %>%
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = S.chao1, shape = as.factor(Station), fill = as.factor(Station))) +
   plotSpecs +
   geom_errorbar(aes(ymin = S.chao1 -2 * se.chao1, ymax = S.chao1 + 2* se.chao1), width = -.1) + 
@@ -141,7 +141,7 @@ plotChao1
 Shannon diversity
 ```{r}
 plotShan <- diversityData %>%
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = shannonH, shape = as.factor(Station), fill = as.factor(Station))) +
   plotSpecs +
   ylab("Diversity (Shannon H)") +
@@ -153,7 +153,7 @@ Evenness
 ```{r}
 plotPielou <- diversityData %>%
 
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pielouJ, shape = as.factor(Station), fill = as.factor(Station))) +
   plotSpecs +scale_y_log10() +ylab("Evenness (PielouJ)")
 plotPielou
@@ -243,7 +243,7 @@ plotSpecs2 <- list(
 
 ```{r}
 plotObs_pred <-  diversityData %>%
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pred_obs, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_obs - 2 * se_obs, yend = pred_obs + 2 * se_obs, xend = Size_Class, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"), alpha = 0.5)  +
   plotSpecs2 + ylab("Predicted  ASVs") 
@@ -261,7 +261,7 @@ diversityData$se_chao1 = predict(chao1Mod, se.fit = TRUE)$se.fit
 ```{r}
 plotChao1_pred <-  diversityData %>%
 
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pred_chao1, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_chao1 - 2 * se_chao1, yend = pred_chao1 + 2 * se_chao1, xend = Size_Class, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"), alpha = 0.5)  +
   plotSpecs2 + ylab("Predictd Richness (Chao1)") + scale_y_log10()
@@ -278,7 +278,7 @@ diversityData$se_shanH = predict(shanMod, se.fit = TRUE)$se.fit
 ```{r}
 plotShannonH_pred <- diversityData %>%
 
- filter(Depth %in% c("Surface", "Bottom")) %>%
+ #filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pred_shanH, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_shanH - 2 * se_shanH, yend = pred_shanH + 2 * se_shanH, xend = Size_Class, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"),  alpha = 0.5)  +
   plotSpecs2 + ylab("Predicted Diversity (Shannon H)") #+ scale_y_log10()
@@ -298,7 +298,7 @@ diversityData$se_pielouJ = predict(pielouMod, se.fit = TRUE)$se.fit
 ```{r}
 plot_pielouJ_pred <- diversityData %>%
 
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pred_pielouJ, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_pielouJ - 2 * se_pielouJ, yend = pred_pielouJ + 2 * se_pielouJ, xend = Size_Class, color = as.factor(Station), alpha = 0.5), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"))  +
   plotSpecs2 + ylab("Predicted Evenness (Pielou J)") + scale_y_log10()
@@ -392,7 +392,7 @@ My first hunch is that chao1 responds to evenness, but actually that shouldn't h
 ```{r}
 plotBreak <- diversityDataWB %>%
 
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = break_estimate, shape = as.factor(Station), fill = as.factor(Station))) +
   plotSpecs +
   #scale_y_log10()+
@@ -404,7 +404,7 @@ plotBreak
 ```{r}
 plotPielou2 <- diversityDataWB %>%
 
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pielouJ2, shape = as.factor(Station), fill = as.factor(Station))) +
   plotSpecs +
   #scale_y_log10()+
@@ -424,7 +424,7 @@ diversityDataWB$se_pielouJ2 = predict(pielouMod2, se.fit = TRUE)$se.fit
 ```{r}
 plot_pielouJ2_pred <- diversityDataWB %>%
 
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = pred_pielouJ2, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_pielouJ2 - 2 * se_pielouJ2, yend = pred_pielouJ2 + 2 * se_pielouJ2, xend = Size_Class, color = as.factor(Station), alpha = 0.5), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"))  +
   plotSpecs2 + ylab("Predicted Evenness (Pielou J2)") #+ scale_y_log10()
@@ -435,7 +435,7 @@ plot_pielouJ2_pred
 
 ```{r}
 plotBreakaway <- diversityDataWB %>%
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
   ggplot(aes(x = Size_Class, y = break_estimate, shape = as.factor(Station), fill = as.factor(Station))) +
   plotSpecs +
   geom_errorbar(aes(ymin = break_lower, ymax = break_upper), width = -.1) + 
@@ -466,7 +466,7 @@ diversityDataWB$se_break = predict(breakLm2, se.fit = TRUE)$se.fit
 ```{r}
 plot_break_pred <- diversityDataWB %>%
 
-filter(Depth %in% c("Surface", "Bottom")) %>%
+#filter(Depth %in% c("Surface", "Bottom")) %>%
 #  filter(Station == 4.3) %>%
   ggplot(aes(x = Size_Class, y = pred_break, shape = as.factor(Station), fill = as.factor(Station))) +
   geom_segment(aes(y = pred_break - 2 * se_break, yend = pred_break + 2 * se_break, xend = Size_Class, color = as.factor(Station), alpha = 0.5), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both"))  +
@@ -485,7 +485,7 @@ plot_break_pred
 ```{r fig.width = 11, fig.height = 4}
 plotAlphaWB <- plot_grid(plotBreakaway, plotShan, plotPielou2, nrow = 1, labels = LETTERS)
 plotAlphaWB
-ggsave(here::here("Figures", "BreakawayAlpha.png"), plotAlpha, width = 11, height = 4)
+ggsave(here::here("Figures", "BreakawayAlpha.png"), plotAlphaWB, width = 8, height = 4)
 ```
 
 Summary table
@@ -565,6 +565,11 @@ myBet$table
 
 
 ```{r fig.width = 11, fig.height = 4}
-plot_grid(plot_break_pred,plotShannonH_pred,plot_pielouJ2_pred, nrow = 1, labels = LETTERS)
+plotAlphaWB_pred <- plot_grid(plot_break_pred,plotShannonH_pred,plot_pielouJ2_pred, nrow = 1, labels = LETTERS)
+plotAlphaWB_pred
+```
+
+```{r}
+ggsave(here::here("Figures", "BreakawayAlphaPredictions.png"), plot = plotAlphaWB_pred, width = 8, height = 4)
 ```
 
