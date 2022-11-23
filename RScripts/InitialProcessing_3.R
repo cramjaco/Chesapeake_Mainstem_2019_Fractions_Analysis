@@ -37,7 +37,7 @@ sample01 <-sample0 %>%
   right_join(tibble(ID = unique(key2$ID)), by = "ID") %>%
   relocate(ID) %>%
   left_join(flags, by = "ID") %>%
-  mutate(Depth = factor(Depth, levels = c("Surface", "Oxycline", "Bottom")))
+  mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom")))
 
 taxa01 <- taxa0 %>%
   mutate(nASV = extract_numeric(ASV))
@@ -95,10 +95,14 @@ metadata1 <- metadata %>%
 elementalJoined <- left_join(molarityCB21, metadata1 %>% filter(!is.na(FilterID)), by = "FilterID")
 elementalFull <- elementalJoined %>%
   mutate(CarbonPerLiter_mg = `Total C (µg)` / (Volume_through_mesh * Volume_through_GFF/Backrinse) / 1000) %>%
-  mutate(NitrogenPerLiter_mg = `Total N (µg)`/ (Volume_through_mesh * Volume_through_GFF/Backrinse) / 1000)
+  mutate(NitrogenPerLiter_mg = `Total N (µg)`/ (Volume_through_mesh * Volume_through_GFF/Backrinse) / 1000) %>%
+  mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom"))) %>% # make a factor again since join undid that
+  identity()
   
 elemental <- elementalFull %>%
-  select(Station, Depth, Size_Class, `δ13CVPDB (‰)`, `δ15NAir (‰)`, CarbonPerLiter_mg, NitrogenPerLiter_mg)
+  select(Station, Depth, Size_Class, `δ13CVPDB (‰)`, `δ15NAir (‰)`, CarbonPerLiter_mg, NitrogenPerLiter_mg) %>%
+  identity()
+  
 
 sample <- sample01 %>%
   left_join(elemental, by = c("Station", "Depth", "Size_Class")) %>%
@@ -189,13 +193,16 @@ nonSpikes <- counts_long %>%
   filter(SpikeReads > 0) %>%
   # add in elemental data
   #left_join(elemental, by = c("Station", "Depth", "Size_Class")) %>%
+  
   identity()
 
 microbialAbundance <- nonSpikes %>%
   group_by(ID) %>%
   summarise(copiesPerL = sum(na.omit(copiesPerL)), ) %>%
  left_join(sample, by = "ID") %>%
- arrange(Station, Depth, Size_Class)
+ arrange(Station, Depth, Size_Class) %>%
+  identity()
+
 
 write_csv(microbialAbundance, here("IntermediateData","AmpliconAbundance.csv"))
 
