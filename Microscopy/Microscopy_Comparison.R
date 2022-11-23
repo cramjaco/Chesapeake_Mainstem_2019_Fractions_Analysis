@@ -60,6 +60,8 @@ CalculationsWithMetadata <- StuffWithMetadata %>%
   mutate(NSize = if_else(Sizes == "<5", 0.2, parse_number(Sizes))) %>%
   mutate(Sizes2 = gsub(",", "", Sizes)) %>%
   ungroup()%>%
+  # 3.3 Bottom is actually 3.3 Oxycline
+  mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>%
   mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
   mutate(Depth2 = recode(Depth2, Oxy = "Oxycline"))
 
@@ -67,9 +69,12 @@ CalculationsWithMetadata <- StuffWithMetadata %>%
 
 SizevsBinSize <- read_csv(here(MicroscopyDir, "SizeVSBinSize.csv"))
 CalculationsWithMetadata01 <- left_join(CalculationsWithMetadata, SizevsBinSize, by =c("NSize"="Size")) %>%
-  mutate(CellsPerLiterofBackrinsePermm = CellsPerLiterofBackrinse / BinSize)%>%
+  mutate(CellsPerLiterofBackrinsePermm = CellsPerLiterofBackrinse / BinSize) %>%
+  # I'm not sure why the following block has to happen again, but apparently it does.
+  mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>%
   mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
   mutate(Depth2 = recode(Depth2, Oxy = "Oxycline"))
+  identity()
 
 # Plot of Cells / Liter of Backrinse / mm VS Size (mm)
 ggplot(CalculationsWithMetadata01, aes(x=NSize, y=CellsPerLiterofBackrinsePermm, color=as.factor(Station))) + 
