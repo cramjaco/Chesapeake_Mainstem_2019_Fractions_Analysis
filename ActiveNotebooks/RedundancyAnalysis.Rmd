@@ -310,6 +310,7 @@ anovaNofree
 ```
 ```{r}
 plotNoFreeRda <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoFree)
+
 plotNoFreeRda
 ```
 
@@ -340,7 +341,14 @@ plotNoSmallRda
 Cowplot the last two together so they can be one supplemental figure
 
 ```{r fig.width = 7, fig.height = 8}
-bigSubsetsRda <- plot_grid(plotNoFreeRda, plotNoSmallRda, labels = LETTERS, nrow = 2)
+legend_rda <- get_legend(
+  plotNoFreeRda0 + theme(legend.box.margin = margin(0, 0, 0, 0))
+                         )
+
+bigSubsetsRda0 <- plot_grid(plotNoFreeRda + theme(legend.position = "none"),
+                           plotNoSmallRda + theme(legend.position = "none"),
+                           labels = LETTERS, nrow = 2)
+bigSubsetsRda <- plot_grid(bigSubsetsRda0, legend_rda, rel_widths = c(10, 1))
 bigSubsetsRda
 ```
 ```{r}
