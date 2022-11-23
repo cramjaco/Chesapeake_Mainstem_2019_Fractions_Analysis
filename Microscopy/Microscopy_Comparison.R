@@ -22,7 +22,9 @@ StuffGetter <- function(Station, SizeRange, BoxesRange, DataRange){
   Boxes <- read_excel(Data_File, sheet = as.character(Station), range = as.character(BoxesRange), col_names = FALSE) %>%
     as.matrix() %>% as.vector()
   Data <- read_excel(Data_File, sheet = as.character(Station), range = as.character(DataRange),col_names = FALSE) %>%
-    as.matrix()
+    as.matrix() 
+  # In cases where there are any characters, we want to replace those with NA, rather than treat everything as a character vector (important for CB3.3Bottom)
+  Data <- matrix(as.numeric(Data), ncol = ncol(Data))
   Mean <- apply(Data, 2, mean) %>% as.vector()
   SD <- apply(Data, 2, sd) %>% as.vector()
   #list(Sizes, Boxes, Data, Mean, SD)
@@ -30,11 +32,16 @@ StuffGetter <- function(Station, SizeRange, BoxesRange, DataRange){
 }
   
 # Tells StuffGetter where to find other data
-  GetRowStuff <- function(rowN){
+GetRowStuff <- function(rowN){
   StuffGetter(DataLocations[rowN,"Station"],
-            SizeRange = DataLocations[rowN,"SizeRange"],
-            BoxesRange = DataLocations[rowN, "BoxesRange"],
-            DataRange = DataLocations[rowN, "DataRange"])}
+              SizeRange = DataLocations[rowN,"SizeRange"],
+              BoxesRange = DataLocations[rowN, "BoxesRange"],
+              DataRange = DataLocations[rowN, "DataRange"])}
+
+# Test and debug
+# Its throwing away all of 3.3 Bottom, which is missing just one slize class.
+GetRowStuff(1) # works
+GetRowStuff(5) # fails to calculate means
 
 # Makes one big table with the data we need
 StuffWithMetadata <- DataLocations %>% mutate(RowNum = 1:9) %>%
@@ -73,7 +80,7 @@ CalculationsWithMetadata01 <- left_join(CalculationsWithMetadata, SizevsBinSize,
   # I'm not sure why the following block has to happen again, but apparently it does.
   mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>%
   mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
-  mutate(Depth2 = recode(Depth2, Oxy = "Oxycline"))
+  mutate(Depth2 = recode(Depth2, Oxy = "Oxycline")) %>%
   identity()
 
 # Plot of Cells / Liter of Backrinse / mm VS Size (mm)
@@ -114,7 +121,7 @@ ggsave(here(MicroscopyDir, "MicrobesPerParticlevsSize.pdf"))
 # and added station 5.1 Bottom
 # But Intital processing regenerates this file so I'll use that.
 
-AmpliconAbundance <- read.csv(here("AmpliconAbundance.csv")) %>%
+AmpliconAbundance <- read.csv(here("IntermediateData","AmpliconAbundance.csv")) %>%
   mutate(DNAPerParticle = DNAperLiter / ParticlesPerLiter)%>%
   filter(Station !="3.1")%>%
   filter(Station !="3.2")
@@ -175,3 +182,5 @@ BackRinseCalc2forModel <- BackRinseCalc2 %>% filter(is.finite(Cells_Per_Liter_To
 mod <- lm(log10(Cells_Per_Liter_Total/Bin_Size) ~ log10(copiesPerL/Bin_Size), data = BackRinseCalc2)
 mod
 summary(mod)
+# There is a "relationship" bewteen microscopy counts and amplicon abundance, which is  a weak stament
+# but the best I can think of for now.
