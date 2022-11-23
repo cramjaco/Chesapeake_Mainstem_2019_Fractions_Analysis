@@ -46,7 +46,7 @@ target %>% head
 
 ```{r}
 target %>%
-  filter(Depth != "Oxy") %>%
+  #filter(Depth != "Oxy") %>%
   arrange(Size_Class) %>%
   ggplot(aes(x = Size_Class, y = RA, fill = as.factor(Station), shape = as.factor(Station))) + facet_wrap(~Depth, nrow = 2) +
   geom_point() +
@@ -99,7 +99,7 @@ scientific_10 <- function(x) {
 
 ```{r fig.height=2, fig.width = 3.5}
 plt1 <- target %>%
-  filter(Depth == "Bottom", Station == 3.3) %>%
+  filter(Depth == "Oxycline", Station == 3.3) %>%
   #filter(Depth == "Bottom", Station == 3.3) %>%
   mutate(RA = RA * 100) %>%
   mutate(copiesPerMg = copiesPerL/MassperLiter) %>%
@@ -109,7 +109,7 @@ plt1 <- target %>%
   mutate(metric = factor(metric, levels = c("RA", "copiesPerMg", "copiesPerL", "copiesPerParticle"))) %>%
   mutate(metric = fct_recode(metric, "Rel. Abun. (%)" = "RA", "Copies/mg" = "copiesPerMg", "Copies/L" = "copiesPerL", "Copies/Particle"= "copiesPerParticle")) %>%
   ggplot(aes(x = Size_Class, y = abund)) + 
-  facet_wrap(~metric, scales = "free_y", switch = "y") +
+  facet_wrap(~metric, scales = "free_y", strip.position = "right") +
   geom_point(color = "Black") + geom_path() +
   #scale_y_log10nice() +
   scale_y_log10(minor_breaks = log_breaks_fn) +
