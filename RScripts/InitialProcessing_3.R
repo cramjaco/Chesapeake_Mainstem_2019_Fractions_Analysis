@@ -3,6 +3,7 @@
 
 library(tidyverse)
 #library(Rtsne)
+library(readxl)
 
 library(here)
 
@@ -19,7 +20,7 @@ flags <- read_csv(here("Keys", "ManualFlags2.csv")) %>%
 
 
 ## Make sample data nice
-sample <-sample0 %>%
+sample01 <-sample0 %>%
   mutate(ID = if_else((Station == 5.1 & Depth == "Bottom"),
          paste0("C_5P1B_",
                 str_replace(Size_Class, "\\.", "P")
@@ -74,7 +75,37 @@ TagDf <- taxa02 %>%
 taxa <- taxa02 %>%
   left_join(TagDf, by = "ASV")
   
+## Elemental Data
+metadata <- read_csv(here("InputData", "CB-DNAandPOM.csv"))
+molarity <- read_excel(here("InputData", "CramJ 220614 CN Chesapeake2021 A003193 EPR A003144.xlsx"), sheet = "Samples")
+
+molarityCB21 <- molarity %>%
+  filter(str_detect(`Sample ID`, "CB19|Blank")) %>%
+  mutate(FilterID = str_extract(`Sample ID`, "(?<=-)\\d{3}") %>% parse_number()) %>%
+  mutate(Type = if_else(str_detect(`Sample ID`, "Blank"), "Blank", "Sample"))
   
+metadata1 <- metadata %>%
+  select(FilterID = `GFF Filter ID`, Volume_through_mesh, Backrinse, Volume_through_GFF, Station, Depth ,Size_Class) %>%
+  # Deal with oxycline malarky
+  mutate(Depth = recode(Depth, Oxy = "Oxycline")) %>%
+  mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxycline", Depth)) %>%
+  #mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom"))) %>%
+  identity()
+
+elementalJoined <- left_join(molarityCB21, metadata1 %>% filter(!is.na(FilterID)), by = "FilterID")
+elementalFull <- elementalJoined %>%
+  mutate(CarbonPerLiter_mg = `Total C (µg)` / (Volume_through_mesh * Volume_through_GFF/Backrinse) / 1000) %>%
+  mutate(NitrogenPerLiter_mg = `Total N (µg)`/ (Volume_through_mesh * Volume_through_GFF/Backrinse) / 1000)
+  
+elemental <- elementalFull %>%
+  select(Station, Depth, Size_Class, `δ13CVPDB (‰)`, `δ15NAir (‰)`, CarbonPerLiter_mg, NitrogenPerLiter_mg)
+
+sample <- sample01 %>%
+  left_join(elemental, by = c("Station", "Depth", "Size_Class")) %>%
+  identity()
+
+## Shaping Data
+
 ## Make flags file, for when I hadn't done that, so I can manually edit
 # overwrite flags file
 # forFlags <- sample %>%
@@ -155,7 +186,10 @@ nonSpikes <- counts_long %>%
   # this next two lines removes the mocks, becauese the conversion multiplier is NA
   mutate(copiesPerL = reads * conversionMultiplier) %>%
   filter(!is.na(copiesPerL)) %>%
-  filter(SpikeReads > 0)
+  filter(SpikeReads > 0) %>%
+  # add in elemental data
+  #left_join(elemental, by = c("Station", "Depth", "Size_Class")) %>%
+  identity()
 
 microbialAbundance <- nonSpikes %>%
   group_by(ID) %>%

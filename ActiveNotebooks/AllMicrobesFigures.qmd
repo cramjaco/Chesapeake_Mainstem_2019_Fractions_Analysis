@@ -72,7 +72,7 @@ abunPlot_perMg
 abunPlot_perL <- microbialAbundance %>% 
   #filter(is.finite(MassperLiter)) %>%
   #filter(Depth %in% c("Surface", "Bottom")) %>%
-  mutate(copiesPerMg = copiesPerL/Bin_Size) %>%
+  mutate(copiesPerMg = copiesPerL/Bin_Size) %>% # Bad leftover variable name
   ggplot(aes(x = Size_Class, y = copiesPerMg, shape = as.factor(Station), fill = as.factor(Station))) +
   facet_wrap(~Depth, ncol = 1) +
   ches_plot_options  +
