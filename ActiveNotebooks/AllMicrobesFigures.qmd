@@ -140,3 +140,15 @@ ggsave(here::here("Figures", "MassAndAbundanceFigure.png"), height = 4, width = 
 ```
 
 ## 
+
+## Query
+
+I wonder if we have more carbon isotome or more mass samples. I should check this in the interest of using as much data as possible for the microbes/mg particles and brigandine fugures.
+
+```{r}
+microbialAbundance %>%
+  summarize(nCarbon = sum(is.finite(CarbonPerLiter_mg)),
+            nMass = sum(is.finite(MassperLiter)))
+```
+
+There are more mass samples so I'll use those.
