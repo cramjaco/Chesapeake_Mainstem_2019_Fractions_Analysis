@@ -79,7 +79,7 @@ CalculationsWithMetadata01 <- left_join(CalculationsWithMetadata, SizevsBinSize,
   mutate(CellsPerLiterofBackrinsePermm = CellsPerLiterofBackrinse / BinSize) %>%
   # I'm not sure why the following block has to happen again, but apparently it does.
   mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>%
-  mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
+  mutate(Depth2 = ordered(Depth, levels = c("Surface","Oxy","Bottom")))%>%
   mutate(Depth2 = recode(Depth2, Oxy = "Oxycline")) %>%
   identity()
 
@@ -98,14 +98,22 @@ ggsave(here(MicroscopyDir, "SizevsCellsPerLiterPermm.pdf"))
 
 # Grace was using this file, so I'll keep using this one, rather than pulling from outside
 # of the subdirectory
-MassSupplement <- read_csv(here(MicroscopyDir, "mass_supplement.csv"))
-BigDataTable <- left_join(CalculationsWithMetadata, MassSupplement, 
-              by=c("Station","Depth2"="Depth", "NSize"="Size_Class"))%>%
+MassSupplement <- read_csv(here(MicroscopyDir, "mass_supplement.csv")) %>%
+  mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>%
+  
+  mutate(Depth2 = recode(Depth, Oxy = "Oxycline")) %>%
+  mutate(Depth2 = ordered(Depth2, levels = c("Surface","Oxycline","Bottom")))%>%
+  identity()
+
+BigDataTable <- left_join(CalculationsWithMetadata01, 
+                          MassSupplement,
+              by=c("Station","Depth2", "NSize"="Size_Class"))%>%
   filter(Sizes2 != "<5") %>%
   mutate(CellsPermgofParticles = CellsPerLiterofBackrinse / MassperLiter)%>%
   mutate(MicrobesPerParticle = CellsPerLiterofBackrinse / ParticlesPerLiter)%>%
-  mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
-  mutate(Depth2 = recode (Depth2, Oxy = "Oxycline"))
+  # mutate(Depth2 = factor(Depth, levels = c("Surface","Oxy","Bottom")))%>%
+  # mutate(Depth2 = recode (Depth2, Oxy = "Oxycline")) %>% 
+  identity()
 
 # Plot of Microbes / Particle VS Size (mm)
 ggplot(BigDataTable, aes(x=NSize, y=MicrobesPerParticle, color=as.factor(Station))) + labs(color= "Station", y= "Microbes Per Particle", x="Size (mm)")+
@@ -124,17 +132,25 @@ ggsave(here(MicroscopyDir, "MicrobesPerParticlevsSize.pdf"))
 AmpliconAbundance <- read.csv(here("IntermediateData","AmpliconAbundance.csv")) %>%
   mutate(DNAPerParticle = DNAperLiter / ParticlesPerLiter)%>%
   filter(Station !="3.1")%>%
-  filter(Station !="3.2")
+  filter(Station !="3.2") %>%
+  mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom")))
 
 # Input more data "DNA and POM", then join with old CalculationsWithMetadata
 
-DNA_and_POM <- read_csv(here(MicroscopyDir, "DNA_and_POM (1).csv"))
+DNA_and_POM <- read_csv(here(MicroscopyDir, "DNA_and_POM (1).csv")) %>%
+  mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth))
 BackRinseCalc <- left_join(DNA_and_POM, CalculationsWithMetadata, by=c("Station","Depth","Size_Class"="NSize"))%>%
 mutate(Cells_Collected_Total = CellsPerLiterofBackrinse * Backrinse)%>%
 mutate(Cells_Per_Liter_Total = Cells_Collected_Total / Volume_through_mesh)%>%
   filter(Station != "3.1")%>%
   filter(Station != "3.2")%>%
-  filter(Sizes != "<5")
+  filter(Sizes != "<5") %>%
+  mutate(Depth = if_else(Station == 3.3 & Depth == "Bottom", "Oxy", Depth)) %>%
+  
+  mutate(Depth = recode(Depth, Oxy = "Oxycline")) %>%
+  mutate(Depth = ordered(Depth, levels = c("Surface","Oxycline","Bottom")))%>%
+  identity()
+  
 
 filterSizes <- c(5, 20, 53, 180, 500)
 
@@ -143,7 +159,8 @@ BackRinseCalc2 <- left_join(BackRinseCalc,
                             AmpliconAbundance, by=c("Station","Depth","Size_Class")) %>%
   mutate(fStation = factor(Station, levels = as.character(c(3.1, 3.2, 3.3, 5.1, 4.3, 5.5))))
 
-ggplot(BackRinseCalc2, aes(x=copiesPerL/Bin_Size,
+ggplot(BackRinseCalc2,
+       aes(x=copiesPerL/Bin_Size,
                            y=Cells_Per_Liter_Total/Bin_Size, 
                            fill=as.factor(Station), 
                            shape=as.factor(Station),
@@ -166,7 +183,7 @@ ggplot(BackRinseCalc2, aes(x=copiesPerL/Bin_Size,
   scale_size(breaks = (filterSizes)^(1/2),
              labels = filterSizes,
              limits = ((c(5, 500)^(1/2)))) +
-  scale_color_manual(values = c(Surface = "green", Oxy = "blue", Bottom = "black")) +
+  scale_color_manual(values = c(Surface = "green", Oxycline = "blue", Bottom = "black")) +
   theme_bw() +
   guides(
     fill = guide_legend(ncol = 2, override.aes = list()),
