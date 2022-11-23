@@ -13,6 +13,8 @@ Steps:
    * Identify whether each goes to zero on some size fraction.
    * If so, what is the mean abundance threshold where this doesn't happen.
    
+To do: Fix the legends so they have the same breaks and labels as everything else.
+   
 ```{r}
 library(tidyverse)
 library(cowplot)
@@ -23,6 +25,8 @@ env1 <- attach(here("RDataFiles", "InitialProcessing_3.RData"))
 #load(here("RDataFiles", "nonSpikes.RData"))
 set.seed(10033)
 nonSpikes <- env1$nonSpikes
+nonSpikes <- nonSpikes %>% mutate(fStation = factor(Station, levels = as.character(c(3.1, 3.2, 3.3, 5.1, 4.3, 5.5))))
+my_stations <- nonSpikes$Station %>% unique()
 ## somewhat to my suprise, variables such as taxa01 appear to be globally available even though they should be only in env1
 # I'm going to leave things like this since code runs and I'm running out of steam on this code wrangling
 ```
@@ -66,22 +70,24 @@ onePercentFreeTaxa <- taxa01 %>% filter(ASV %in% onePercenters)
 
 ```{r}
 nonSpikes1pct <- nonSpikes %>% filter(ASV %in% onePercenters)
-nonSpikes1pct_Surface <- nonSpikes %>% filter(ASV %in% onePercenters_Surface)
+nonSpikes1pct_Surface <- nonSpikes %>% filter(ASV %in% onePercenters_Surface) # Includes all depths, necessary to preserve Station IDs
 nonSpikes1pct_Bottom <- nonSpikes %>% filter(ASV %in% onePercenters_Bottom)
+nonSpikes1pct_Surface_Samples <- nonSpikes1pct_Surface %>% filter(Depth == "Surface") %>% arrange(Size_Class)
 ```
 
 ```{r}
-surfaceNSPlot <- nonSpikes1pct_Surface %>% filter(Depth == "Surface") %>% 
+surfaceNSPlot <- nonSpikes1pct_Surface %>%
   #filter(ASV == "ASV_2") %>%
   #filter(Tag == "Clade_III") %>%
   filter(Station %in% c(3.1, 3.2, 4.3)) %>%
+  filter(Depth == "Surface") %>%
   arrange(Size_Class) %>%
-  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
+  ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = fStation, shape = fStation)) +
   scale_y_log10nice(omag = seq(-10, 20, by = 2)) + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
   facet_wrap(~Tag_ASV, ncol = 4) +
   geom_point(size = 3) +
-  geom_path(aes(color = as.factor(Station))) +
-  scale_shape_manual(values = rep(21:25, 2)) +
+  geom_path(aes(color = as.factor(fStation))) +
+  scale_shape_manual(values = rep(21:25, 2)) + # why isn't this doing what I want
   scale_fill_viridis_d(option = "plasma") +
   scale_color_viridis_d(option = "plasma") +
   theme_bw(base_size = 14) +
