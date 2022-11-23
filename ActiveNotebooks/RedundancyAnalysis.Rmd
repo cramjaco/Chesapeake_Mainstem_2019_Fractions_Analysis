@@ -216,8 +216,15 @@ My_Constrained_RDA_Plot_Type1_wFort <- function(ccaConstrained){
 }
   
 
-My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained)
+mainRDA <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained)
+mainRDA
 ```
+
+```{r}
+ggsave(here::here("Figures", "mainRDA.png"),mainRDA, height = 4, width = 6)
+```
+
+
 Axis 1 vs 3
 Not the most dry code I've ever done, but I'm not sure how to actually do this, so I'm manually changing the axes
 ```{r}
@@ -270,7 +277,12 @@ My_Constrained_RDA_Plot_Type1_wFort_13 <- function(ccaConstrained){
 }
   
 
-My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained)
+mainRDA13 <- My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained)
+mainRDA13
+```
+
+```{r}
+ggsave(here::here("Figures", "mainRDA_axis1and3.png"),mainRDA13, height = 4, width = 6)
 ```
 
 
@@ -302,6 +314,8 @@ plotNoFreeRda
 ```
 
 
+
+
 # As above but without 0.2 or 1.2 micron data
 
 ```{r}
@@ -326,8 +340,13 @@ plotNoSmallRda
 Cowplot the last two together so they can be one supplemental figure
 
 ```{r fig.width = 7, fig.height = 8}
-plot_grid(plotNoFreeRda, plotNoSmallRda, labels = LETTERS, nrow = 2)
+bigSubsetsRda <- plot_grid(plotNoFreeRda, plotNoSmallRda, labels = LETTERS, nrow = 2)
+bigSubsetsRda
 ```
+```{r}
+ggsave(here::here("Figures", "bigSubsetsRda.png"), bigSubsetsRda, height = 8, width = 7)
+```
+
 # Tables
 
 ```{r}
