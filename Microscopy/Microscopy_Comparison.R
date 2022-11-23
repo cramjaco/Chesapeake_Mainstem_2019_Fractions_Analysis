@@ -189,10 +189,10 @@ ggplot(BackRinseCalc2,
     fill = guide_legend(ncol = 2, override.aes = list()),
     shape = guide_legend(override.aes = list(size = 3)),
     size = guide_legend(override.aes = list(shape = 21, color = "black", fill = "gray")),
-    color = guide_legend(override.aes = list(shape = 21, fill = "gray"))
+    color = guide_legend(override.aes = list(shape = 21, fill = "gray", size = 3))
   )
 
-ggsave(here(MicroscopyDir,"MicroscopyVsAmplicons.png"), height = 4, width = 6)
+ggsave(here("Figures","MicroscopyVsAmplicons.png"), height = 4, width = 6)
 
 # Make a model and check your work to see statistical significance of results
 BackRinseCalc2forModel <- BackRinseCalc2 %>% filter(is.finite(Cells_Per_Liter_Total), is.finite(copiesPerL))
