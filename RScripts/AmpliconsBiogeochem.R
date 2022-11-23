@@ -412,11 +412,11 @@ nsBiogeo <- nonSpikes %>%
   ),
   Class = case_when(
     (Biogeo == "Nitrogen Cycling" & Class == "Nitrososphaeria") ~ paste0(Class, "\n(Archaea)\n(Ammonium Oxidizing)"),
-    (Biogeo == "Nitrogen Cycling" & Class == "Gammaproteobacteria") ~ paste0(Class, "\n(Ammonium Oxidizing)"),
+    (Biogeo == "Nitrogen Cycling" & Class == "γ-proteobacteria") ~ paste0(Class, "\n(Ammonium Oxidizing)"),
     (Biogeo == "Nitrogen Cycling" & Class == "Nitrospira") ~ paste0(Class, "\n(Nitrite Oxidizing)"),
-    (Biogeo == "Sulfur Cycling" & Class == "Deltaproteobacteria") ~ paste0(Class, "\n(Sulfate Reducing)"),
+    (Biogeo == "Sulfur Cycling" & Class == "δ-proteobacteria") ~ paste0(Class, "\n(Sulfate Reducing)"),
     (Biogeo == "Methane Cycling" & Class == "Thermococci") ~ paste0(Class, "\n(Methanogenisis)"),
-    (Biogeo == "Methane Cycling" & Class == "Gammaproteobacteria") ~ paste0(Class, "\n(Methanotrophy)"),
+    (Biogeo == "Methane Cycling" & Class == "γ-proteobacteria") ~ paste0(Class, "\n(Methanotrophy)"),
     TRUE ~ Class
   )
            ) %>%
@@ -424,11 +424,11 @@ nsBiogeo <- nonSpikes %>%
                            levels = c(
                              "Nitrososphaeria\n(Archaea)\n(Ammonium Oxidizing)",
                              "Thermococci\n(Methanogenisis)",
-                             "Alphaproteobacteria",
-                             "Gammaproteobacteria\n(Ammonium Oxidizing)",
-                             "Gammaproteobacteria\n(Methanotrophy)",
-                             "Gammaproteobacteria",
-                             "Deltaproteobacteria\n(Sulfate Reducing)",
+                             "α-proteobacteria",
+                             "γ-proteobacteria\n(Ammonium Oxidizing)",
+                             "γ-proteobacteria\n(Methanotrophy)",
+                             "γ-proteobacteria",
+                             "δ-proteobacteria\n(Sulfate Reducing)",
                               "Nitrospira\n(Nitrite Oxidizing)"
   ))) %>%
   identity()
