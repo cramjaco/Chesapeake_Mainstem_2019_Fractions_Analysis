@@ -212,7 +212,7 @@ My_Constrained_RDA_Plot_Type1 <- function(ccaConstrainedFort, ccaConstrained){
     myPlotDetails +
     guides(color = guide_legend(override.aes = list(shape = 21, size = 2, stroke = 2, fill = "gray")),
            shape = guide_legend(override.aes = list(size = 3)),
-           size = guide_legend(override.aes = list(shape = 21, color = "black", fill = "gray"))
+           size = guide_legend(override.aes = list(shape = 21, color = "black", fill = "gray"), ncol = 2)
     )
   ccaConstrainedPlot
 }
@@ -228,7 +228,7 @@ mainRDA
 ```
 
 ```{r}
-ggsave(here::here("Figures", "mainRDA.png"),mainRDA, height = 4, width = 6)
+ggsave(here::here("Figures", "mainRDA.png"),mainRDA, height = 4.4, width = 6)
 ```
 
 
