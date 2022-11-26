@@ -45,6 +45,7 @@ taxa01 <- taxa0 %>%
 # Add greek letters to proteobacteria and assign class as phylum for those
 taxa01 %>% filter(Phylum == "Proteobacteria") %>% .$Class %>% unique() # these are the proteobacteria I want to rename
 taxa02 <- taxa01 %>%
+  # Better names for proteobacterial classes
   mutate(Class = str_replace_all(Class,
                                  c(
                                    "^Alpha" = "α-",
@@ -54,7 +55,13 @@ taxa02 <- taxa01 %>%
                                    "^Zetta" = "ζ-"
                                  )
                                  )) %>%
-  mutate(Phylum = if_else(Phylum == "Proteobacteria", Class, Phylum))
+  # Generally we want to replort proteobacteria to class, even in phylum level summaries
+  mutate(Phylum = if_else(Phylum == "Proteobacteria", Class, Phylum)) %>%
+  # We want Chloroplasts to be their own phyla too (rather than just more cyanobacteria)
+  mutate(Phylum = if_else(Order == "Chloroplast", "Chloroplast", Phylum)) %>%
+  # ibid Class
+  mutate(Class = if_else(Order == "Chloroplast", "Chloroplast", Class)) %>%
+  identity()
 
 # give a "Tag" which is the finest level of taxa known
 TaxResTab <- tibble(
