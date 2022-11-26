@@ -1,0 +1,200 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Goal here is to show CTD profiles
+Pulled from Emily Dougherty's analysis.
+```{r}
+library(tidyverse)
+library(here)
+library(readxl)
+library(cowplot)
+```
+# Loading in Data
+
+```{r}
+source(here("RScripts", "CBMap_Transect.R"))
+```
+
+Pull in Station Coordinates
+```{r}
+# stations <- read_csv(here("InputData", "stations.csv"))
+# stations01 <- stations %>% mutate(Station = str_sub(Station, start = 3)) %>%
+#   mutate(isWest = str_detect(Station, "W")) %>% filter(!isWest) %>% mutate(Station = str_remove(Station, "C")) %>% select(-isWest)
+```
+
+CTD Data processed by Sairah Malkin
+```{r}
+SairahCTD <- read_excel(here("InputData", "Summary CTD 2019-07 cruise CB_Malkin.xlsx"))
+```
+
+#Processing the data
+
+```{r}
+ParseCTD <- SairahCTD %>%
+  mutate(FullStation = Station,
+         Station = parse_number(FullStation),
+         LastChar = str_sub(FullStation, start = -1, end = -1),
+         EWLoc = if_else(LastChar %in% c("E", "W"), LastChar, "C")
+         ) %>%
+  select(-LastChar)
+```
+
+New names
+```{r}
+CTDNameTibble <- tribble(
+  ~ShortName, ~FullName, ~BetterName,
+  "Depth", "Depth (m)", "Depth (m)",
+  "Temperature", "Temperature (degC)", "Temperature~(degree*C)",
+  "Salinity", "Salinity (PSU)", "Salinity~(PSU)",
+  "Oxygen", "Oxygen (mg L-1)", "Oxygen~(mg/L)",
+  "Fluorescence", "Fluorescence (mg m-3)", "Fluorescence~(mg/m^3)",
+  "PAR", "PAR (umol m-2 s-1)", "PAR~(mu*mol/m^2/s)",
+  "pH", "pH", "pH"
+)
+```
+
+Clean up the CTD data
+```{r}
+UseCTD <- ParseCTD %>%
+  filter(EWLoc == "C", is.finite(Station)) %>%
+  select(Station,
+         Depth = `Depth (m)`,
+         Oxygen = `Oxygen (mg L-1)`,
+         Temperature = `Temperature (degC)`,
+         Salinity = `Salinity (PSU)`,
+         Fluorescence = `Fluorescence (mg m-3)`,
+         PAR = `PAR (umol m-2 s-1)`,
+         pH) %>%
+  pivot_longer(cols = -c(Depth, Station)) %>%
+  left_join(CTDNameTibble, by = c("name" = "ShortName")) %>%
+  mutate(name = ordered(name, levels = CTDNameTibble$ShortName),
+         BetterName = ordered(BetterName, levels = CTDNameTibble$BetterName))
+```
+
+
+
+Assign "zones" to depths. Are things from the shallow or the deep region
+
+The following essentially is a table that tells which CTD samples correspond to which depth zones
+
+```{r}
+SampleDepths00 <- read_csv(here("InputData", "SampleDepths.csv"))
+SampleDepths01 <- SampleDepths00 %>%
+  pivot_longer(cols = -Station, names_to = "DepthZone", values_to = "Depth") %>%
+  filter(is.finite(Depth)) %>%
+  mutate(Depth = -Depth)
+
+SampleWidth = 2 # Precision of CTD in M
+SampleDepths02 <- SampleDepths01 %>%
+  mutate(Lower = Depth - SampleWidth/2,
+         Upper = Depth + SampleWidth/2)
+SampleDepths02
+```
+
+The zoneify function tels whether a sample is in a particular depth zone
+```{r}
+zoneify <- function(StationIn, DepthIn, ZoneTable){
+  Thing <- ZoneTable %>%
+    filter(Station == StationIn) %>%
+    mutate(isIn = (DepthIn > Lower & DepthIn < Upper)) %>%
+    filter(isIn) %>%
+    pull(DepthZone)
+  
+  if(length(Thing) == 1){
+    Thing
+  }else{
+    NA # This returns NA if multiple or no depths hit
+  }
+}
+
+zoneify(3.1, 7.11, SampleDepths02) # Corresponding to a bottom sample
+zoneify(3.1, 700, SampleDepths02) # Not corresponding to any of our depths
+```
+
+Determine which ctd samples correspond to which depth zones
+Apparently the following is inefficient and slow (takes about one minute)
+```{r}
+pt0 <- proc.time() # start time of the slow process
+UseCTD01 <- UseCTD %>%
+  mutate(Zone = map2_chr(Station, Depth, zoneify, SampleDepths02))
+pt1 <- proc.time() # end time of the slow process
+opTime <- pt1-pt0 # how long does the process take?
+opTime
+```
+
+Create what is effectively "bottle" data. CTD averages around where we took our samples.
+```{r}
+UseCTD02 <- UseCTD01 %>%
+  filter(!is.na(Zone)) %>%
+  group_by(Station, name, BetterName, Zone) %>%
+  summarize(value = mean(value)) %>%
+  ungroup() %>%
+  left_join(SampleDepths01, by = c("Station", "Zone" = "DepthZone"))
+```
+
+### CTD Plots
+
+Most CTD Variables
+
+```{r fig.height = 3, fig.width = 2}
+MostPlot <- ggplot(UseCTD %>% filter((name %in% c("Temperature", "Salinity"))), aes(y = Depth, x = value, group = as.factor(Station))) +
+  scale_color_viridis_d(option = "plasma") + scale_fill_viridis_d(option = "plasma") +
+  scale_shape_manual(values = c(21:25, 21)) +
+  geom_path(size = 2, aes(color = as.factor(Station))) +
+  geom_path() + 
+  facet_wrap(~BetterName, scales = "free_x", strip.position = "bottom", labeller = "label_parsed", nrow = 2) +
+  scale_y_reverse(limits = c(33, 0)) +
+  theme_cowplot() +
+  geom_point(data = UseCTD02 %>% filter((name %in% c("Temperature", "Salinity"))), aes(shape = as.factor(Station), fill = as.factor(Station)), color = "black", size = 3)+
+  labs(y = "Depth (m)") +
+  theme(strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text = element_text(size = 11),
+        axis.title.x = element_blank(),
+        legend.position = "none")
+
+MostPlotWLab <- ggdraw(MostPlot) + draw_plot_label(c("B", "C"), x = c(0.25, 0.25), y = c(1, .4), size = 18)
+
+MostPlotWLab
+```
+
+
+```{r fig.height = 3, fig.width = 2}
+OxyPlot <- ggplot(UseCTD %>% filter((name %in% c("Oxygen"))), aes(y = Depth, x = value, group = as.factor(Station))) +
+  scale_color_viridis_d(option = "plasma") + scale_fill_viridis_d(option = "plasma") +
+  scale_shape_manual(values = c(21:25, 21)) +
+  geom_path(size = 2, aes(color = as.factor(Station))) +
+  geom_path() + 
+  facet_wrap(~BetterName, scales = "free_x", strip.position = "bottom", labeller = "label_parsed", nrow = 2) +
+  scale_y_reverse(limits = c(33, 0)) +
+  theme_cowplot() +
+  geom_point(data = UseCTD02 %>% filter((name %in% c("Oxygen"))), aes(shape = as.factor(Station), fill = as.factor(Station)), color = "black", size = 3)+
+  #labs(y = "") +
+  lims(y = c(15, 0)) +
+  theme(strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text = element_text(size = 11),
+        axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+        legend.position = "none")
+OxyPlotWLab <- ggdraw(OxyPlot) + draw_plot_label("D", 0.25, 1, size = 18)
+OxyPlotWLab
+```
+
+Add Map
+
+```{r}
+cbMapWLab <- ggdraw(cbMap) + draw_plot_label("A", 0, 1, size = 18)
+```
+
+
+```{r}
+ProfilesWMap <- plot_grid(cbMapWLab, MostPlotWLab, OxyPlotWLab, rel_widths = c(1,1,1), nrow = 1)
+ProfilesWMap
+```
+```{r}
+ggsave(here("Figures", "PofilesWithMap.png"), width = 6, height = 4)
+```
+

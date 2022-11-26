@@ -14,7 +14,7 @@ phylum_mg_plot <- ches_brigandine(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% 
 phylum_L_plot <- ches_brigandine_L(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 9, thresh = 10^6)
 
 ggsave(here("Figures", "Phylum_per_mg_brig.png"), height = 5.5, width = 6.5, plot = phylum_mg_plot)
-ggsave(here("Figures", "Phylum_per_L_brig.png"), height = 4.5, width = 7.5, plot = phylum_L_plot)
+ggsave(here("Figures", "Phylum_per_L_brig.png"), height = 5.5, width = 6.5, plot = phylum_L_plot)
 
 ## Planktomycetes ASVs
 plankto_mg_plot <- ches_brigandine(Tag_ASV, Order, taxa01 %>% filter(Phylum == "Planctomycetes") %>% pull(Order) %>% unique() %>% na.omit(), thresh = 10^6, min = 3)
