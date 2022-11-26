@@ -160,7 +160,7 @@ TotalMassAbundanceFigure
 ```
 
 ```{r}
-ggsave(here::here("Figures", "MassAndAbundanceNoMap.png"), height = 4, width = 8 ,plot = combinedPlot2)
+ggsave(here::here("Figures", "MassAndAbundanceNoMap.png"), height = 4, width = 8 ,plot = combinedPlot2a)
 ggsave(here::here("Figures", "MassAndAbundanceFigure.png"), height = 4, width = 10 ,plot = TotalMassAbundanceFigure)
 ```
 

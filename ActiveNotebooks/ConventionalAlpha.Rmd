@@ -45,8 +45,10 @@ countMat <-  nonSpikes_Remake %>%
 
 ```{r}
 seqDep <- countMat %>% apply(1, sum)
+names(seqDep) <- rownames(countMat)
 min(seqDep)
 ```
+This value is lower than the lowist chimera checked value because the spikes have been discarded (while chimera checked read depth still has spikes)
 
 ```{r}
 sampleRichness <- rarefy(countMat, min(seqDep))

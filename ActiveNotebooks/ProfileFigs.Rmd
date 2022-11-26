@@ -155,7 +155,7 @@ MostPlot <- ggplot(UseCTD %>% filter((name %in% c("Temperature", "Salinity"))), 
         axis.title.x = element_blank(),
         legend.position = "none")
 
-MostPlotWLab <- ggdraw(MostPlot) + draw_plot_label(c("B", "C"), x = c(0.25, 0.25), y = c(1, .4), size = 18)
+MostPlotWLab <- ggdraw(MostPlot) + draw_plot_label(c("B", "C"), x = c(0.3, 0.3), y = c(1, .4), size = 18)
 
 MostPlotWLab
 ```
@@ -179,7 +179,7 @@ OxyPlot <- ggplot(UseCTD %>% filter((name %in% c("Oxygen"))), aes(y = Depth, x =
         axis.title.x = element_blank(),
                 axis.title.y = element_blank(),
         legend.position = "none")
-OxyPlotWLab <- ggdraw(OxyPlot) + draw_plot_label("D", 0.25, 1, size = 18)
+OxyPlotWLab <- ggdraw(OxyPlot) + draw_plot_label("D", 0.18, 1, size = 18)
 OxyPlotWLab
 ```
 
