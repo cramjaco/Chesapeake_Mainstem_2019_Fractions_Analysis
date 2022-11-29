@@ -23,6 +23,11 @@ plankto_L_plot <- ches_brigandine_L(Tag_ASV, Order, taxa01 %>% filter(Phylum == 
 ggsave(here("Figures", "Plankto_per_mg_brig.png"), height = 4.5, width = 7.5, plot = plankto_mg_plot)
 ggsave(here("Figures", "Plankto_per_L_brig.png"), height = 4.5, width = 7.5, plot = plankto_L_plot)
 
+## Eukaryotes
+ches_brigandine(Phylum, Kingdom, taxa01 %>% filter(Kingdom == "Eukaryota") %>% pull(Kingdom) %>% unique(), min = 4, max = 7, thresh = 10^5, ns = nonSpikes)
+ches_brigandine(Family, Class, taxa01 %>% filter(Phylum == "Arthropoda") %>% pull(Class) %>% unique(), min = 4, thresh = 0, ns = nonSpikes)
+ches_brigandine(Tag_ASV, Class, taxa01 %>% filter(Phylum == "Arthropoda") %>% pull(Class) %>% unique() %>% na.omit(), thresh = 0, min = 3, max = 5, ns = nonSpikes)
+
 ## Snow dwellers primarely live on large particles
 mainHabitats <- nonSpikes20 %>%
   group_by(Tag_ASV, Size_Class) %>% 
