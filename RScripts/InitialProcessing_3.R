@@ -84,10 +84,13 @@ taxa <- taxa02 %>%
   
 ## Elemental Data
 metadata <- read_csv(here("InputData", "CB-DNAandPOM.csv"))
-molarity <- read_excel(here("InputData", "CramJ 220614 CN Chesapeake2021 A003193 EPR A003144.xlsx"), sheet = "Samples")
+elemental0 <- read_excel(here("InputData", "CramJ 220614 CN Chesapeake2021 A003193 EPR A003144.xlsx"), sheet = "Samples")
 
-molarityCB21 <- molarity %>%
-  filter(str_detect(`Sample ID`, "CB19|Blank")) %>%
+elementalCB21 <- elemental0 %>%
+  # EPR samples 24, 27, and 29 are actually from this study, 
+  #keep those, the others from this study
+  # I used to include blanks, but I'm not using them anymore, bc samples are already checked by center against blanks.
+  filter(str_detect(`Sample ID`, "CB19|EPR-02[479]")) %>%
   mutate(FilterID = str_extract(`Sample ID`, "(?<=-)\\d{3}") %>% parse_number()) %>%
   mutate(Type = if_else(str_detect(`Sample ID`, "Blank"), "Blank", "Sample"))
   
@@ -99,12 +102,13 @@ metadata1 <- metadata %>%
   #mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom"))) %>%
   identity()
 
-elementalJoined <- left_join(molarityCB21, metadata1 %>% filter(!is.na(FilterID)), by = "FilterID")
+elementalJoined <- left_join(elementalCB21, metadata1 %>% filter(!is.na(FilterID)), by = "FilterID")
 elementalFull <- elementalJoined %>%
   mutate(CarbonPerLiter_mg = `Total C (µg)` / (Volume_through_mesh * Volume_through_GFF/Backrinse) / 1000) %>%
   mutate(NitrogenPerLiter_mg = `Total N (µg)`/ (Volume_through_mesh * Volume_through_GFF/Backrinse) / 1000) %>%
   mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom"))) %>% # make a factor again since join undid that
   identity()
+# There are two elemental filters (124 & 127) that don't seem to match with any samples.
   
 elemental <- elementalFull %>%
   select(Station, Depth, Size_Class, `δ13CVPDB (‰)`, `δ15NAir (‰)`, CarbonPerLiter_mg, NitrogenPerLiter_mg) %>%
