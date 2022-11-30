@@ -59,9 +59,14 @@ ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, m
   
   taxlevel <- enquo(taxlevel)
   broadlevel <- enquo(broadlevel)
+  
   ns_loc0 <- aglom(!!taxlevel, !!broadlevel, ns)
   ns_loc <- ns_loc0 %>%
     filter(!!broadlevel %in% broadkeep)
+  
+  # ## alternative doesn't work
+  # ns_keep <- filter(!!broadlevel %in% broadkeep)
+  # ns_loc <- aglom(!!taxlevel, !!broadlevel, ns_keep)
   
     attached_loc <- find_attached(ns_loc, threshold = thresh) 
   present_loc <- find_present(ns_loc, threshold = threshL)
@@ -94,9 +99,9 @@ ches_brigandine <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20, m
   
   # main
   locPlot <- toPlot %>%
-  ggplot(aes(x = as.factor(Station), y = !!taxlevel, size = sqrt(Size_Class), fill = log10(copiesPerMg))) +
+  ggplot(aes(x = as.factor(Station), y = !!taxlevel, size = (Size_Class)^(1/3), fill = log10(copiesPerMg))) +
   geom_point(shape = 21, color = "black", stroke = .5) +
-  scale_radius(breaks = sqrt(c(1.2, 5, 20, 53, 180, 500)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 12)) +
+  scale_radius(breaks = c(1.2, 5, 20, 53, 180, 500)^(1/3), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 12)) +
   scale_fill_viridis_c(breaks = loc_breaks, labels = loc_labels) +
   facet_grid(rows = vars(!!broadlevel), cols= vars(Depth), drop = TRUE, scales = "free", space = "free") +
   labs(y = quo_name(taxlevel), x = "Station", size = "Size Class", fill = "log10(Copies/mg)") +
@@ -165,9 +170,9 @@ ches_brigandine_L <- function(taxlevel, broadlevel, broadkeep, ns = nonSpikes20,
   geom_point(shape = 22, color = "black", stroke = .5, size = 12, data = toPlotFree,
              aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL))) +
   geom_point(shape = 21, color = "black", stroke = .5, data = toPlotAttached,
-             aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL), size = sqrt(Size_Class))) +
+             aes(x = as.factor(Station), y = !!taxlevel, fill = log10(copiesPerL), size = (Size_Class)^(1/3))) +
   
-  scale_radius(breaks = sqrt(c(1.2, 5, 20, 53, 180, 500)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 10)) +
+  scale_radius(breaks = (c(1.2, 5, 20, 53, 180, 500)^(1/3)), labels = c(1.2, 5, 20, 53, 180, 500), range = c(1, 10)) +
   scale_fill_viridis_c(breaks = loc_breaks, labels = loc_labels) +
   facet_grid(rows = vars(!!broadlevel), cols= vars(Depth), drop = TRUE, scales = "free", space = "free") +
   labs(y = quo_name(taxlevel), x = "Station", size = "Size Class", fill = "log10(Copies/L)") +

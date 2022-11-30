@@ -348,7 +348,7 @@ pmoa_plot_L
 # Threre are lots! Many not so aboundant
 ammonium_oxidizers_plot <- ches_brigandine_L(ASV, Kingdom,
 taxa %>% filter(Genus %in% nitrite_oxidizers) %>% pull(Kingdom) %>% unique() %>% na.omit,
-min = 3, max = 6, 
+min = 1, max = 5, 
 ns = nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
 filter(Genus %in% nitrite_oxidizers[-1]),
 thresh = 0 * 10^4)
