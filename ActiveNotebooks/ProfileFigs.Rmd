@@ -134,6 +134,11 @@ UseCTD02 <- UseCTD01 %>%
   left_join(SampleDepths01, by = c("Station", "Zone" = "DepthZone"))
 ```
 
+```{r}
+write_csv(UseCTD02, file = here::here("IntermediateData", "BottleCTD.csv"))
+```
+
+
 ### CTD Plots
 
 Most CTD Variables

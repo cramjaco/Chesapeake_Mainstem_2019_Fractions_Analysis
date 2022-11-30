@@ -115,9 +115,19 @@ elemental <- elementalFull %>%
   identity()
   
 
-sample <- sample01 %>%
+sample02 <- sample01 %>%
   left_join(elemental, by = c("Station", "Depth", "Size_Class")) %>%
   identity()
+
+## CTD data
+CTD00 <- read_csv(here("IntermediateData", "BottleCTD.csv"))
+CTD <- CTD00 %>% rename(param = "name", Depth_m = Depth, Depth = Zone) %>%
+  mutate(Depth = if_else((Station == 3.3 & Depth == "Bottom")|Depth == "OMZ", "Oxycline", Depth)) %>%
+  pivot_wider(id_cols = c("Station", "Depth", "Depth_m"), names_from = "param", values_from = "value")
+
+## BOOKMARK
+sample = sample02 %>%
+  left_join(CTD, by = c("Station", "Depth"))
 
 ## Shaping Data
 
