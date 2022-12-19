@@ -1,0 +1,47 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+2022 November 28
+Hydrogen Sulfide data from M. Gomes.
+Worked up by Minming Cui
+
+```{r}
+library(tidyverse)
+library(here)
+library(readxl)
+```
+
+```{r}
+sulfideRaw <- read_excel(here::here("InputData", "cb2019_sulfide sample log (1) (1)(1).xlsx"), range = "A2:J20")
+```
+
+```{r}
+ggplot(sulfideRaw, aes(y = `Depth (m)`, x = `correct concentration`)) +
+  geom_point() +
+  scale_y_reverse() +
+  labs(x = "Sulfide (μM)") +
+  facet_wrap(~Site) +
+  #geom_vline(xintercept = 7.78 * 3) +
+  theme_bw(base_size = 16)+
+  lims(y = c(25, 0))
+```
+
+
+```{r}
+sulfidePlot <- sulfideRaw %>% 
+  arrange(Site) %>%
+ggplot(aes(y = `Depth (m)`, x = `correct concentration`, shape = Site, fill = Site)) +
+  geom_point(size = 3, alpha = 0.8) +
+  scale_y_reverse() +
+  labs(x = "Sulfide (μM)") +
+  #geom_vline(xintercept = 7.78 * 3) +
+  theme_bw(base_size = 16)+
+  lims(y = c(25, 0)) +
+  scale_fill_manual(values = viridis::plasma(n = 6)[3:4]) +
+  scale_shape_manual(values = rep(21:25, 2)[3:4]) +
+  cowplot::theme_cowplot() +
+  theme(legend.position = "none", axis.title.y = element_blank(),
+        axis.title.x = element_text(size = 11))
+sulfidePlot
+```

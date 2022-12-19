@@ -15,6 +15,7 @@ library(cowplot)
 
 ```{r}
 source(here("RScripts", "CBMap_Transect.R"))
+source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
 ```
 
 Pull in Station Coordinates
@@ -70,7 +71,7 @@ UseCTD <- ParseCTD %>%
   pivot_longer(cols = -c(Depth, Station)) %>%
   left_join(CTDNameTibble, by = c("name" = "ShortName")) %>%
   mutate(name = ordered(name, levels = CTDNameTibble$ShortName),
-         BetterName = ordered(BetterName, levels = CTDNameTibble$BetterName))
+         BetterName = ordered(BetterName, levels = CTDNameTibble$BetterName)) 
 ```
 
 
@@ -166,10 +167,16 @@ MostPlotWLab
 ```
 
 
-```{r fig.height = 3, fig.width = 2}
-OxyPlot <- ggplot(UseCTD %>% filter((name %in% c("Oxygen"))), aes(y = Depth, x = value, group = as.factor(Station))) +
-  scale_color_viridis_d(option = "plasma") + scale_fill_viridis_d(option = "plasma") +
-  scale_shape_manual(values = c(21:25, 21)) +
+```{r fig.height = 5, fig.width = 2}
+UseCtdForOx <- UseCTD %>% filter((name %in% c("Oxygen"))) %>%
+  mutate(Station = factor(Station, levels = rev(unique(Station))))
+StationsLs <- as.character(unique(UseCTD$Station))
+
+OxyPlot <- UseCtdForOx %>%
+  ggplot(aes(y = Depth, x = value, group = as.factor(Station))) +
+  scale_color_manual(breaks = StationsLs, values = viridis::plasma(n = 6)[1:6]) +
+  scale_fill_manual(breaks = StationsLs, values = viridis::plasma(n = 6)[1:6]) +
+  scale_shape_manual(breaks = StationsLs, values = c(21:25, 21)[1:6]) +
   geom_path(size = 2, aes(color = as.factor(Station))) +
   geom_path() + 
   facet_wrap(~BetterName, scales = "free_x", strip.position = "bottom", labeller = "label_parsed", nrow = 2) +
@@ -177,7 +184,7 @@ OxyPlot <- ggplot(UseCTD %>% filter((name %in% c("Oxygen"))), aes(y = Depth, x =
   theme_cowplot() +
   geom_point(data = UseCTD02 %>% filter((name %in% c("Oxygen"))), aes(shape = as.factor(Station), fill = as.factor(Station)), color = "black", size = 3)+
   #labs(y = "") +
-  lims(y = c(15, 0)) +
+  #lims(y = c(15, 0)) +
   theme(strip.background = element_blank(),
         strip.placement = "outside",
         strip.text = element_text(size = 11),
@@ -202,4 +209,48 @@ ProfilesWMap
 ```{r}
 ggsave(here("Figures", "PofilesWithMap.png"), width = 6, height = 4)
 ```
+
+# Now with sulfide
+
+```{r}
+ksource(here::here("ActiveNotebooks", "Sulfide.Rmd"))
+```
+
+```{r fig.height = 3, fig.width = 2}
+SalinityPlot <- ggplot(UseCTD %>% filter((name %in% c("Salinity"))), aes(y = Depth, x = value, group = as.factor(Station))) +
+  scale_color_viridis_d(option = "plasma") + scale_fill_viridis_d(breaks = StationsLs, option = "plasma") +
+  scale_shape_manual(values = c(21:25, 21)) +
+  geom_path(size = 2, aes(color = as.factor(Station))) +
+  geom_path() + 
+  facet_wrap(~BetterName, scales = "free_x", strip.position = "bottom", labeller = "label_parsed", nrow = 2) +
+  scale_y_reverse(limits = c(33, 0)) +
+  theme_cowplot() +
+  geom_point(data = UseCTD02 %>% filter((name %in% c("Salinity"))), aes(shape = as.factor(Station), fill = as.factor(Station)), color = "black", size = 3)+
+  labs(y = "Depth (m)") +
+  theme(strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text = element_text(size = 11),
+        axis.title.x = element_blank(),
+        legend.position = "none")
+
+SalinityPlotWLab <- ggdraw(SalinityPlot) + draw_plot_label(c("B"), x = c(0.3, 0.3), y = c(1, .4), size = 18)
+SalinityPlot
+```
+
+
+
+```{r}
+ProfilesWMapSulfide <- plot_grid(cbMap, SalinityPlot + lims(y = c(33, 0)),
+                                 OxyPlot + lims(y = c(33, 0)),
+                                 sulfidePlot + lims(y = c(33, 0)) +
+                                 theme(plot.margin = margin(t = 6, l = 9, r = 5, b = 17, unit = "pt")),
+                                 rel_widths = c(1,1,1), nrow = 1,
+                                 labels = LETTERS)
+ProfilesWMapSulfide
+```
+
+```{r}
+ggsave(here("Figures", "PofilesWithMapAndSulfide.png"), width = 8, height = 4)
+```
+
 

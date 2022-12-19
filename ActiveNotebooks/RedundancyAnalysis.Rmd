@@ -31,7 +31,7 @@ library(flextable)
 library(ftExtra)
 #source(here("RScripts", "InitialProcessing_3.R"))
 source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
-env1 <- attach(here("RDataFiles", "InitialProcessing_3.RData"))
+env1 <- attach(here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 set.seed(10033)
 ```
 
@@ -393,5 +393,109 @@ betaThreeTable <- threeAnovas %>%
 
 betaThreeTable %>% save_as_docx(path = here::here("Tables", "betaThreeTable.docx"))
 betaThreeTable
+```
+
+# Comparing to environmental parameters
+
+```{r}
+rdaConstrained_env <- rda(wideASVs_log ~ Salinity + Depth2 + sqrt(Size_Class), data = sampleData01)
+```
+
+```{r}
+anova(rdaConstrained_env, by = "margin")
+```
+
+```{r}
+My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_env)
+```
+```{r}
+rdaConstrained_wdepth <- rda(wideASVs_log ~ Salinity + Depth_m  + log(Oxygen + 0.03) + sqrt(Size_Class), data = sampleData01)
+anova(rdaConstrained_wdepth, by = "margin")
+```
+
+
+```{r}
+rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + sqrt(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
+anova(rdaConstrained_env2, by = "margin")
+```
+```{r}
+EnvRDA <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_env2)
+EnvRDA
+My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained_env2)
+```
+
+```{r fig.height = 4, fig.width = 8}
+combinedRDA <- plot_grid( mainRDA + theme(legend.position = "none"), 
+           EnvRDA + theme(legend.position = "none"),
+           legend_rda, rel_widths = c(3,3,1), nrow = 1, labels = c("A", "B", ""), label_y = 0.9)
+combinedRDA
+```
+
+
+sampleData_NoSmall <- sampleData01 %>% filter(Size_Class > 2)
+wideASVs_log_NoSmall <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoSmall$ID,]
+wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID, rownames(wideASVs_log_NoSmall)),]
+
+Particle characteristics?
+Have to strike the 0.2 and omit any missing values.
+```{r}
+sampleData_MeasuredParticles <- sampleData01 %>%
+  filter(!is.na(CarbonPerLiter_mg) & !is.na(MassperLiter))
+wideASVs_log_MeasuredParticles <- wideASVs_log[match(sampleData_MeasuredParticles$ID, rownames(wideASVs_log)),]
+```
+
+
+```{r}
+rdaConstrained_env_particles <- rda(wideASVs_log_MeasuredParticles ~ Salinity  + log(Oxygen + 0.03) + sqrt(Size_Class) + I(CarbonPerLiter_mg/MassperLiter) + I(NitrogenPerLiter_mg/CarbonPerLiter_mg) + `δ13CVPDB (‰)` + `δ15NAir (‰)`, data = sampleData_MeasuredParticles)
+```
+
+```{r}
+anova(rdaConstrained_env_particles, by = "margin")
+```
+```{r}
+ordistep(rdaConstrained_env2)
+```
+# Squared terms
+
+
+```{r}
+rdaConstrained_env3 <- rda(wideASVs_log ~ Salinity + I(Salinity^2)  + Oxygen + Size + I(Size^2), data = sampleData01 %>%
+                             mutate(Oxygen = log(Oxygen + 0.03),
+                                    Size = sqrt(Size_Class)))
+anova(rdaConstrained_env3, by = "margin")
+```
+```{r}
+rdaConstrained_position <- rda(wideASVs_log ~ Latitude + I(Latitude^2) + Depth + Size + I(Size^2), data = sampleData01 %>%
+                        select(-Depth) %>%
+                        rename(Latitude = lat, Depth = Depth2) %>%
+                        mutate(Size = sqrt(Size_Class)))
+anova(rdaConstrained_position, by = "margin")
+```
+
+```{r}
+rdaConstrained
+rdaConstrained_position
+rdaConstrained_env2
+rdaConstrained_env3
+```
+```{r}
+rdaConstrained %>% extractAIC()
+rdaConstrained_position %>% extractAIC()
+rdaConstrained_env2 %>% extractAIC()
+rdaConstrained_env3 %>% extractAIC()
+```
+
+```{r}
+positionRDA_Quadratic <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_position)
+envRDA_Quadratic <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_env3)
+positionRDA_Quadratic
+envRDA_Quadratic
+```
+
+```{r}
+My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained_position)
+```
+```{r}
+plot(rdaConstrained_position, choices = c(1,6))
 ```
 
