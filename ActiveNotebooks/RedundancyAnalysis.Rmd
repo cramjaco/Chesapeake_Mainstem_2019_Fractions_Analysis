@@ -316,7 +316,9 @@ anovaNofree <- anova(rdaConstrained_NoFree, by = "margin", permutations = how(np
 anovaNofree
 ```
 ```{r}
-plotNoFreeRda <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoFree)
+plotNoFreeRda <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoFree) + 
+  scale_size(breaks = sqrt(filterSizes),
+             labels = filterSizes, range = c(1.5,6))
 
 plotNoFreeRda
 ```
@@ -342,9 +344,17 @@ anovaNoSmall <- anova(rdaConstrained_NoSmall, by = "margin", permutations = how(
 anovaNoSmall
 ```
 ```{r}
-plotNoSmallRda<- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoSmall) + lims(x = c(-10, 11))
+plotNoSmallRda<- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoSmall) + lims(x = c(-10, 11)) + scale_size(breaks = sqrt(filterSizes),
+             labels = filterSizes, range = c(2.5,6))
 plotNoSmallRda
 ```
+```{r fig.width=7, fig.height = 8}
+plot_grid(plotNoFreeRda ,
+                           plotNoSmallRda ,
+                           labels = LETTERS, nrow = 2)
+```
+
+
 Cowplot the last two together so they can be one supplemental figure
 
 ```{r fig.width = 7, fig.height = 8}
@@ -355,11 +365,11 @@ legend_rda <- get_legend(
 bigSubsetsRda0 <- plot_grid(plotNoFreeRda + theme(legend.position = "none"),
                            plotNoSmallRda + theme(legend.position = "none"),
                            labels = LETTERS, nrow = 2)
-bigSubsetsRda <- plot_grid(bigSubsetsRda0, legend_rda, rel_widths = c(10, 1))
+bigSubsetsRda <- plot_grid(bigSubsetsRda0, legend_rda, rel_widths = c(10, 2))
 bigSubsetsRda
 ```
 ```{r}
-ggsave(here::here("Figures", "bigSubsetsRda.png"), bigSubsetsRda, height = 8, width = 7)
+ggsave(here::here("Figures", "bigSubsetsRda.png"), bigSubsetsRda, height = 8, width = 8)
 ```
 
 # Tables
@@ -421,8 +431,26 @@ anova(rdaConstrained_env2, by = "margin")
 ```{r}
 EnvRDA <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_env2)
 EnvRDA
-My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained_env2)
+EnvRDA13 <- My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained_env2)
 ```
+
+
+```{r fig.height = 7, fig.width = 6}
+EnvRDA123 <- plot_grid(
+  plot_grid(
+    EnvRDA + theme(legend.position = "none"),
+    EnvRDA13 + theme(legend.position = "none"),
+    ncol = 1, labels = c("A", "B"), label_y = 0.9
+  ),
+  legend_rda, rel_widths = c(10, 2)
+)
+EnvRDA123
+```
+
+```{r}
+ggsave(here("Figures", "EnvRDA.png"), plot = EnvRDA123, height = 7, width = 6)
+```
+
 
 ```{r fig.height = 4, fig.width = 8}
 combinedRDA <- plot_grid( mainRDA + theme(legend.position = "none"), 
@@ -448,6 +476,11 @@ wideASVs_log_MeasuredParticles <- wideASVs_log[match(sampleData_MeasuredParticle
 ```{r}
 rdaConstrained_env_particles <- rda(wideASVs_log_MeasuredParticles ~ Salinity  + log(Oxygen + 0.03) + sqrt(Size_Class) + I(CarbonPerLiter_mg/MassperLiter) + I(NitrogenPerLiter_mg/CarbonPerLiter_mg) + `δ13CVPDB (‰)` + `δ15NAir (‰)`, data = sampleData_MeasuredParticles)
 ```
+
+```{r}
+extractAIC(rdaConstrained_env_particles)
+```
+
 
 ```{r}
 anova(rdaConstrained_env_particles, by = "margin")
