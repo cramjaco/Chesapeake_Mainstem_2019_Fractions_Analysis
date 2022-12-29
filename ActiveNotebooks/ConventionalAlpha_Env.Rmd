@@ -174,26 +174,26 @@ ggsave(here::here("Figures", "ConventionalAlpha.png"), plotAlpha, width = 11, he
 Rarefied observed species numbers
 
 ```{r}
-obsMod <- lm(S.obs ~ log(Size_Class) + I(log(Size_Class)^2)  + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+obsMod <- lm(S.obs ~ sqrt(Size_Class) + I(sqrt(Size_Class)^2)  + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 summary(obsMod)
 ```
 
 ## Richness
 Rarified chao1 estimates
 ```{r}
-chao1Mod <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+chao1Mod <- lm(S.chao1 ~ sqrt(Size_Class) + I(sqrt(Size_Class)^2)  + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 summary(chao1Mod)
 ```
 As above but without latitude and depth
 ```{r}
-chao1ModSimple <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2), data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+chao1ModSimple <- lm(S.chao1 ~ sqrt(Size_Class) + I(sqrt(Size_Class)^2), data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 summary(chao1ModSimple)
 ```
 
 ## Shannon Diversity
 
 ```{r}
-shanMod <- lm(shannonH ~ log(Size_Class) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+shanMod <- lm(shannonH ~ sqrt(Size_Class) + I(sqrt(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 ```
 
 
@@ -203,7 +203,7 @@ summary(shanMod)
 ## Evenness
 
 ```{r}
-pielouMod <- lm(pielouJ ~ log(Size_Class) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+pielouMod <- lm(pielouJ ~ sqrt(Size_Class) + I(sqrt(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 summary(pielouMod)
 ```
 
@@ -384,7 +384,7 @@ diversityDataWB <- full_join(diversityData,
 diversityDataWB
 ```
 ```{r}
-pielouMod2 <- lm(pielouJ2 ~ log(Size_Class) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityDataWB %>% mutate(Oxygen = log(Oxygen + 0.03)))
+pielouMod2 <- lm(pielouJ2 ~ sqrt(Size_Class) + I(sqrt(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityDataWB %>% mutate(Oxygen = log(Oxygen + 0.03)))
 summary(pielouMod2)
 ```
 Ok. So the narrative makes sense. Alpha diveristy is driven by variability in richness rather than evenness.
@@ -454,7 +454,7 @@ Why are these not smooth curves?!!
 What if I redo the model, this time with the same data frame
 
 ```{r}
-breakLm2 <- lm(break_estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2) + Oxygen ,data = diversityDataWB %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+breakLm2 <- lm(break_estimate ~ sqrt(Size_Class) + I(sqrt(Size_Class) ^2) + Salinity +  I(Salinity^2) + Oxygen ,data = diversityDataWB %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 breakLm2 %>% summary()
 ```
 Note the non statistical significance overall
@@ -537,6 +537,7 @@ alphaSummary2 <- alphaSummary2 %>%
          Term = str_replace(Term, "\\^2", "\\^2\\^"),
          Term = str_replace(Term, "depth", "Depth"),
          Term = str_replace(Term, "lat", "Latitude"),
+         Term = str_replace(Term, "sqrt\\(Size_Class\\)", "√Size Class"),
          Term = str_replace(Term, "_", " ")# BOOKMARK!!
          ) %>%
   mutate(Estimate = format(Estimate, digits = 2, scientific = TRUE) %>%
