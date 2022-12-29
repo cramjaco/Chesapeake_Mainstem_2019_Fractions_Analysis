@@ -174,9 +174,9 @@ The betta model in breakaway looks for trends in the data
 
 ```{r}
 myBet_Env_Depth <- betta(
-  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2) +Oxygen + depth,
+  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2)   + depth,
   ses = error,
-  data = richSummaryExpanded  %>% mutate(Oyxgen = log10(Oxygen + 0.03))
+  data = richSummaryExpanded  %>% mutate(Oxygen = log10(Oxygen + 0.03))
 )
 ```
 
@@ -187,7 +187,7 @@ myBet_Env_Depth$table
 
 ```{r}
 myBet_Env <- betta(
-  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2) +Oxygen,
+  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2) +Oxygen + depth,
   ses = error,
   data = richSummaryExpanded %>% mutate(Oxygen = log10(Oxygen + 0.03))
 )
