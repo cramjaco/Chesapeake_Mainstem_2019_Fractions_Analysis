@@ -174,14 +174,14 @@ ggsave(here::here("Figures", "ConventionalAlpha.png"), plotAlpha, width = 11, he
 Rarefied observed species numbers
 
 ```{r}
-obsMod <- lm(S.obs ~ log(Size_Class) + I(log(Size_Class)^2)  + Salinity + I(Salinity^2) + Oxygen + depth, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+obsMod <- lm(S.obs ~ log(Size_Class) + I(log(Size_Class)^2)  + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 summary(obsMod)
 ```
 
 ## Richness
 Rarified chao1 estimates
 ```{r}
-chao1Mod <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen + depth, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+chao1Mod <- lm(S.chao1 ~ log(Size_Class) + I(log(Size_Class)^2) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 summary(chao1Mod)
 ```
 As above but without latitude and depth
@@ -193,7 +193,7 @@ summary(chao1ModSimple)
 ## Shannon Diversity
 
 ```{r}
-shanMod <- lm(shannonH ~ log(Size_Class) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen + depth, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+shanMod <- lm(shannonH ~ log(Size_Class) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 ```
 
 
@@ -203,7 +203,7 @@ summary(shanMod)
 ## Evenness
 
 ```{r}
-pielouMod <- lm(pielouJ ~ log(Size_Class) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen+ depth, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+pielouMod <- lm(pielouJ ~ log(Size_Class) + I(log(Size_Class)^2) + Salinity + I(Salinity^2) + Oxygen, data = diversityData %>% mutate(Oxygen = log10(Oxygen + 0.03)))
 summary(pielouMod)
 ```
 
