@@ -1,0 +1,237 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Goal here is to get breakaway richness and evenness from all of the samples. 
+This is the same as BreakawayAlphDiversity, but this time, I'm using the enviornmental data framing (Salinity + Oxygen) rather than latitude and depth.
+
+```{r}
+library(breakaway)
+library(flextable)
+library(ftExtra)
+source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
+#source(here::here("RScripts", "InitialProcessing_3.R"))
+#load(here::here("RDataFiles", "InitialProcessing_3.RData"))
+#
+## Too many random things loaded from the main environent. Speed up may be too much work.
+load(here::here("RDataFiles", "InitialProcessing_3_minimal.RData"))
+# load(here::here("RDataFiles", "nonSpikes.RData"))
+# load(here::here("RDataFiles", "microbialAbundance.RData"))
+my_sizes <- sort(unique(microbialAbundance$Size_Class))
+set.seed(10033)
+```
+
+For alpha diversity analysis, I'm going to treat station 3.3 Oxycline as a bottom station.
+This will allow more consistancy with the surface samples.
+
+```{r}
+CB33Oxy_to_CB33Bottom <- function(df){
+  remake <- df %>%
+    mutate(Depth = as.character(Depth)) %>%
+    mutate(Depth = if_else(Station == 3.3 & Depth == "Oxycline", "Bottom", Depth)) %>%
+    mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom")))
+  remake
+}
+
+nonSpikes_Remake <- nonSpikes %>% CB33Oxy_to_CB33Bottom
+```
+
+
+Breakaway uses frequency tables
+```{r}
+otuTable <- nonSpikes_Remake %>% select(ID, ASV, reads) %>% pivot_wider(names_from = ASV, values_from = reads, id_cols = ID)
+
+otuMatrix <- otuTable %>% column_to_rownames(var = "ID") %>% as.matrix %>% t()
+
+otuPhyseq <- phyloseq::otu_table(otuMatrix, taxa_are_rows = FALSE)
+
+frequencytablelist <- build_frequency_count_tables(otuMatrix)
+```
+
+```{r}
+plot(breakaway_nof1(frequencytablelist[[1]]))
+```
+Run the breakaway claculations
+```{r}
+allBreak <- breakaway(otuPhyseq)
+
+richSummary <- summary(allBreak)
+
+richSummaryExpanded <- richSummary %>% left_join(sampleData, by = c("sample_names" = "ID"))
+```
+
+A plot of breakaway richness at each station-depth
+```{r fig.height = 8, fig.width = 6}
+richSummaryExpanded %>%
+  arrange(Size_Class) %>%
+  filter(Depth != "Oxy") %>%
+  ggplot(
+  aes(x = Size_Class, y = estimate,
+      fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Station~Depth) +
+  geom_point(aes(size = model)) +
+  geom_segment(aes(x = Size_Class, xend = Size_Class, y = lower, yend = upper, color = as.factor(Station))) +
+  geom_path(aes(color = as.factor(Station))) +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+So no imediatly observavle richness patterns, except maybe that the big particles at the surface of station 3.1 are lower than their friends
+
+As above plot but formatted differently
+```{r fig.height = 4, fig.width = 6}
+richSummaryExpanded %>%
+  arrange(Size_Class) %>%
+  filter(Depth != "Oxy") %>%
+  ggplot(
+  aes(x = Size_Class, y = estimate,
+      fill = as.factor(Station), shape = as.factor(Station))) +
+  scale_y_log10nice() + scale_x_log10(breaks = my_sizes, labels = as.character(my_sizes)) +
+  facet_grid(Depth~.) +
+  geom_point(size = 3) +
+  geom_segment(aes(x = Size_Class, xend = Size_Class, y = lower, yend = upper, color = as.factor(Station)), arrow = arrow(angle = 70, length = unit(0.05, "in"), ends = "both")) +
+  geom_path(aes(color = as.factor(Station))) +
+  labs(x = "Size Class (μm)", y = "Richness (Species)") +
+  scale_shape_manual(values = rep(21:25, 2)) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "none")
+```
+
+# Betta
+The betta model in breakaway looks for trends in the data
+
+```{r}
+myBet <- betta(
+  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + lat +  I(lat^2) + depth,
+  ses = error,
+  data = richSummaryExpanded %>% filter(depth != "Oxy")
+)
+```
+
+```{r}
+myBet$table
+```
+
+Apparenlty, there is a statistical effect for everything except size.
+
+Wait, with the non linear size class, I'm actually significant on everything!
+Holy cow.
+
+Apparently my R2 is like 15 percent so no wonder everything looks terrible
+
+# A prettier table of the results
+```{r}
+
+
+
+myBet$table %>% as.data.frame() %>% rownames_to_column(var = "Parameter") %>%
+  mutate(Estimates = format(Estimates, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+         ) %>%
+  mutate(`Standard Errors` = format(`Standard Errors`, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+  ) %>%
+  mutate(`p` = if_else(`p-values` < 0.001, "<0.001", paste(" ", as.character(`p-values`)))) %>%
+  select(-`p-values`) %>%
+  #mutate(Parameter = str_remove_all(Parameter, "I\\(|^\\(|\\)$")) %>% # why won't it remove left facing parentheses
+  #mutate(Parameter = str_remove(Parameter, "\\)")) %>%
+  mutate(Parameter = str_replace(Parameter, "^I?\\((.*)\\)", "\\1"),
+         Parameter = str_replace(Parameter, "\\^2", "\\^2\\^"),
+         Parameter = str_replace(Parameter, "depth", "Depth"),
+         Parameter = str_replace(Parameter, "lat", "Latitude"),
+         Parameter = str_replace(Parameter, "_", " ")# BOOKMARK!!
+         ) %>%
+  flextable() %>%
+  colformat_md() %>%
+  identity()
+```
+
+## How does the model look if I just linearly regress the estemated beta diversity values?
+Instead of using the breakawy function
+
+```{r}
+breakLm <- lm(estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + lat +  I(lat^2) + depth, data = richSummaryExpanded)
+summary(breakLm)
+```
+Same overall pattern with less statistical significance
+
+I don't think this workbook returns any figures or tables that are directly used in the manuscript. Look in 
+ConventialAlpha.Rmd for those data
+
+######################
+# As above but with enviromental framing
+##########################
+
+# Betta
+The betta model in breakaway looks for trends in the data
+
+```{r}
+myBet_Env_Depth <- betta(
+  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2) +Oxygen + depth,
+  ses = error,
+  data = richSummaryExpanded  %>% mutate(Oyxgen = log10(Oxygen + 0.03))
+)
+```
+
+```{r}
+myBet_Env_Depth$table
+```
+
+
+```{r}
+myBet_Env <- betta(
+  formula = estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2) +Oxygen,
+  ses = error,
+  data = richSummaryExpanded %>% mutate(Oxygen = log10(Oxygen + 0.03))
+)
+```
+
+```{r}
+myBet_Env$table
+```
+
+There is a statistical effect for everything except oxygen.
+
+
+
+# A prettier table of the results
+```{r}
+
+
+
+myBet_Env$table %>% as.data.frame() %>% rownames_to_column(var = "Parameter") %>%
+  mutate(Estimates = format(Estimates, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+         ) %>%
+  mutate(`Standard Errors` = format(`Standard Errors`, digits = 2, scientific = TRUE) %>%
+           reformat_sci()
+  ) %>%
+  mutate(`p` = if_else(`p-values` < 0.001, "<0.001", paste(" ", as.character(`p-values`)))) %>%
+  select(-`p-values`) %>%
+  #mutate(Parameter = str_remove_all(Parameter, "I\\(|^\\(|\\)$")) %>% # why won't it remove left facing parentheses
+  #mutate(Parameter = str_remove(Parameter, "\\)")) %>%
+  mutate(Parameter = str_replace(Parameter, "^I?\\((.*)\\)", "\\1"),
+         Parameter = str_replace(Parameter, "\\^2", "\\^2\\^"),
+         Parameter = str_replace(Parameter, "depth", "Depth"),
+         Parameter = str_replace(Parameter, "lat", "Latitude"),
+         Parameter = str_replace(Parameter, "_", " ")# BOOKMARK!!
+         ) %>%
+  flextable() %>%
+  colformat_md() %>%
+  identity()
+```
+
+## How does the model look if I just linearly regress the estemated beta diversity values?
+Instead of using the breakawy function
+
+```{r}
+breakLm_Env <- lm(estimate ~ log(Size_Class) + I(log(Size_Class) ^2) + Salinity +  I(Salinity^2) + Oxygen + depth, data = richSummaryExpanded %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+summary(breakLm_Env)
+```

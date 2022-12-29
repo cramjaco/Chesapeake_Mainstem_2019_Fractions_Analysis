@@ -424,6 +424,11 @@ rdaConstrained_wdepth <- rda(wideASVs_log ~ Salinity + Depth_m  + log(Oxygen + 0
 anova(rdaConstrained_wdepth, by = "margin")
 ```
 
+```{r}
+rdaConstrained_env3 <- rda(wideASVs_log ~ Salinity  + Oxygen + Depth_m + sqrt(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
+mooAnova_Env3 <- anova(rdaConstrained_env3, by = "margin", permutations = 9999)
+mooAnova_Env3
+```
 
 ```{r}
 rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + sqrt(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
