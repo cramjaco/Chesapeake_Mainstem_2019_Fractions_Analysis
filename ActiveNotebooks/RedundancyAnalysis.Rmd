@@ -89,7 +89,7 @@ myPlotDetails <- list(
 but pretty this time
 
 ```{r}
-rdaConstrained <- rda(wideASVs_log ~ lat + Depth2 + sqrt(Size_Class), data = sampleData01)
+rdaConstrained <- rda(wideASVs_log ~ lat + Depth2 + log10(Size_Class), data = sampleData01)
 ```
 
 ```{r}
@@ -115,7 +115,7 @@ And a row added for residual and for total
 # unicode: 00a0
 betaTable <- mooAnova %>% broom::tidy() %>%
   mutate(`% Variance` = Variance/sum(Variance)) %>%
-  mutate(term = recode(term, lat = "Latitude", Depth2 = "Depth", `sqrt(Size_Class)` = "√Size Class")) %>%
+  mutate(term = recode(term, lat = "Latitude", Depth2 = "Depth", `log10(Size_Class)` = "√Size Class")) %>%
   select(Term = term, DF = df, Variance, `% Variance`, T = statistic, p = p.value) %>%
     mutate(Variance = format(Variance, digits = 3),
          `% Variance` = format(`% Variance`, digits = 2),
@@ -310,7 +310,7 @@ wideASVs_log_NoFree <- wideASVs_log_NoFree[match(sampleData_NoFree$ID, rownames(
 ```
 
 ```{r}
-rdaConstrained_NoFree <- rda(wideASVs_log_NoFree ~ lat + Depth2 + sqrt(Size_Class), data = sampleData_NoFree)
+rdaConstrained_NoFree <- rda(wideASVs_log_NoFree ~ lat + Depth2 + log10(Size_Class), data = sampleData_NoFree)
 ```
 
 ```{r}
@@ -338,7 +338,7 @@ wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID, rownam
 ```
 
 ```{r}
-rdaConstrained_NoSmall <- rda(wideASVs_log_NoSmall ~ lat + Depth2 + sqrt(Size_Class), data = sampleData_NoSmall)
+rdaConstrained_NoSmall <- rda(wideASVs_log_NoSmall ~ lat + Depth2 + log10(Size_Class), data = sampleData_NoSmall)
 ```
 
 ```{r}
@@ -411,7 +411,7 @@ betaThreeTable
 # Comparing to environmental parameters
 
 ```{r}
-rdaConstrained_env <- rda(wideASVs_log ~ Salinity + Depth2 + sqrt(Size_Class), data = sampleData01)
+rdaConstrained_env <- rda(wideASVs_log ~ Salinity + Depth2 + log10(Size_Class), data = sampleData01)
 ```
 
 ```{r}
@@ -422,18 +422,18 @@ anova(rdaConstrained_env, by = "margin")
 My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_env)
 ```
 ```{r}
-rdaConstrained_wdepth <- rda(wideASVs_log ~ Salinity + Depth_m  + log(Oxygen + 0.03) + sqrt(Size_Class), data = sampleData01)
+rdaConstrained_wdepth <- rda(wideASVs_log ~ Salinity + Depth_m  + log(Oxygen + 0.03) + log10(Size_Class), data = sampleData01)
 anova(rdaConstrained_wdepth, by = "margin")
 ```
 
 ```{r}
-rdaConstrained_env3 <- rda(wideASVs_log ~ Salinity  + Oxygen + Depth_m + sqrt(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
+rdaConstrained_env3 <- rda(wideASVs_log ~ Salinity  + Oxygen + Depth_m + log10(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
 mooAnova_Env3 <- anova(rdaConstrained_env3, by = "margin", permutations = 9999)
 mooAnova_Env3
 ```
 
 ```{r}
-rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + sqrt(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
+rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + log10(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
 mooAnova_Env <- anova(rdaConstrained_env2, by = "margin", permutations = 9999)
 mooAnova_Env
 ```
@@ -483,7 +483,7 @@ wideASVs_log_MeasuredParticles <- wideASVs_log[match(sampleData_MeasuredParticle
 
 
 ```{r}
-rdaConstrained_env_particles <- rda(wideASVs_log_MeasuredParticles ~ Salinity  + log(Oxygen + 0.03) + sqrt(Size_Class) + I(CarbonPerLiter_mg/MassperLiter) + I(NitrogenPerLiter_mg/CarbonPerLiter_mg) + `δ13CVPDB (‰)` + `δ15NAir (‰)`, data = sampleData_MeasuredParticles)
+rdaConstrained_env_particles <- rda(wideASVs_log_MeasuredParticles ~ Salinity  + log(Oxygen + 0.03) + log10(Size_Class) + I(CarbonPerLiter_mg/MassperLiter) + I(NitrogenPerLiter_mg/CarbonPerLiter_mg) + `δ13CVPDB (‰)` + `δ15NAir (‰)`, data = sampleData_MeasuredParticles)
 ```
 
 ```{r}
@@ -503,14 +503,14 @@ ordistep(rdaConstrained_env2)
 ```{r}
 rdaConstrained_env3 <- rda(wideASVs_log ~ Salinity + I(Salinity^2)  + Oxygen + Size + I(Size^2), data = sampleData01 %>%
                              mutate(Oxygen = log(Oxygen + 0.03),
-                                    Size = sqrt(Size_Class)))
+                                    Size = log10(Size_Class)))
 anova(rdaConstrained_env3, by = "margin")
 ```
 ```{r}
 rdaConstrained_position <- rda(wideASVs_log ~ Latitude + I(Latitude^2) + Depth + Size + I(Size^2), data = sampleData01 %>%
                         select(-Depth) %>%
                         rename(Latitude = lat, Depth = Depth2) %>%
-                        mutate(Size = sqrt(Size_Class)))
+                        mutate(Size = log10(Size_Class)))
 anova(rdaConstrained_position, by = "margin")
 ```
 
@@ -543,9 +543,9 @@ plot(rdaConstrained_position, choices = c(1,6))
 
 # No Free and Small, but this time with an environmental focus
 
-rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + sqrt(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
+rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + log10(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
 ```{r}
-rdaConstrained_NoFree_Env <- rda(wideASVs_log_NoFree ~ Salinity + Oxygen + sqrt(Size_Class), data = sampleData_NoFree %>% mutate(Oxygen = log(Oxygen + 0.03)))
+rdaConstrained_NoFree_Env <- rda(wideASVs_log_NoFree ~ Salinity + Oxygen + log10(Size_Class), data = sampleData_NoFree %>% mutate(Oxygen = log(Oxygen + 0.03)))
 ```
 
 ```{r}
@@ -569,7 +569,7 @@ plotNoFreeRda_Env
 
 
 ```{r}
-rdaConstrained_NoSmall_Env <- rda(wideASVs_log_NoSmall ~ Salinity + Oxygen + sqrt(Size_Class), data = sampleData_NoSmall %>% mutate(Oxygen = log(Oxygen + 0.03)))
+rdaConstrained_NoSmall_Env <- rda(wideASVs_log_NoSmall ~ Salinity + Oxygen + log10(Size_Class), data = sampleData_NoSmall %>% mutate(Oxygen = log(Oxygen + 0.03)))
 ```
 
 ```{r}
@@ -620,7 +620,7 @@ betaThreeTable_Env <- threeAnovas_Env %>%
   #mutate(`% Variance` = paste0(round(Variance/sum(Variance) * 100, 1), "%")) %>%
   mutate(`% Variance` = scales::percent(Variance/sum(Variance), accuracy = 0.1)) %>%
   
-  mutate(term = recode(term, lat = "Latitude", Depth2 = "Depth", `sqrt(Size_Class)` = "√Size Class")) %>%
+  mutate(term = recode(term, lat = "Latitude", Depth2 = "Depth", `log10(Size_Class)` = "log10(Size Class)")) %>%
   select(Dataset, Term = term, DF = df, Variance, `% Variance`, T = statistic, p = p.value) %>%
     mutate(Variance = format(Variance, digits = 3),
          `% Variance` = format(`% Variance`, digits = 2),
@@ -638,3 +638,5 @@ betaThreeTable_Env <- threeAnovas_Env %>%
 betaThreeTable_Env %>% save_as_docx(path = here::here("Tables", "betaThreeTable_Env.docx"))
 betaThreeTable_Env
 ```
+
+These numbers aren't quite matching the figures. Need to investegate.
