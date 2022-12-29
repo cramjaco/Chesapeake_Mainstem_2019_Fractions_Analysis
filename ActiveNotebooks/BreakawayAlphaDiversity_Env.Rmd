@@ -174,9 +174,9 @@ The betta model in breakaway looks for trends in the data
 
 ```{r}
 myBet_Env_Depth <- betta(
-  formula = estimate ~ sqrt(Size_Class) + I(sqrt(Size_Class) ^2) + Salinity +  I(Salinity^2)  + Oxygen + depth,
+  formula = estimate ~ log10(Size_Class) + I(log10(Size_Class) ^2) + Salinity +  I(Salinity^2)  + log10(Oxygen + 0.03) + depth,
   ses = error,
-  data = richSummaryExpanded  %>% mutate(Oxygen = log10(Oxygen + 0.03))
+  data = richSummaryExpanded
 )
 ```
 
@@ -187,9 +187,9 @@ myBet_Env_Depth$table
 
 ```{r}
 myBet_Env <- betta(
-  formula = estimate ~ sqrt(Size_Class) + I(sqrt(Size_Class) ^2) + Salinity +  I(Salinity^2) +Oxygen,
+  formula = estimate ~ log10(Size_Class) + I(log10(Size_Class) ^2) + Salinity +  I(Salinity^2) +log10(Oxygen + 0.03),
   ses = error,
-  data = richSummaryExpanded %>% mutate(Oxygen = log10(Oxygen + 0.03))
+  data = richSummaryExpanded
 )
 ```
 
@@ -219,6 +219,7 @@ myBet_Env$table %>% as.data.frame() %>% rownames_to_column(var = "Parameter") %>
   #mutate(Parameter = str_remove(Parameter, "\\)")) %>%
   mutate(Parameter = str_replace(Parameter, "^I?\\((.*)\\)", "\\1"),
          Parameter = str_replace(Parameter, "\\^2", "\\^2\\^"),
+         Parameter = str_replace(Parameter, "log10", "log\\~10\\~"),
          Parameter = str_replace(Parameter, "depth", "Depth"),
          Parameter = str_replace(Parameter, "lat", "Latitude"),
          Parameter = str_replace(Parameter, "_", " ")# BOOKMARK!!
@@ -232,6 +233,6 @@ myBet_Env$table %>% as.data.frame() %>% rownames_to_column(var = "Parameter") %>
 Instead of using the breakawy function
 
 ```{r}
-breakLm_Env <- lm(estimate ~ sqrt(Size_Class) + I(sqrt(Size_Class) ^2) + Salinity +  I(Salinity^2) + Oxygen, data = richSummaryExpanded %>% mutate(Oxygen = log10(Oxygen + 0.03)))
+breakLm_Env <- lm(estimate ~ log10(Size_Class) + I(log10(Size_Class) ^2) + Salinity +  I(Salinity^2) + log10(Oxygen + 0.03), data = richSummaryExpanded)
 summary(breakLm_Env)
 ```

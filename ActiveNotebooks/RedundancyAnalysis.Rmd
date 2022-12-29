@@ -21,6 +21,8 @@ Step 4 - CCA with Size, factoring out Station and Depth, > 5 micron only
 
 Try to get nice looking CCA plots with symbols on each
 
+# To do -- I wonder what happens if I log transform the size class instead of sqrt transforming
+
 ```{r}
 library(ggvegan)
 library(vegan)
