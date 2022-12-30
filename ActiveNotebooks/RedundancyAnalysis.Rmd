@@ -1,6 +1,9 @@
 ---
 title: "R Notebook"
 output: html_notebook
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 Trying to be more systematic about constrained CCA.
@@ -15,9 +18,11 @@ Step 1 -- CCA with Station and Depth and Size
 
 Step 2 -- CCA with Size, factoring out Station and Depth
 
-Step 3 -- CCA with Size, factoring out Station and Depth, removing Free-living microbes
+Step 3 -- CCA with Size, factoring out Station and Depth, removing
+Free-living microbes
 
-Step 4 - CCA with Size, factoring out Station and Depth, > 5 micron only
+Step 4 - CCA with Size, factoring out Station and Depth, \> 5 micron
+only
 
 Try to get nice looking CCA plots with symbols on each
 
@@ -42,9 +47,7 @@ nonSpikes20 <- env1$nonSpikes20
 sampleData <- env1$sampleData
 ```
 
-
 # Setup
-
 
 ```{r}
 wideASVs <- nonSpikes20 %>%
@@ -60,13 +63,13 @@ wideASVs <- nonSpikes20 %>%
 sampleData01 <- sampleData[match(rownames(wideASVs), sampleData$ID),]
 ```
 
-
 ```{r}
 wideASVs_log <- log(wideASVs + 1)
 wideASVs_scaled <- scale(wideASVs_log)
 ```
 
 ## Plot settings
+
 ```{r}
 filterSizes <- c(0.2, 1.2, 5, 20, 53, 180, 500)
 myGuides <-   guides(shape = guide_legend(ncol = 2), fill = guide_legend(ncol = 2),
@@ -84,8 +87,8 @@ myPlotDetails <- list(
 )
 ```
 
-
 # RDA with everything
+
 but pretty this time
 
 ```{r}
@@ -97,18 +100,15 @@ rdaConstrained
 anova(rdaConstrained)
 ```
 
-
-
 ```{r}
 mooAnova <- anova(rdaConstrained, by = "margin", permutations = 9999)
 mooAnova
 mooAnova$Variance/sum(mooAnova$Variance) # proportions explained
 sum(mooAnova$Variance[1:3])/sum(mooAnova$Variance) # same as total variance explained? Very similar
 ```
-Lets make this into a nice table
-Columns are variance?,  percent variance explained, F, P
-And a row added for residual and for total
 
+Lets make this into a nice table Columns are variance?, percent variance
+explained, F, P And a row added for residual and for total
 
 ```{r}
 # note that I'm using a non breaking space in the percent variance variable name
@@ -154,7 +154,11 @@ CCAPctVarPlot
 
 CCA_Eigen_Plot(rdaConstrained)
 ```
-This looks pretty awful, but Its not going in the paper I don't think so I'll leave it for now.
+
+This looks pretty awful, but Its not going in the paper I don't think so
+I'll leave it for now.
+
+## Main CCA Doing and Plotting Functions
 
 ```{r}
 my_fortify_function <- function(ccaConstrained){
@@ -191,14 +195,14 @@ My_Constrained_RDA_Plot_Type1 <- function(ccaConstrainedFort, ccaConstrained){
          fill = "Station",
          shape = "Station",
          size = "Size Class") +
-        geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 7, yend = RDA2 * 7), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.9, arrow = arrow(length = unit(0.1, "in")), color = "gray20") +
-    geom_label(aes(label = Label2, x = RDA1 * 9, y = RDA2 * 9),
+        geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 6, yend = RDA2 * 6), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.9, arrow = arrow(length = unit(0.1, "in")), color = "gray20") +
+    geom_label(aes(label = Label2, x = RDA1 * 7.5, y = RDA2 * 7.5),
                color = "black", fill = "white", alpha = 0.4,
                show.legend = FALSE,
                data = ccaConstrainedFort %>%
                  filter(Score == "biplot") %>%
                  mutate(Label = recode(Label, lat = "Lat",
-                                       `sqrt(Size_Class)` = "Size",
+                                       `log10(Size_Class)` = "Size",
                                        `Depth2Surface` = "Surface",
                                        `log10(Oxygen + 0.03)` = "Oxygen"
                  )) %>%
@@ -211,7 +215,7 @@ My_Constrained_RDA_Plot_Type1 <- function(ccaConstrainedFort, ccaConstrained){
                  identity()
     ) +
 
-    lims(x = c(range(ccaConstrainedFort$RDA1)[1] * 1.1, range(ccaConstrainedFort$RDA1)[2] * 1.5), y = range(ccaConstrainedFort$RDA2 * 1.1)) +
+    lims(x = c(range(ccaConstrainedFort$RDA1)[1] * 1.1, range(ccaConstrainedFort$RDA1)[2] * 1.7), y = range(ccaConstrainedFort$RDA2 * 1.1)) + # BOOKMARK
     myPlotDetails +
     guides(color = guide_legend(override.aes = list(shape = 21, size = 2, stroke = 2, fill = "gray")),
            shape = guide_legend(override.aes = list(size = 3)),
@@ -234,9 +238,9 @@ mainRDA
 ggsave(here::here("Figures", "mainRDA.png"),mainRDA, height = 4.4, width = 6)
 ```
 
+Axis 1 vs 3 Not the most dry code I've ever done, but I'm not sure how
+to actually do this, so I'm manually changing the axes
 
-Axis 1 vs 3
-Not the most dry code I've ever done, but I'm not sure how to actually do this, so I'm manually changing the axes
 ```{r}
 My_Constrained_RDA_Plot_Type1_13 <- function(ccaConstrainedFort, ccaConstrained){
   ccaConstrainedPlot <- ccaConstrainedFort %>%
@@ -252,7 +256,7 @@ My_Constrained_RDA_Plot_Type1_13 <- function(ccaConstrainedFort, ccaConstrained)
  geom_point() +
  coord_fixed(sqrt(ccaConstrained$CCA$eig[2]/ccaConstrained$CCA$eig[1])) +
 
-  geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 7, yend = RDA3 * 7), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.9, arrow = arrow(length = unit(0.1, "in")), color = "gray20") +
+  geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 6, yend = RDA3 * 6), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.9, arrow = arrow(length = unit(0.1, "in")), color = "gray20") +
   #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
     labs(x = paste0("RDA1 (", round(ccaConstrained$CCA$eig[1]/ccaConstrained$tot.chi, 3) * 100, "%)"),
        y = paste0("RDA3 (", round(ccaConstrained$CCA$eig[3]/ccaConstrained$tot.chi, 3) * 100, "%)"),
@@ -260,19 +264,19 @@ My_Constrained_RDA_Plot_Type1_13 <- function(ccaConstrainedFort, ccaConstrained)
        fill = "Station",
        shape = "Station",
        size = "Size Class") +
-     geom_label(aes(label = Label2, x = RDA1 * 9, y = RDA3 * 9),
+     geom_label(aes(label = Label2, x = RDA1 * 7.5, y = RDA3 * 7.5),
             color = "black", fill = "white", alpha = 0.6,
             show.legend = FALSE,
            data = ccaConstrainedFort %>%
              filter(Score == "biplot") %>%
              mutate(Label = recode(Label, lat = "Lat",
-                                   `sqrt(Size_Class)` = "Size",
+                                   `log10(Size_Class)` = "Size",
                                    `Depth2Surface` = "Surface"
                                    )) %>%
              mutate(PctExplained = my_percent_explained(ccaConstrained)) %>%
              mutate(Label2 = paste0(Label, "\n", round(PctExplained, 3) * 100, "%"))
              ) +
-    lims(x = c(range(ccaConstrainedFort$RDA1)[1] * 1.1, range(ccaConstrainedFort$RDA1)[2] * 1.5), y = range(ccaConstrainedFort$RDA3 * 1.1)) +
+    lims(x = c(range(ccaConstrainedFort$RDA1)[1] * 1.1, range(ccaConstrainedFort$RDA1)[2] * 1.7), y = range(ccaConstrainedFort$RDA3 * 1.1)) +
   myPlotDetails +
   guides(color = guide_legend(override.aes = list(shape = 21, size = 2, stroke = 2, fill = "gray")),
          shape = guide_legend(override.aes = list(size = 3)),
@@ -295,14 +299,13 @@ mainRDA13
 ggsave(here::here("Figures", "mainRDA_axis1and3.png"),mainRDA13, height = 4, width = 6)
 ```
 
-
 ```{r}
 rdaConstrainedFort <- fortify(rdaConstrained) %>% filter(Score %in% c("sites", "biplot")) %>% # not sure what constraints are
  left_join(microbialAbundance, by = c("Label" = "ID"))
 ```
 
-
 # As above, but this time without the 0.2 micron data
+
 ```{r}
 sampleData_NoFree <- sampleData01 %>% filter(Size_Class > 1)
 wideASVs_log_NoFree <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoFree$ID,]
@@ -318,6 +321,7 @@ rdaConstrained_NoFree
 anovaNofree <- anova(rdaConstrained_NoFree, by = "margin", permutations = how(nperm=9999))
 anovaNofree
 ```
+
 ```{r}
 plotNoFreeRda <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoFree) + 
   scale_size(breaks = sqrt(filterSizes),
@@ -325,9 +329,6 @@ plotNoFreeRda <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoFree) +
 
 plotNoFreeRda
 ```
-
-
-
 
 # As above but without 0.2 or 1.2 micron data
 
@@ -346,19 +347,21 @@ rdaConstrained_NoSmall
 anovaNoSmall <- anova(rdaConstrained_NoSmall, by = "margin", permutations = how(nperm=9999))
 anovaNoSmall
 ```
+
 ```{r}
 plotNoSmallRda<- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoSmall) + lims(x = c(-10, 11)) + scale_size(breaks = sqrt(filterSizes),
              labels = filterSizes, range = c(2.5,6))
 plotNoSmallRda
 ```
+
 ```{r fig.width=7, fig.height = 8}
 plot_grid(plotNoFreeRda ,
                            plotNoSmallRda ,
                            labels = LETTERS, nrow = 2)
 ```
 
-
-Cowplot the last two together so they can be one supplemental figure
+Cowplot the last two together so they can be one supplemental figure \>
+These looked different from eachother. Check them.
 
 ```{r fig.width = 7, fig.height = 8}
 legend_rda <- get_legend(
@@ -371,6 +374,7 @@ bigSubsetsRda0 <- plot_grid(plotNoFreeRda + theme(legend.position = "none"),
 bigSubsetsRda <- plot_grid(bigSubsetsRda0, legend_rda, rel_widths = c(10, 2))
 bigSubsetsRda
 ```
+
 ```{r}
 ggsave(here::here("Figures", "bigSubsetsRda.png"), bigSubsetsRda, height = 8, width = 8)
 ```
@@ -387,6 +391,7 @@ anovaNoSmall %>% broom::tidy() %>% mutate(dataset = "≥ 5 Micron Particles")
 
 betaThreeTable <- threeAnovas %>%
   #mutate(`% Variance` = paste0(round(Variance/sum(Variance) * 100, 1), "%")) %>%
+  group_by(Dataset) %>%
   mutate(`% Variance` = scales::percent(Variance/sum(Variance), accuracy = 0.1)) %>%
   
   mutate(term = recode(term, lat = "Latitude", Depth2 = "Depth", `sqrt(Size_Class)` = "√Size Class")) %>%
@@ -421,6 +426,7 @@ anova(rdaConstrained_env, by = "margin")
 ```{r}
 My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_env)
 ```
+
 ```{r}
 rdaConstrained_wdepth <- rda(wideASVs_log ~ Salinity + Depth_m  + log(Oxygen + 0.03) + log10(Size_Class), data = sampleData01)
 anova(rdaConstrained_wdepth, by = "margin")
@@ -437,12 +443,13 @@ rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + log10(Size_Class)
 mooAnova_Env <- anova(rdaConstrained_env2, by = "margin", permutations = 9999)
 mooAnova_Env
 ```
+
+## Run Env CCA
 ```{r}
 EnvRDA <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_env2)
 EnvRDA
 EnvRDA13 <- My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained_env2)
 ```
-
 
 ```{r fig.height = 7, fig.width = 6}
 EnvRDA123 <- plot_grid(
@@ -460,7 +467,6 @@ EnvRDA123
 ggsave(here("Figures", "EnvRDA.png"), plot = EnvRDA123, height = 7, width = 6)
 ```
 
-
 ```{r fig.height = 4, fig.width = 8}
 combinedRDA <- plot_grid( mainRDA + theme(legend.position = "none"), 
            EnvRDA + theme(legend.position = "none"),
@@ -468,19 +474,19 @@ combinedRDA <- plot_grid( mainRDA + theme(legend.position = "none"),
 combinedRDA
 ```
 
+sampleData_NoSmall \<- sampleData01 %\>% filter(Size_Class \> 2)
+wideASVs_log_NoSmall \<- wideASVs_log[rownames(wideASVs_log) %in%
+sampleData_NoSmall$ID,] wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID,
+rownames(wideASVs_log_NoSmall)),]
 
-sampleData_NoSmall <- sampleData01 %>% filter(Size_Class > 2)
-wideASVs_log_NoSmall <- wideASVs_log[rownames(wideASVs_log) %in% sampleData_NoSmall$ID,]
-wideASVs_log_NoSmall <- wideASVs_log_NoSmall[match(sampleData_NoSmall$ID, rownames(wideASVs_log_NoSmall)),]
+Particle characteristics? Have to strike the 0.2 and omit any missing
+values.
 
-Particle characteristics?
-Have to strike the 0.2 and omit any missing values.
 ```{r}
 sampleData_MeasuredParticles <- sampleData01 %>%
   filter(!is.na(CarbonPerLiter_mg) & !is.na(MassperLiter))
 wideASVs_log_MeasuredParticles <- wideASVs_log[match(sampleData_MeasuredParticles$ID, rownames(wideASVs_log)),]
 ```
-
 
 ```{r}
 rdaConstrained_env_particles <- rda(wideASVs_log_MeasuredParticles ~ Salinity  + log(Oxygen + 0.03) + log10(Size_Class) + I(CarbonPerLiter_mg/MassperLiter) + I(NitrogenPerLiter_mg/CarbonPerLiter_mg) + `δ13CVPDB (‰)` + `δ15NAir (‰)`, data = sampleData_MeasuredParticles)
@@ -490,15 +496,15 @@ rdaConstrained_env_particles <- rda(wideASVs_log_MeasuredParticles ~ Salinity  +
 extractAIC(rdaConstrained_env_particles)
 ```
 
-
 ```{r}
 anova(rdaConstrained_env_particles, by = "margin")
 ```
+
 ```{r}
 ordistep(rdaConstrained_env2)
 ```
-# Squared terms
 
+# Squared terms
 
 ```{r}
 rdaConstrained_env3 <- rda(wideASVs_log ~ Salinity + I(Salinity^2)  + Oxygen + Size + I(Size^2), data = sampleData01 %>%
@@ -506,6 +512,7 @@ rdaConstrained_env3 <- rda(wideASVs_log ~ Salinity + I(Salinity^2)  + Oxygen + S
                                     Size = log10(Size_Class)))
 anova(rdaConstrained_env3, by = "margin")
 ```
+
 ```{r}
 rdaConstrained_position <- rda(wideASVs_log ~ Latitude + I(Latitude^2) + Depth + Size + I(Size^2), data = sampleData01 %>%
                         select(-Depth) %>%
@@ -520,6 +527,7 @@ rdaConstrained_position
 rdaConstrained_env2
 rdaConstrained_env3
 ```
+
 ```{r}
 rdaConstrained %>% extractAIC()
 rdaConstrained_position %>% extractAIC()
@@ -537,13 +545,17 @@ envRDA_Quadratic
 ```{r}
 My_Constrained_RDA_Plot_Type1_wFort_13(rdaConstrained_position)
 ```
+
 ```{r}
 plot(rdaConstrained_position, choices = c(1,6))
 ```
 
 # No Free and Small, but this time with an environmental focus
 
-rdaConstrained_env2 <- rda(wideASVs_log ~ Salinity  + Oxygen + log10(Size_Class), data = sampleData01 %>% mutate(Oxygen = log(Oxygen + 0.03)))
+rdaConstrained_env2 \<- rda(wideASVs_log \~ Salinity + Oxygen +
+log10(Size_Class), data = sampleData01 %\>% mutate(Oxygen = log(Oxygen +
+0.03)))
+
 ```{r}
 rdaConstrained_NoFree_Env <- rda(wideASVs_log_NoFree ~ Salinity + Oxygen + log10(Size_Class), data = sampleData_NoFree %>% mutate(Oxygen = log(Oxygen + 0.03)))
 ```
@@ -562,11 +574,7 @@ plotNoFreeRda_Env <- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoFree_E
 plotNoFreeRda_Env
 ```
 
-
-
-
 ## As above but without 0.2 or 1.2 micron data
-
 
 ```{r}
 rdaConstrained_NoSmall_Env <- rda(wideASVs_log_NoSmall ~ Salinity + Oxygen + log10(Size_Class), data = sampleData_NoSmall %>% mutate(Oxygen = log(Oxygen + 0.03)))
@@ -577,17 +585,18 @@ rdaConstrained_NoSmall_Env
 anovaNoSmall_Env <- anova(rdaConstrained_NoSmall_Env, by = "margin", permutations = how(nperm=9999))
 anovaNoSmall_Env
 ```
+
 ```{r}
 plotNoSmallRda_Env<- My_Constrained_RDA_Plot_Type1_wFort(rdaConstrained_NoSmall_Env) + lims(x = c(-10, 11)) + scale_size(breaks = sqrt(filterSizes),
              labels = filterSizes, range = c(2.5,6))
 plotNoSmallRda_Env
 ```
+
 ```{r fig.width=7, fig.height = 8}
 plot_grid(plotNoFreeRda_Env ,
                            plotNoSmallRda_Env ,
                            labels = LETTERS, nrow = 2)
 ```
-
 
 Cowplot the last two together so they can be one supplemental figure
 
@@ -602,6 +611,7 @@ bigSubsetsRda0_Env <- plot_grid(plotNoFreeRda_Env + theme(legend.position = "non
 bigSubsetsRda_Env <- plot_grid(bigSubsetsRda0_Env, legend_rda, rel_widths = c(10, 2))
 bigSubsetsRda_Env
 ```
+
 ```{r}
 ggsave(here::here("Figures", "bigSubsetsRda_Env.png"), bigSubsetsRda_Env, height = 8, width = 8)
 ```
@@ -617,6 +627,7 @@ anovaNoSmall_Env %>% broom::tidy() %>% mutate(dataset = "≥ 5 Micron Particles"
   select(Dataset = dataset, everything())
 
 betaThreeTable_Env <- threeAnovas_Env %>%
+  group_by(Dataset) %>%
   #mutate(`% Variance` = paste0(round(Variance/sum(Variance) * 100, 1), "%")) %>%
   mutate(`% Variance` = scales::percent(Variance/sum(Variance), accuracy = 0.1)) %>%
   
@@ -639,4 +650,6 @@ betaThreeTable_Env %>% save_as_docx(path = here::here("Tables", "betaThreeTable_
 betaThreeTable_Env
 ```
 
-These numbers aren't quite matching the figures. Need to investegate.
+These percent variance numbers aren't quite matching the figures. For
+instance, "size" explains less variance in the table than the figures.
+Need to investegate.
