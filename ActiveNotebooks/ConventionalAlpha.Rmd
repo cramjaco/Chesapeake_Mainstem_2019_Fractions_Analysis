@@ -92,7 +92,8 @@ diversityData <- sampleData %>%
   left_join(richnessRare %>% t() %>% as.data.frame() %>% rownames_to_column("ID"), by = "ID") %>%
   left_join(shan %>% enframe(name = "ID", value = "shannonH"), by = "ID") %>%
   left_join(pielouJ %>% enframe(name = "ID", value = "pielouJ"), by = "ID") %>%
-  arrange(Size_Class)
+  arrange(Size_Class) %>%
+  mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom")))
 ```
 
 

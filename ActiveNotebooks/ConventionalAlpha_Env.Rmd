@@ -184,7 +184,7 @@ Rarified chao1 estimates
 chao1Mod <- lm(S.chao1 ~ log10(Size_Class) + I(log10(Size_Class)^2)  + Salinity + I(Salinity^2) + log10(Oxygen + 0.03), data = diversityData)
 summary(chao1Mod)
 ```
-As above but without latitude and depth
+As above but without salinity and oxygen
 ```{r}
 chao1ModSimple <- lm(S.chao1 ~ log10(Size_Class) + I(log10(Size_Class)^2), data = diversityData)
 summary(chao1ModSimple)
