@@ -464,7 +464,13 @@ EnvRDA123
 ```
 
 ```{r}
-ggsave(here("Figures", "EnvRDA.png"), plot = EnvRDA123, height = 7, width = 6)
+ggsave(here("Figures", "EnvRDA_12.png"), plot = EnvRDA, height = 4.5, width = 6)
+ggsave(here("Figures", "EnvRDA_13.png"), plot = EnvRDA13, height = 5, width = 6)
+```
+
+
+```{r}
+ggsave(here("Figures", "EnvRDA_123.png"), plot = EnvRDA123, height = 7, width = 6)
 ```
 
 ```{r fig.height = 4, fig.width = 8}
