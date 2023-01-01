@@ -185,6 +185,10 @@ OxyPlot <- UseCtdForOx %>%
   geom_point(data = UseCTD02 %>% filter((name %in% c("Oxygen"))), aes(shape = as.factor(Station), fill = as.factor(Station)), color = "black", size = 3)+
   #labs(y = "") +
   #lims(y = c(15, 0)) +
+  geom_hline(yintercept = 16) + # Add sulfitocline
+  annotate("label", x = 6, y = 16, label = "              ", fill = "white") +
+  annotate("text", x = 5.5, y = 16, label = bquote(H[2]*S), fill = "white") +
+  annotate("point", x = 7,  y = 16, shape = 23, color = "black", fill = viridis::plasma(6)[3], size = 3)+
   theme(strip.background = element_blank(),
         strip.placement = "outside",
         strip.text = element_text(size = 11),
@@ -238,12 +242,12 @@ SalinityPlot
 ```
 
 
-
+#sulfidePlot + lims(y = c(33, 0)) +
 ```{r}
-ProfilesWMapSulfide <- plot_grid(cbMap, SalinityPlot + lims(y = c(33, 0)),
+ProfilesWMapSulfide <- plot_grid(cbMap,
+                                 SalinityPlot + lims(y = c(33, 0)),
                                  OxyPlot + lims(y = c(33, 0)),
-                                 sulfidePlot + lims(y = c(33, 0)) +
-                                 theme(plot.margin = margin(t = 6, l = 9, r = 5, b = 17, unit = "pt")),
+                                 #theme(plot.margin = margin(t = 6, l = 9, r = 5, b = 17, unit = "pt")),
                                  rel_widths = c(1,1,1), nrow = 1,
                                  labels = LETTERS)
 ProfilesWMapSulfide

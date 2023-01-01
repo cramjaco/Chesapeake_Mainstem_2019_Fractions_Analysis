@@ -45,3 +45,8 @@ ggplot(aes(y = `Depth (m)`, x = `correct concentration`, shape = Site, fill = Si
         axis.title.x = element_text(size = 11))
 sulfidePlot
 ```
+
+```{r}
+ggsave(here("Figures", "sulfidePlot.png"), plot = sulfidePlot)
+```
+
