@@ -131,8 +131,8 @@ C:N Cite Van Mooy
 
 ```{r}
 deltaCNPlot <- plot_grid(
-  cb_plotter(`δ13CVPDB (‰)`, logify = FALSE, lab = "δ13C (‰)"),
-  cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = "δ15N (‰)"),
+  cb_plotter(`δ13CVPDB (‰)`, logify = FALSE, lab = bquote(`δ`^{13}*'C (‰)')),
+  cb_plotter(`δ15NAir (‰)`, logify = FALSE, lab = bquote(`δ`^{15}*'N (‰)')),
   nrow = 1,
   labels = LETTERS
 ) %>% append_xg()
