@@ -292,7 +292,7 @@ methano_plot_L_pi
 # I don't believe this plot
 
 
-# ammonia monooxygenase should be useful for identifying ammonium oxidizing archaea (and bacteria)
+# ammonia monooxygenase should be useful for identifying Ammonia oxidizing archaea (and bacteria)
 # But actually it didn't return anything, except somehow the same methaonogen we saw earleir?
 keggFindAndProcess("EC:2.8.4.1") # no asvs with that gene
 amo <- keggFindAndProcess("ammonia monooxygenase") # has one asv
@@ -320,7 +320,7 @@ nitriteox_plot_L  # this gene looks too general
 ## so lets show the following:
 # dissimilatory sulfite reductase havers
 # the one bug with pmoa
-# Anyone with Nitro in their genus name (ammonium oxidizers)
+# Anyone with Nitro in their genus name (Ammonia oxidizers)
 
 ## Combining the different approaches
 
@@ -344,16 +344,16 @@ pmoa_plot_L <- ches_brigandine_L(ASV, Class,
                 thresh = 2 * 10^4)
 pmoa_plot_L
 
-# Possible ammonium oxidizers
+# Possible Ammonia oxidizers
 # Threre are lots! Many not so aboundant
-ammonium_oxidizers_plot <- ches_brigandine_L(ASV, Kingdom,
+Ammonia_oxidizers_plot <- ches_brigandine_L(ASV, Kingdom,
 taxa %>% filter(Genus %in% nitrite_oxidizers) %>% pull(Kingdom) %>% unique() %>% na.omit,
 min = 1, max = 5, 
 ns = nonSpikes %>% rename(ASV0 = ASV, ASV = Tag_ASV) %>% 
 filter(Genus %in% nitrite_oxidizers[-1]),
 thresh = 0 * 10^4)
 
-ammonium_oxidizers_plot
+Ammonia_oxidizers_plot
 
 ## Looking for anammox
 keggFindAndProcess("hydrazine dehydrogenase") %>% .$enzymes %>% length() # gene exists
@@ -397,7 +397,7 @@ nsBiogeo <- nonSpikes %>%
   mutate(Family = case_when(
     (Biogeo == "Methane Cycling" & Order == "Methanofastidiosales" & is.na(Family)) ~ "Unknown\nMethanofastidiosales",
     Biogeo == "Nitrogen Cycling" ~ case_when(
-      #Family %in% c("Nitrosopumilaceae", "Nitrosomonadaceae") ~ paste0(Family, "\n(Ammonium Oxidizing)"),
+      #Family %in% c("Nitrosopumilaceae", "Nitrosomonadaceae") ~ paste0(Family, "\n(Ammonia Oxidizing)"),
       #Family %in% c("Nitrospiraceae") ~ paste0(Family, "\n(Nitrite Oxidizing)"),
       
       TRUE ~ Family
@@ -411,8 +411,8 @@ nsBiogeo <- nonSpikes %>%
     TRUE ~ Family
   ),
   Class = case_when(
-    (Biogeo == "Nitrogen Cycling" & Class == "Nitrososphaeria") ~ paste0(Class, "\n(Archaea)\n(Ammonium Oxidizing)"),
-    (Biogeo == "Nitrogen Cycling" & Class == "γ-proteobacteria") ~ paste0(Class, "\n(Ammonium Oxidizing)"),
+    (Biogeo == "Nitrogen Cycling" & Class == "Nitrososphaeria") ~ paste0(Class, "\n(Archaea)\n(Ammonia Oxidizing)"),
+    (Biogeo == "Nitrogen Cycling" & Class == "γ-proteobacteria") ~ paste0(Class, "\n(Ammonia Oxidizing)"),
     (Biogeo == "Nitrogen Cycling" & Class == "Nitrospira") ~ paste0(Class, "\n(Nitrite Oxidizing)"),
     (Biogeo == "Sulfur Cycling" & Class == "δ-proteobacteria") ~ paste0(Class, "\n(Sulfate Reducing)"),
     (Biogeo == "Methane Cycling" & Class == "Thermococci") ~ paste0(Class, "\n(Methanogenisis)"),
@@ -422,10 +422,10 @@ nsBiogeo <- nonSpikes %>%
            ) %>%
   mutate(Class = factor(Class,
                            levels = c(
-                             "Nitrososphaeria\n(Archaea)\n(Ammonium Oxidizing)",
+                             "Nitrososphaeria\n(Archaea)\n(Ammonia Oxidizing)",
                              "Thermococci\n(Methanogenisis)",
                              "α-proteobacteria",
-                             "γ-proteobacteria\n(Ammonium Oxidizing)",
+                             "γ-proteobacteria\n(Ammonia Oxidizing)",
                              "γ-proteobacteria\n(Methanotrophy)",
                              "γ-proteobacteria",
                              "δ-proteobacteria\n(Sulfate Reducing)",
