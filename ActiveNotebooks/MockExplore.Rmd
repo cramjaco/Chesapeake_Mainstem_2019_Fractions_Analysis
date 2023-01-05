@@ -71,3 +71,8 @@ Is this true of my dataset overall?
 
 And if you just look at the speces that are left, a bunch of them don't look like the input
 species (which are in the `Info` directory)
+
+```{r}
+counts_long_mock_01 %>% filter(SubType == "Even") %>% mutate(RAOver1Pct = RA > 0.01) %>% group_by(Run, RAOver1Pct)  %>% summarise(min = min(RA), max = max(RA), sum = sum(RA), n = n()) %>% arrange(RAOver1Pct)
+```
+
