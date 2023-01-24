@@ -59,6 +59,8 @@ silva_nr_v132_train_set.fa.gz*
 
 *.tgz
 
+Tables/nonSpikes.csv.gz
+
 *.stockholm
 ref_seqs_hmmaligh.fasta
 

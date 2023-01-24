@@ -264,6 +264,10 @@ sampleData <- microbialAbundance %>%
   left_join(stations01 %>% mutate(Station = as.numeric(Station)), by = "Station") %>%
   mutate(Depth2 = if_else(Depth == "Surface", "Surface", "NotSurface"))
 
+## Nonspikes but only the data that isn't in sampleData or taxa
+
+nonSpikes_minimal <- nonSpikes %>%
+  select(ASV, reads, ID, SpikeReads, conversionMultiplier, RA, copiesPerL)
 
 ## Dependent library functions
 
@@ -285,3 +289,6 @@ save(microbialAbundance, file = here::here("RDataFiles", "microbialAbundance.RDa
 save(nonSpikes, nonSpikes20, microbialAbundance, sampleData, my_sizes, ches_plot_options, file = here("RDataFiles", "InitialProcessing_3_minimal.RData"))
 
 write_csv(nonSpikes, file = gzfile(here::here("Tables", "nonSpikes.csv.gz")))
+write_csv(nonSpikes_minimal, file = gzfile(here::here("Tables", "normalized_abundance.csv.gz")))
+write_csv(sampleData, file = here::here("Tables", "sampleData.csv"))
+write_csv(taxa, file = here::here("Tables", "taxa.csv"))
