@@ -13,11 +13,25 @@ library(readxl)
 ```
 
 ```{r}
-sulfideRaw <- read_excel(here::here("InputData", "cb2019_sulfide sample log (1) (1)(1).xlsx"), range = "A2:J20")
+sulfideGomes <- read_excel(here::here("InputData", "cb2019_sulfide sample log (1) (1)(1).xlsx"), range = "A2:J20")
 ```
 
 ```{r}
-ggplot(sulfideRaw, aes(y = `Depth (m)`, x = `correct concentration`)) +
+sulfideCornwell <- read_excel(here::here("InputData", "July 2019 water column profile rev.xlsx")) %>%
+  slice(-1) %>%
+  mutate_all(as.numeric)
+```
+
+```{r}
+sulfideCombined <- bind_rows(
+  sulfideGomes %>% mutate(Lab = "JHU") %>% select(Lab, Site, `Depth (m)`, H2S = `correct concentration`), 
+  sulfideCornwell %>% mutate(Lab = "HPL", Site = "CB4.3C") %>% select(Lab, Site, `Depth (m)` = Depth, H2S)
+)
+```
+
+
+```{r}
+ggplot(sulfideCombined, aes(y = `Depth (m)`, x = H2S, color = Lab)) +
   geom_point() +
   scale_y_reverse() +
   labs(x = "Sulfide (μM)") +
@@ -26,27 +40,30 @@ ggplot(sulfideRaw, aes(y = `Depth (m)`, x = `correct concentration`)) +
   theme_bw(base_size = 16)+
   lims(y = c(25, 0))
 ```
-
+guides(color = guide_legend(override.aes = list(shape=1)))
 
 ```{r}
-sulfidePlot <- sulfideRaw %>% 
+sulfidePlot <- sulfideCombined %>% 
   arrange(Site) %>%
-ggplot(aes(y = `Depth (m)`, x = `correct concentration`, shape = Site, fill = Site)) +
-  geom_point(size = 3, alpha = 0.8) +
+ggplot(aes(y = `Depth (m)`, x = H2S, shape = Site, fill = Site, color = Lab)) +
+  geom_point(size = 3, alpha = 0.8, stroke = 1.5) +
   scale_y_reverse() +
   labs(x = "Sulfide (μM)") +
   #geom_vline(xintercept = 7.78 * 3) +
   theme_bw(base_size = 16)+
   lims(y = c(25, 0)) +
   scale_fill_manual(values = viridis::plasma(n = 6)[3:4]) +
+  scale_color_manual(values = c("blue", "black")) +
   scale_shape_manual(values = rep(21:25, 2)[3:4]) +
-  cowplot::theme_cowplot() +
-  theme(legend.position = "none", axis.title.y = element_blank(),
-        axis.title.x = element_text(size = 11))
+  cowplot::theme_cowplot()+
+  guides(color = guide_legend(override.aes = list(shape=1))) +
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_text(size = 11)
+        )
 sulfidePlot
 ```
 
 ```{r}
-ggsave(here("Figures", "sulfidePlot.png"), plot = sulfidePlot)
+ggsave(here("Figures", "sulfidePlot.png"), plot = sulfidePlot, height = 4, width = 4)
 ```
 
