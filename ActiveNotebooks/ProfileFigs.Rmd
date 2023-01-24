@@ -186,9 +186,10 @@ OxyPlot <- UseCtdForOx %>%
   #labs(y = "") +
   #lims(y = c(15, 0)) +
   geom_hline(yintercept = 16) + # Add sulfitocline
-  annotate("label", x = 6, y = 16, label = "              ", fill = "white") +
+  annotate("label", x = 6, y = 16, label = "                 ", fill = "white") +
   annotate("text", x = 5.5, y = 16, label = bquote(H[2]*S), fill = "white") +
-  annotate("point", x = 7,  y = 16, shape = 23, color = "black", fill = viridis::plasma(6)[3], size = 3)+
+  annotate("point", x = 6.65,  y = 16, shape = 23, color = "black", fill = viridis::plasma(6)[3], size = 3)+
+  annotate("point", x = 7.4,  y = 16, shape = 24, color = "black", fill = viridis::plasma(6)[4], size = 3)+
   theme(strip.background = element_blank(),
         strip.placement = "outside",
         strip.text = element_text(size = 11),
