@@ -6,8 +6,12 @@ output: html_notebook
 2022 November 18
 Jacob Cram
 
-We just got data back from UC dafvis of carbon and nitrogne content of particles.
+We just got data back from UC davis of carbon and nitrogne content of particles.
 This file is for examining that data
+
+I refer to things as "Molarity" a lot here, including in the title, because I originally though the measurments were in moles/L.  They are not, everything is in mg/L. The units in the figures should be correct.
+
+2023 March 20 -- I'm updating the figure S2 -- MCN_Molarity.png to correct the units.
 
 ```{r}
 library(tidyverse)
@@ -106,9 +110,9 @@ append_xg <- function(plt, txt = expression(paste("Particle Size (", mu, "m)")))
 
 ```{r}
 molarityPlot0 <- plot_grid(
-  cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/mm)"),
-  cb_plotter(CarbonPerLiter_mg/Bin_Size, logify = TRUE, lab = "POC (mg/L/mm)"),
-  cb_plotter(NitrogenPerLiter_mg/Bin_Size, logify = TRUE, lab = "PON (mg/L/mm)"),
+  cb_plotter(MassperLiter/Bin_Size, logify = TRUE, lab = "Particle Mass (mg/L/μm)"),
+  cb_plotter(CarbonPerLiter_mg/Bin_Size, logify = TRUE, lab = "POC (mg/L/μm)"),
+  cb_plotter(NitrogenPerLiter_mg/Bin_Size, logify = TRUE, lab = "PON (mg/L/μm)"),
   nrow = 1,
   labels = LETTERS
 )
