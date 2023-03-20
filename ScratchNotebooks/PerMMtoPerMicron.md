@@ -5,8 +5,8 @@ Fortunately, this problem affects only units that I report things in and not any
 
 The following figures need to be updated
 
-Figure 2, panels A&C -- MassAndAbundanceNoMap.png --
-Figure S2, all, MCN_Molarity.png --
+Figure 2, panels A&C -- MassAndAbundanceNoMap.png -- AllMicrobesFigures.qmd; (Resaved)
+Figure S2, all, MCN_Molarity.png -- ParticulateMolarity.Rmd; (Resaved)
 Figure S23, all, bottomNS.png, oxyclineNS.png, surfaceNS.png
 
 I need to comment the code so that when I define something as /L/mm, I clarify in the comments that the units are wrong.
