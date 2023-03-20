@@ -26,6 +26,9 @@ load(here::here("RDataFiles", "microbialAbundance.RData"))
 my_sizes <- sort(unique(microbialAbundance$Size_Class))
 source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 
+# This operation stopped sticking for some reaon, so I'm redoing it.
+microbialAbundance <- microbialAbundance %>% 
+  mutate(Depth = ordered(Depth, levels = c("Surface", "Oxycline", "Bottom")))
 ```
 
 

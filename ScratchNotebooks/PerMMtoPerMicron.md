@@ -13,3 +13,5 @@ I need to comment the code so that when I define something as /L/mm, I clarify i
 Actually, it turns out that we devide by bin width when plotting happens and not before. So things are correct as written.
 
 I need to update the text in two places.
+
+For reasons I don't understand, some of these plots loo
