@@ -79,7 +79,7 @@ abunPlot_perL <- microbialAbundance %>%
   scale_y_log10nice(omag = seq(from = 3, to = 11, by = 2)) +
 theme_bw(base_size = 14) +
 
-   labs(y = "16s + 18s Genes/L/mm", x = expression(paste("Particle Size (", mu, "m)")))+
+   labs(y = "16s + 18s Genes/L/μm", x = expression(paste("Particle Size (", mu, "m)")))+
   theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
         axis.title.x = element_blank(),

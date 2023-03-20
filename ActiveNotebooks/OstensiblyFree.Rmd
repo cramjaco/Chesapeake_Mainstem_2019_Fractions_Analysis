@@ -103,7 +103,7 @@ surfaceNSPlot <- nonSpikes1pct_Surface %>%
   scale_color_manual(values = viridis::plasma(n = 6)[c(1,2,4)]) +
   theme_bw(base_size = 14) +
   #theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
-  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")  +
+  labs(y = "16s Copies/L/μm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")  +
   theme(axis.text.x = element_text(angle = 90), strip.text = element_text(size = 8))
 surfaceNSPlot
 ggsave(here("Figures", "surfaceNS.png"), plot = surfaceNSPlot, height = 8, width = 8.5, limitsize = FALSE)
@@ -127,7 +127,7 @@ oxyclineNSPlot <- nonSpikes1pct_Oxycline %>%
   scale_color_manual(values = viridis::plasma(n = 6)[c(3,4)]) +
   theme_bw(base_size = 14) +
   #theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
-  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")  +
+  labs(y = "16s Copies/L/μm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")  +
   theme(axis.text.x = element_text(angle = 90), strip.text = element_text(size = 8))
 oxyclineNSPlot
 ggsave(here("Figures", "oxyclineNS.png"), plot = oxyclineNSPlot, height = 8, width = 8.5, limitsize = FALSE)
@@ -147,7 +147,7 @@ bottomNSPlot <- nonSpikes1pct_Bottom %>% filter(Depth == "Bottom") %>%
   scale_color_manual(values = viridis::plasma(n = 6)[-3]) +
   theme_bw(base_size = 12) +
   #theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
-  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station") +
+  labs(y = "16s Copies/L/μm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station") +
   theme(axis.text.x = element_text(angle = 90), strip.text = element_text(size = 8))
 bottomNSPlot
 ggsave(here("Figures", "bottomNS.png"), plot = bottomNSPlot, height = 11, width = 8.5, limitsize = FALSE)
@@ -171,7 +171,7 @@ nonSpikes1pct %>% filter(Depth == "Surface") %>%
   scale_color_viridis_d(option = "plasma") +
   theme_bw(base_size = 14) +
   #theme(axis.text.x = element_text(angle = 90), legend.position = "none") +
-  labs(y = "16s Copies/L/mm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")
+  labs(y = "16s Copies/L/μm", x = expression(paste("Particle Size (", mu, "m)")), fill = "Station", color = "Station", shape = "Station")
 ```
 
 ```{r}
