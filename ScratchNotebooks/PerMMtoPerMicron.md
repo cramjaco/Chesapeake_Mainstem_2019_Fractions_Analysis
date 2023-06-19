@@ -14,4 +14,5 @@ Actually, it turns out that we devide by bin width when plotting happens and not
 
 I need to update the text in two places.
 
-For reasons I don't understand, some of these plots loo
+For reasons I don't understand, the order of the plots are now wrong. I had to go in and manually reorder factors.
+Also, in the new verison a few more POC/Mass points somehow appeared. I'm not sure why.
