@@ -196,8 +196,8 @@ My_Constrained_RDA_Plot_Type1 <- function(ccaConstrainedFort, ccaConstrained){
          shape = "Station",
          size = "Size Class") +
         geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 6, yend = RDA2 * 6), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.9, arrow = arrow(length = unit(0.1, "in")), color = "gray20") +
-    geom_label(aes(label = Label2, x = RDA1 * 7.5, y = RDA2 * 7.5),
-               color = "black", fill = "white", alpha = 0.4,
+    geom_text(aes(label = Label2, x = RDA1 * 7.5, y = RDA2 * 7.5),
+               color = "black", alpha = 1,
                show.legend = FALSE,
                data = ccaConstrainedFort %>%
                  filter(Score == "biplot") %>%
@@ -210,8 +210,8 @@ My_Constrained_RDA_Plot_Type1 <- function(ccaConstrainedFort, ccaConstrained){
                  mutate(Label2 = paste0(Label, "\n", round(PctExplained, 3) * 100, "%")) %>%
                  # Fates, please forgive me my hard-coding.
                  # I just need the biplot segment labels away from the origin.
-                 mutate(RDA1 = if_else(sqrt(RDA1^2 + RDA2^2) < 0.5, RDA1 * 1.5, RDA1)) %>%
-                 mutate(RDA2 = if_else(sqrt(RDA1^2 + RDA2^2) < 0.5, RDA2 * 1.5, RDA2)) %>%
+                 mutate(RDA1 = if_else(sqrt(RDA1^2 + RDA2^2) < 0.5, RDA1 * 2, RDA1)) %>% # was 1.5
+                 mutate(RDA2 = if_else(sqrt(RDA1^2 + RDA2^2) < 0.5, RDA2 * 2, RDA2)) %>%
                  identity()
     ) +
 
@@ -236,6 +236,7 @@ mainRDA
 
 ```{r}
 ggsave(here::here("Figures", "mainRDA.png"),mainRDA, height = 4.4, width = 6)
+ggsave(here::here("Figures", "mainRDA.svg"),mainRDA, height = 4.4, width = 6)
 ```
 
 Axis 1 vs 3 Not the most dry code I've ever done, but I'm not sure how
@@ -264,8 +265,8 @@ My_Constrained_RDA_Plot_Type1_13 <- function(ccaConstrainedFort, ccaConstrained)
        fill = "Station",
        shape = "Station",
        size = "Size Class") +
-     geom_label(aes(label = Label2, x = RDA1 * 7.5, y = RDA3 * 7.5),
-            color = "black", fill = "white", alpha = 0.6,
+     geom_text(aes(label = Label2, x = RDA1 * 7.5, y = RDA3 * 7.5),
+            color = "black", alpha = 1,
             show.legend = FALSE,
            data = ccaConstrainedFort %>%
              filter(Score == "biplot") %>%
@@ -297,6 +298,7 @@ mainRDA13
 
 ```{r}
 ggsave(here::here("Figures", "mainRDA_axis1and3.png"),mainRDA13, height = 4, width = 6)
+ggsave(here::here("Figures", "mainRDA_axis1and3.svg"),mainRDA13, height = 4, width = 6)
 ```
 
 
@@ -327,6 +329,7 @@ PosRDA123
 ```
 ```{r}
 ggsave(here("Figures", "PosRDA_123.png"), plot = PosRDA123, height = 7, width = 6)
+ggsave(here("Figures", "PosRDA_123.svg"), plot = PosRDA123, height = 7, width = 6)
 ```
 
 ```{r}
@@ -407,6 +410,7 @@ bigSubsetsRda
 
 ```{r}
 ggsave(here::here("Figures", "bigSubsetsRda.png"), bigSubsetsRda, height = 8, width = 8)
+ggsave(here::here("Figures", "bigSubsetsRda.svg"), bigSubsetsRda, height = 8, width = 8)
 ```
 
 # Tables
@@ -495,12 +499,13 @@ EnvRDA123
 
 ```{r}
 ggsave(here("Figures", "EnvRDA_12.png"), plot = EnvRDA, height = 4.5, width = 6)
-ggsave(here("Figures", "EnvRDA_13.png"), plot = EnvRDA13, height = 5, width = 6)
+ggsave(here("Figures", "EnvRDA_13.svg"), plot = EnvRDA13, height = 5, width = 6)
 ```
 
 
 ```{r}
 ggsave(here("Figures", "EnvRDA_123.png"), plot = EnvRDA123, height = 7, width = 6)
+ggsave(here("Figures", "EnvRDA_123.svg"), plot = EnvRDA123, height = 7, width = 6)
 ```
 
 ```{r fig.height = 4, fig.width = 8}
@@ -650,6 +655,7 @@ bigSubsetsRda_Env
 
 ```{r}
 ggsave(here::here("Figures", "bigSubsetsRda_Env.png"), bigSubsetsRda_Env, height = 8, width = 8)
+ggsave(here::here("Figures", "bigSubsetsRda_Env.svg"), bigSubsetsRda_Env, height = 8, width = 8)
 ```
 
 # Tables with Enviornmental Frame
