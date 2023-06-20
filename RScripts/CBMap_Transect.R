@@ -44,3 +44,25 @@ cbMap
 
 ggsave(here("Figures", "cbMap.png"), height = 6, width = 4)
 
+## As above but with rivers labeled
+
+cbMap
+
+rivers <- tribble(
+  ~river, ~abbreviation, ~long, ~lat,
+  "Sesquehanna -- Harrisburg", "SesH", 40.27, -76.88,
+  "Sesquehanna -- Conowingo", "SesC", 39.66, -76.17,
+  "Patapsco -- Catonsville", "Pat", 39.25, -76.75,
+  "Potomic -- DC", "Pot", 38.95, -76.12,
+  "James", "Jam", 36.93, -76.43
+)
+
+cbMap + 
+  geom_label(aes(x = lat, y = long, label = abbreviation), data = rivers, size = 5, shape = 1, fill = "lightgoldenrod") +
+  coord_sf(xlim = c(-77.3, -75.8), ylim = c(36.8, 40.4)) +
+  scale_x_continuous(breaks = seq(from = -77.2, to = -75.8, by = 0.4), 
+                     minor_breaks = seq(from = -77.2, to = -75.8, by = 0.2)) + # not sure why this has no affect
+  scale_y_continuous(breaks = seq(from = 36, to = 41, by = 0.4))
+# why are my points not showing up?!
+
+ggsave(here("Figures", "cbRiverMap.png"), height = 6, width = 4)
