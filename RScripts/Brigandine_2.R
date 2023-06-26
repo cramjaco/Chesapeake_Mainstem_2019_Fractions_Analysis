@@ -4,6 +4,8 @@
 library(here)
 library(tidyverse)
 library(cowplot)
+library(ggh4x) # facet_nested() lives here
+
 
 # Bring in data
 #source(here("RScripts", "InitialProcessing_3.R"))
@@ -11,6 +13,7 @@ load(here::here("RDataFiles", "InitialProcessing_3.RData"))
 source(here("RLibraries", "Brigandine_Library.R"))
 
 nonSpikes$Depth <- ordered(nonSpikes$Depth, levels = c("Surface", "Oxycline", "Bottom"))
+nonSpikes20$Depth <- ordered(nonSpikes20$Depth, levels = c("Surface", "Oxycline", "Bottom"))
 
 # Phylum Level Plots
 phylum_mg_plot <- ches_brigandine(Phylum, Kingdom, taxa01 %>% pull(Kingdom) %>% unique(), min = 4, max = 7, thresh = 10^6, ns = nonSpikes %>%
@@ -23,9 +26,9 @@ ggsave(here("Figures", "Phylum_per_mg_brig.png"), height = 5.5, width = 6.5, plo
 ggsave(here("Figures", "Phylum_per_L_brig.png"), height = 5.5, width = 6.5, plot = phylum_L_plot)
 
 ## Planktomycetes ASVs
-plankto_mg_plot <- ches_brigandine(Tag_ASV, Order, taxa01 %>% filter(Phylum == "Planctomycetes") %>% pull(Order) %>% unique() %>% na.omit(), thresh = 10^6, min = 3) +
+plankto_mg_plot <- ches_brigandine(Tag_ASV, Order, taxa01 %>% filter(Phylum == "Planctomycetes") %>% pull(Order) %>% unique() %>% na.omit(), thresh = 10^6, min = 3, ns = nonSpikes20) +
   guides(size = "none", legend.position = "top") + labs(y = "Tag; ASV")
-plankto_L_plot <- ches_brigandine_L(Tag_ASV, Order, taxa01 %>% filter(Phylum == "Planctomycetes") %>% pull(Order) %>% unique() %>% na.omit(), thresh = 10^6, min = 3) + 
+plankto_L_plot <- ches_brigandine_L(Tag_ASV, Order, taxa01 %>% filter(Phylum == "Planctomycetes") %>% pull(Order) %>% unique() %>% na.omit(), thresh = 10^6, min = 3, ns = nonSpikes20) + 
    labs(y = "Tag; ASV")
 
 ggsave(here("Figures", "Plankto_per_mg_brig.png"), height = 4.5, width = 7.5, plot = plankto_mg_plot)
