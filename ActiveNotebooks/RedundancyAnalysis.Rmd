@@ -499,6 +499,8 @@ EnvRDA123
 
 ```{r}
 ggsave(here("Figures", "EnvRDA_12.png"), plot = EnvRDA, height = 4.5, width = 6)
+ggsave(here("Figures", "EnvRDA_13.png"), plot = EnvRDA13, height = 5, width = 6)
+ggsave(here("Figures", "EnvRDA_12.svg"), plot = EnvRDA, height = 4.5, width = 6)
 ggsave(here("Figures", "EnvRDA_13.svg"), plot = EnvRDA13, height = 5, width = 6)
 ```
 

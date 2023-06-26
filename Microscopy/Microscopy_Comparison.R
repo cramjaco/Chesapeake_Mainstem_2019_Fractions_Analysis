@@ -167,6 +167,7 @@ ggplot(BackRinseCalc2,
                            color=as.factor(Depth),
                            size=(Size_Class)^(1/2))) + 
   labs(shape = "Station", fill= "Station", size = "Size Class (μm)", color = "Depth", y= "Microscopy (Cells/L)", x="Amplicon (Copies/L)") +
+  geom_abline(intercept=0, slope=1, color = "gray30", size = 1, linetype = "dashed") +
   geom_point(stroke = 1) + 
   geom_path(aes(x=copiesPerL/Bin_Size,
                 y=Cells_Per_Liter_Total/Bin_Size,
@@ -176,7 +177,7 @@ ggplot(BackRinseCalc2,
     panel.grid.minor = element_blank()) + 
   # facet_wrap(~Depth2, ncol = 1) +
   scale_y_log10() + scale_x_log10() +
-  geom_abline(intercept=0, slope=1) +
+  
   scale_shape_manual(values = rep(21:25, 2)[3:10]) +
   scale_fill_manual(values = viridis::plasma(n = 6)[3:6]) +
   #scale_fill_viridis_d(breaks = as.character(c(3.1, 3.3, 4.3, 5.1, 5.5)), labels = as.character(c(3.1, 3.3, 4.3, 5.1, 5.5))) + 
