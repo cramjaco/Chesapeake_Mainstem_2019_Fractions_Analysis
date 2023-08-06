@@ -9,6 +9,9 @@ source(here::here("RLibraries", "ChesapeakePersonalLibrary.R"))
 source(here::here("RLibraries", "Brigandine_Library.R"))
 # source(here::here("RScripts", "InitialProcessing_2.R"))
 
+nonSpikes$Depth <- ordered(nonSpikes$Depth, levels = c("Surface", "Oxycline", "Bottom"))
+nonSpikes20$Depth <- ordered(nonSpikes20$Depth, levels = c("Surface", "Oxycline", "Bottom"))
+
 listDatabases()
 #org <- keggList("organism")
 #head(org)
