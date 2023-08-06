@@ -150,3 +150,19 @@ Clara says 40 delta 15N is very very high.
 
 # Primary figure
 Happens over in ActiveNotebooks/AllMicrobesFigures.qmd
+
+# Carbon to nitrogen ratios for all of the particles
+So I can say how C:N vary across space
+```{r}
+microbialAbundance %>%
+  select(Station, Size_Class, Depth, CarbonPerLiter_mg, NitrogenPerLiter_mg) %>%
+  pivot_longer(cols = c(CarbonPerLiter_mg, NitrogenPerLiter_mg), names_to = "measurement", values_to = "mg") %>%
+  filter(Size_Class>0.2) %>%
+  #filter(is.na(mg)) %>%
+  group_by(Station, Depth, measurement) %>%
+  summarise(mg = sum(mg)) %>%
+  pivot_wider(names_from = measurement, values_from = mg) %>%
+  mutate(CtoN = CarbonPerLiter_mg/NitrogenPerLiter_mg) %>%
+  identity()
+```
+
