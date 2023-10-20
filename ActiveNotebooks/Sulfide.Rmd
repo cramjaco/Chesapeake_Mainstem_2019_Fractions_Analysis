@@ -29,6 +29,10 @@ sulfideCombined <- bind_rows(
 )
 ```
 
+```{r}
+write_csv(sulfideCombined, file = here("IntermediateData", "SulfideCombined.csv"))
+```
+
 
 ```{r}
 ggplot(sulfideCombined, aes(y = `Depth (m)`, x = H2S, color = Lab)) +
