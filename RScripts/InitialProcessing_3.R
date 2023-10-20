@@ -61,6 +61,9 @@ taxa02 <- taxa01 %>%
   mutate(Phylum = if_else(Order == "Chloroplast", "Chloroplast", Phylum)) %>%
   # ibid Class
   mutate(Class = if_else(Order == "Chloroplast", "Chloroplast", Class)) %>%
+  ## Handle the word "Clade" Orders SAR11_Clade and SAR86_Clade become SAR11 and SAR86
+  ## Then Clades of SAR11, for their tag get SAR11 appended to the left
+  mutate(Order = str_remove(Order, "_clade")) %>%
   identity()
 
 # give a "Tag" which is the finest level of taxa known
@@ -73,6 +76,8 @@ TagDf <- taxa02 %>%
   pivot_longer(Kingdom:Genus, names_to = "TagLevel", values_to = "Tag") %>%
   left_join(TaxResTab) %>%
   filter(!is.na(Tag)) %>%
+  # ^Clade -> SAR11_Clade
+  mutate(Tag = str_replace(Tag, "^Clade", "SAR11_Clade")) %>%
   group_by(ASV) %>%
   slice_max(order_by = TaxRes, n = 1) %>%
   select(-TaxRes) %>%

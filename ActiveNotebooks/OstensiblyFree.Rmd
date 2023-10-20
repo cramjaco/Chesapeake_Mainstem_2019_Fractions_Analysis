@@ -158,7 +158,7 @@ SAR11 surface III clade
 ```{r}
 nonSpikes1pct %>% filter(Depth == "Surface") %>% 
   #filter(ASV == "ASV_2") %>%
-  filter(Tag == "Clade_III") %>%
+  filter(Tag == "SAR11_Clade_III") %>%
   filter(Station %in% c(3.1, 3.2, 4.3)) %>%
   arrange(Size_Class) %>%
   ggplot(aes(y = copiesPerL/Bin_Size, x = Size_Class, fill = as.factor(Station), shape = as.factor(Station))) +
@@ -177,7 +177,7 @@ nonSpikes1pct %>% filter(Depth == "Surface") %>%
 ```{r}
 nonSpikes1pct %>% filter(Depth == "Surface") %>% 
   filter(ASV == "ASV_3") %>%
-  filter(Tag == "Clade_III") %>%
+  #filter(Tag == "SAR11_Clade_III") %>%
   filter(Station %in% c(3.1)) %>%
   arrange(Size_Class) 
 ```
