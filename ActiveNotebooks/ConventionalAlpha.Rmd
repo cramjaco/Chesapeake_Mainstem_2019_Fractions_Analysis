@@ -567,12 +567,12 @@ myBet$table
 ## And finally predictions from richness, diversity evenness again.
 
 
-```{r fig.width = 11, fig.height = 4}
+```{r fig.width = 11, fig.height = 5}
 plotAlphaWB_pred <- plot_grid(plot_break_pred,plotShannonH_pred,plot_pielouJ2_pred, nrow = 1, labels = LETTERS)
 plotAlphaWB_pred
 ```
 
 ```{r}
-ggsave(here::here("Figures", "BreakawayAlphaPredictions.png"), plot = plotAlphaWB_pred, width = 8, height = 4)
+ggsave(here::here("Figures", "BreakawayAlphaPredictions.png"), plot = plotAlphaWB_pred, width = 8, height = 4.5)
 ```
 

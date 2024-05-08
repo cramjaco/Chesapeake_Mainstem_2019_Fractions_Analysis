@@ -57,7 +57,7 @@ abunPlot_perMg <- microbialAbundance %>%
   ches_plot_options  +
 theme_bw(base_size = 14) +
 
-   labs(y = "16s + 18s Genes / mg Particles", x = expression(paste("Particle Size (", mu, "m)")))+
+   labs(y = "16S + 18S Genes / mg Particles", x = expression(paste("Particle Size (", mu, "m)")))+
   theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
         axis.title.x = element_blank(),
@@ -79,7 +79,7 @@ abunPlot_perL <- microbialAbundance %>%
   scale_y_log10nice(omag = seq(from = 3, to = 11, by = 2)) +
 theme_bw(base_size = 14) +
 
-   labs(y = "16s + 18s Genes/L/μm", x = expression(paste("Particle Size (", mu, "m)")))+
+   labs(y = "16S + 18S Genes/L/μm", x = expression(paste("Particle Size (", mu, "m)")))+
   theme(legend.position = "none",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
         axis.title.x = element_blank(),
@@ -166,9 +166,11 @@ ggsave(here::here("Figures", "MassAndAbundanceFigure.png"), height = 4, width = 
 
 ## 
 
-## Query
+## Queries
 
-I wonder if we have more carbon isotome or more mass samples. I should check this in the interest of using as much data as possible for the microbes/mg particles and brigandine fugures.
+### Carbon vs mass samples
+
+I wonder if we have more carbon isotope or more mass samples. I should check this in the interest of using as much data as possible for the microbes/mg particles and brigandine fugures.
 
 ```{r}
 microbialAbundance %>%
@@ -177,3 +179,24 @@ microbialAbundance %>%
 ```
 
 There are more mass samples so I'll use those.
+
+### Fraction of particle attached miccrobes in smallest size fraction
+
+```{r}
+maSmallFrac <- microbialAbundance %>%
+  filter(Size_Class >= 1.2) %>%
+  #filter(!is.na(copiesPerL)) %>%
+  mutate(Size_Class_Type = if_else(Size_Class > 1.2, "> 1.2", "1.2"), .after = Size_Class) %>%
+  group_by(Station, Depth, Size_Class_Type) %>%
+  summarise(copiesPerL = sum((copiesPerL))) %>%
+  pivot_wider(names_from = Size_Class_Type, values_from = copiesPerL) %>%
+  mutate(Frac1p2 = `1.2`/ (`> 1.2` + `1.2`)) %>%
+  identity()
+
+maSmallFrac %>%
+  filter(!is.na(Frac1p2)) %>%
+  ungroup() %>%
+  summarise(median(Frac1p2), min(Frac1p2), max(Frac1p2))
+```
+
+Note that this is when counting unobserved size classes \> 1.2 microns as zeros.

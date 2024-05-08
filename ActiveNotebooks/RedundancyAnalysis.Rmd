@@ -77,9 +77,9 @@ myGuides <-   guides(shape = guide_legend(ncol = 2), fill = guide_legend(ncol = 
          color = guide_legend(ncol = 2))
 
 myPlotDetails <- list(
-  scale_fill_viridis_d() ,
+  scale_fill_viridis_d(option = "plasma") ,
   scale_shape_manual(values = rep(21:25, 2)),
-  scale_color_manual(values = c("green", "blue", "black")) ,
+  scale_color_manual(values = c("green2", "blue", "black")) ,
   scale_size(breaks = sqrt(filterSizes),
              labels = filterSizes) ,
   theme_bw(),
@@ -184,14 +184,14 @@ My_Constrained_RDA_Plot_Type1 <- function(ccaConstrainedFort, ccaConstrained){
                size = sqrt(Size_Class),
                color = as.factor(Depth)
     )) + 
-    geom_point() +
+    geom_point(stroke = 1) +
     coord_fixed(sqrt(ccaConstrained$CCA$eig[2]/ccaConstrained$CCA$eig[1])) +
     
     
     #geom_point(aes(x  = CCA1, y = CCA2), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE) +
     labs(x = paste0("RDA1 (", round(ccaConstrained$CCA$eig[1]/ccaConstrained$tot.chi, 3) * 100, "%)"),
          y = paste0("RDA2 (", round(ccaConstrained$CCA$eig[2]/ccaConstrained$tot.chi, 3) * 100, "%)"),
-         col = "Depth (Outline Color)",
+         col = "Depth\n(Outline Color)",
          fill = "Station",
          shape = "Station",
          size = "Size Class") +
@@ -254,7 +254,7 @@ My_Constrained_RDA_Plot_Type1_13 <- function(ccaConstrainedFort, ccaConstrained)
              size = sqrt(Size_Class),
              color = as.factor(Depth)
              )) + 
- geom_point() +
+ geom_point(stroke = 1) +
  coord_fixed(sqrt(ccaConstrained$CCA$eig[2]/ccaConstrained$CCA$eig[1])) +
 
   geom_segment(aes(x = 0, y = 0, xend  = RDA1 * 6, yend = RDA3 * 6), data = ccaConstrainedFort %>% filter(Score == "biplot"), inherit.aes = FALSE, size = 1, alpha = 0.9, arrow = arrow(length = unit(0.1, "in")), color = "gray20") +
@@ -510,7 +510,7 @@ ggsave(here("Figures", "EnvRDA_123.png"), plot = EnvRDA123, height = 7, width = 
 ggsave(here("Figures", "EnvRDA_123.svg"), plot = EnvRDA123, height = 7, width = 6)
 ```
 
-```{r fig.height = 4, fig.width = 8}
+```{r fig.height = 4, fig.width = 10}
 combinedRDA <- plot_grid( mainRDA + theme(legend.position = "none"), 
            EnvRDA + theme(legend.position = "none"),
            legend_rda, rel_widths = c(3,3,1), nrow = 1, labels = c("A", "B", ""), label_y = 0.9)

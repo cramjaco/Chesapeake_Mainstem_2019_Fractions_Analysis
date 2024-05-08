@@ -1,0 +1,64 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+A reviewer asked about what the chloroplasts were. I'm going to blast them.
+
+```{r}
+library(here)
+source(here("RLibraries", "ChesapeakePersonalLibrary.R"))
+env2 <- attach(here("RDataFiles", "InitialProcessing_3.RData"))
+set.seed(10033)
+```
+
+```{r}
+taxa <- env2$taxa
+nonSpikes <- env2$nonSpikes
+```
+
+```{r}
+raw_ASV <- read_lines(here("DadaData", "ASVs.fa"))
+```
+
+Make the ASVs into a tibble
+```{r}
+tib_ASV <- tibble(raw_ASV) %>%
+  mutate(type = rep(c("ASV", "Seq"), length.out = length(raw_ASV)), .before = everything()) %>%
+  mutate(id = rep(1:(length(raw_ASV)/2), each = 2)) %>%
+  pivot_wider(names_from = "type", values_from = "raw_ASV") %>%
+  mutate(ASV = str_remove(ASV, ">")) %>%
+  select(-id) %>%
+  identity()
+#tib_ASV
+```
+
+```{r}
+Chlor_tib <- taxa %>%
+  filter(Phylum == "Chloroplast") %>% 
+  left_join(tib_ASV, by = "ASV") %>%
+  mutate(ASV = paste0(">", ASV)) %>%
+  select(ASV, Seq)
+```
+
+```{r}
+chlor_fasta <- c(rbind(Chlor_tib$ASV, Chlor_tib$Seq))
+```
+
+```{r}
+write(chlor_fasta, here("IntermediateData","Chloroplast_ASVs.fa"))
+```
+
+```{r}
+chlor_fasta_10 <- chlor_fasta[1:20]
+chlor_fasta_10
+```
+
+```{r}
+write(chlor_fasta_10, here("IntermediateData","Chloroplast_ASVs_top10.fa"))
+```
+
+Blast these with the parameters "Exclude Unculutred/environmental sample seqeuences"
+Limiting to chloroplasts somehow seems to slow things down.
+
+ASV 60 is a diatom, either Skeletonema or Thelasiosiaira
+
